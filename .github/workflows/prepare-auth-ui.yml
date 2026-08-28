@@ -1,5 +1,7 @@
 name: Prepare Auth UI
 
+# Latest auth/e2e checkpoint.
+
 on:
   push:
     paths:
