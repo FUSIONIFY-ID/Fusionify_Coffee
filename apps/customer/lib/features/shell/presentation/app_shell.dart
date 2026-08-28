@@ -38,7 +38,7 @@ class AppShell extends StatelessWidget {
             bottomNavigationBar: NavigationBar(
               selectedIndex: _currentIndex,
               onDestinationSelected: (index) => _navigate(context, index),
-              destinations: const [
+              destinations: [
                 NavigationDestination(
                   icon: Icon(Icons.home_outlined),
                   selectedIcon: Icon(Icons.home),
@@ -84,7 +84,7 @@ class AppShell extends StatelessWidget {
                     size: 30,
                   ),
                 ),
-                destinations: const [
+                destinations: [
                   NavigationRailDestination(
                     icon: Icon(Icons.home_outlined),
                     selectedIcon: Icon(Icons.home),
