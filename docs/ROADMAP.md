@@ -65,15 +65,29 @@ Still required before claiming milestone production-ready:
 
 ## Milestone 0.3: Fulfillment + Fusion Points
 
-Status: **Next after live payment validation**
+Status: **Partially in progress**
 
-- order history/detail
+Implemented:
+- authenticated customer order history API
+- Flutter order history
+- separate staff/admin identity model
+- staff password + TOTP authenticator login
+- staff access/refresh sessions
+- staff RBAC permission foundation
+- staff audit log foundation
+- server-side initial SUPER_ADMIN bootstrap
+- e2e staff TOTP/RBAC validation
+
+Remaining:
+- order detail
 - order tracking
+- staff-managed order state transitions
 - POS/KDS minimum flow
 - preparing
 - ready
 - picked up
 - completed
+- staff management lifecycle
 - rewards ledger
 - Fusion Points earning
 
@@ -125,7 +139,7 @@ Before production:
 - Android Play policy re-check
 - iOS App Store policy re-check
 - privacy policy/Data Safety
-- account deletion
+- account deletion ✅ implemented with OTP verification and identity anonymization
 - signing/package verification
 - SDK audit
 - security review

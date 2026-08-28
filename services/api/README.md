@@ -17,8 +17,18 @@ Catalog:
 - `GET /v1/health`
 - `GET /v1/catalog/preview`
 
+Customer auth/account:
+- `POST /v1/auth/otp/request`
+- `POST /v1/auth/otp/verify`
+- `POST /v1/auth/register`
+- `POST /v1/auth/login`
+- `POST /v1/auth/refresh`
+- `POST /v1/auth/reset-password`
+- authenticated profile/session/change-phone/delete-account endpoints
+
 Orders:
 - `POST /v1/orders`
+- `GET /v1/orders`
 - `GET /v1/orders/:orderId`
 
 Payments:
@@ -29,6 +39,23 @@ Payments:
 
 Webhook:
 - `POST /v1/webhooks/autogopay`
+
+Staff/admin:
+- `POST /v1/staff/auth/login`
+- `POST /v1/staff/auth/totp/setup`
+- `POST /v1/staff/auth/totp/verify`
+- `POST /v1/staff/auth/refresh`
+- `GET /v1/staff/me`
+- `POST /v1/staff/auth/logout`
+- `GET /v1/staff/audit-logs` (permission protected)
+
+Initial SUPER_ADMIN creation is server-side only through:
+
+```bash
+npm run staff:bootstrap
+```
+
+Staff authentication is separate from customer authentication and requires password + TOTP.
 
 ## Database
 
@@ -100,7 +127,7 @@ npm run build
 
 CI uses PostgreSQL 17.
 
-Latest validated implementation head: `035379c16378d599cde8d8d626bae8106ff3b984`.
+Latest validated implementation head: `a139346b5dab4d5cb53bfa8b6eb5c02356cefd56`.
 
 ## Security
 
@@ -109,6 +136,10 @@ Latest validated implementation head: `035379c16378d599cde8d8d626bae8106ff3b984`
 - client-supplied totals are not trusted
 - payment amount is checked against local order
 - signing/database/provider secrets are not committed
+- customer and staff identity/session silos are separate
+- staff TOTP secrets are encrypted with AES-256-GCM
+- staff privileged endpoints use explicit RBAC permissions
+- staff auth/security activity has an audit-log foundation
 
 Read:
 - `../../docs/integrations/PAYMENTS.md`
