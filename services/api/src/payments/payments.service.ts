@@ -91,9 +91,9 @@ export class PaymentsService {
       return this.toView(pending);
     }
 
-    let reserved;
+    let reservedPaymentId: string;
     try {
-      reserved = await this.prisma.payment.create({
+      const reserved = await this.prisma.payment.create({
         data: {
           idempotencyKey,
           orderId,
@@ -104,6 +104,7 @@ export class PaymentsService {
           currency: order.currency,
         },
       });
+      reservedPaymentId = reserved.id;
     } catch (error: unknown) {
       const concurrentPending = await this.prisma.payment.findFirst({
         where: {
@@ -128,10 +129,10 @@ export class PaymentsService {
         amount: order.totalAmount,
       });
 
-      return this.applyProviderResult(reserved.id, providerResult);
+      return this.applyProviderResult(reservedPaymentId, providerResult);
     } catch (error: unknown) {
       await this.prisma.payment.update({
-        where: { id: reserved.id },
+        where: { id: reservedPaymentId },
         data: {
           status: PaymentStatus.FAILED,
           providerRawStatus: 'provider_error',
