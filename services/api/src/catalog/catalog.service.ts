@@ -1,11 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 
+type CatalogLanguage = 'ID_ID' | 'MS_MY' | 'EN';
+
 @Injectable()
 export class CatalogService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getPreviewCatalog() {
+  async getPreviewCatalog(requestedLanguage?: string) {
+    const language = this.normalizeLanguage(requestedLanguage);
     const [outlet, products] = await Promise.all([
       this.prisma.outlet.findFirst({
         where: { pickupEnabled: true },
@@ -35,32 +38,107 @@ export class CatalogService {
 
     return {
       preview: true,
+      language,
       outlet: {
         id: outlet.id,
-        name: outlet.name,
-        note: outlet.note,
+        name: this.text(outlet.translations, language, 'name', outlet.name),
+        note: this.text(outlet.translations, language, 'note', outlet.note),
         pickupEnabled: outlet.pickupEnabled,
       },
       products: products.map((product) => ({
         id: product.id,
-        name: product.name,
-        description: product.description,
-        category: product.category.name,
+        name: this.text(
+          product.translations,
+          language,
+          'name',
+          product.name,
+        ),
+        description: this.text(
+          product.translations,
+          language,
+          'description',
+          product.description,
+        ),
+        categoryId: product.categoryId,
+        category: this.text(
+          product.category.translations,
+          language,
+          'name',
+          product.category.name,
+        ),
         basePrice: product.basePrice,
         isBestseller: product.isBestseller,
         modifierGroups: product.modifierGroups.map((group) => ({
           id: group.id,
-          label: group.name,
+          label: this.text(
+            group.translations,
+            language,
+            'name',
+            group.name,
+          ),
           required: group.required,
           allowMultiple: group.allowMultiple,
           options: group.options.map((option) => ({
             id: option.id,
-            label: option.name,
+            label: this.text(
+              option.translations,
+              language,
+              'name',
+              option.name,
+            ),
             priceDelta: option.priceDelta,
             isDefault: option.isDefault,
           })),
         })),
       })),
     };
+  }
+
+  private normalizeLanguage(value?: string): CatalogLanguage {
+    return switchLanguage(value);
+  }
+
+  private text(
+    translations: unknown,
+    language: CatalogLanguage,
+    field: string,
+    fallback: string,
+  ) {
+    if (
+      translations === null ||
+      typeof translations !== 'object' ||
+      Array.isArray(translations)
+    ) {
+      return fallback;
+    }
+
+    const localized = (translations as Record<string, unknown>)[language];
+    if (
+      localized === null ||
+      typeof localized !== 'object' ||
+      Array.isArray(localized)
+    ) {
+      return fallback;
+    }
+
+    const value = (localized as Record<string, unknown>)[field];
+    return typeof value === 'string' && value.trim().length > 0
+      ? value
+      : fallback;
+  }
+}
+
+function switchLanguage(value?: string): CatalogLanguage {
+  switch (value) {
+    case 'MS_MY':
+    case 'ms':
+      return 'MS_MY';
+    case 'EN':
+    case 'en':
+      return 'EN';
+    case 'ID_ID':
+    case 'id':
+    default:
+      return 'ID_ID';
   }
 }

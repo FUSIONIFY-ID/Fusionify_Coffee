@@ -103,6 +103,7 @@ class Product {
   const Product({
     required this.id,
     required this.name,
+    required this.categoryId,
     required this.description,
     required this.category,
     required this.basePrice,
@@ -114,6 +115,7 @@ class Product {
     return Product(
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
+      categoryId: json['categoryId'] as String? ?? '',
       description: json['description'] as String? ?? '',
       category: json['category'] as String? ?? '',
       basePrice: json['basePrice'] as int? ?? 0,
@@ -129,6 +131,7 @@ class Product {
 
   final String id;
   final String name;
+  final String categoryId;
   final String description;
   final String category;
   final int basePrice;

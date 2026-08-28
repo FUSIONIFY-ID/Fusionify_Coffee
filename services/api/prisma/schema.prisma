@@ -72,6 +72,7 @@ model Outlet {
   id              String   @id
   name            String
   note            String   @default("")
+  translations    Json?
   pickupEnabled   Boolean  @default(true)
   deliveryEnabled Boolean  @default(false)
   orders          Order[]
@@ -82,6 +83,7 @@ model Outlet {
 model Category {
   id        String    @id
   name      String
+  translations Json?
   sortOrder Int       @default(0)
   products  Product[]
   createdAt DateTime  @default(now())
@@ -92,6 +94,7 @@ model Product {
   id             String          @id
   name           String
   description    String
+  translations   Json?
   basePrice      Int
   active         Boolean         @default(true)
   isBestseller   Boolean         @default(false)
@@ -108,6 +111,7 @@ model ModifierGroup {
   productId     String
   product       Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
   name          String
+  translations  Json?
   required      Boolean          @default(false)
   allowMultiple Boolean          @default(false)
   sortOrder     Int              @default(0)
@@ -121,6 +125,7 @@ model ModifierOption {
   modifierGroupId String
   modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
   name            String
+  translations    Json?
   priceDelta      Int           @default(0)
   isDefault       Boolean       @default(false)
   active          Boolean       @default(true)

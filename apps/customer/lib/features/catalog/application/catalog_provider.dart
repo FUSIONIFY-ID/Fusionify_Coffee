@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/dio_provider.dart';
+import '../../../l10n/app_language.dart';
+import '../../../l10n/locale_controller.dart';
 import '../data/catalog_repository.dart';
 import '../domain/catalog_models.dart';
 
@@ -9,5 +11,10 @@ final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
 });
 
 final catalogProvider = FutureProvider<CatalogSnapshot>((ref) {
-  return ref.watch(catalogRepositoryProvider).fetchPreviewCatalog();
+  final language =
+      ref.watch(localeControllerProvider).value ?? AppLanguage.indonesia;
+
+  return ref
+      .watch(catalogRepositoryProvider)
+      .fetchPreviewCatalog(language: language);
 });

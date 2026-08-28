@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../../l10n/app_language.dart';
 import '../domain/catalog_models.dart';
 
 class CatalogRepository {
@@ -7,9 +8,12 @@ class CatalogRepository {
 
   final Dio _dio;
 
-  Future<CatalogSnapshot> fetchPreviewCatalog() async {
+  Future<CatalogSnapshot> fetchPreviewCatalog({
+    required AppLanguage language,
+  }) async {
     final response = await _dio.get<Map<String, dynamic>>(
       '/v1/catalog/preview',
+      queryParameters: {'lang': language.apiValue},
     );
 
     final data = response.data;

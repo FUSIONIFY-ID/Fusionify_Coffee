@@ -11,96 +11,212 @@ if (!databaseUrl) {
 const adapter = new PrismaPg({ connectionString: databaseUrl });
 const prisma = new PrismaClient({ adapter });
 
+type Language = 'ID_ID' | 'MS_MY' | 'EN';
+
+type LocalizedName = Record<Language, string>;
+
 type SeedOption = {
   id: string;
-  label: string;
+  labels: LocalizedName;
   priceDelta?: number;
   isDefault?: boolean;
 };
 
 type SeedGroup = {
   id: string;
-  label: string;
+  labels: LocalizedName;
   required?: boolean;
   allowMultiple?: boolean;
   options: SeedOption[];
 };
 
+function nameTranslations(labels: LocalizedName) {
+  return {
+    ID_ID: { name: labels.ID_ID },
+    MS_MY: { name: labels.MS_MY },
+    EN: { name: labels.EN },
+  };
+}
+
+function contentTranslations(input: {
+  names: LocalizedName;
+  descriptions: LocalizedName;
+}) {
+  return {
+    ID_ID: {
+      name: input.names.ID_ID,
+      description: input.descriptions.ID_ID,
+    },
+    MS_MY: {
+      name: input.names.MS_MY,
+      description: input.descriptions.MS_MY,
+    },
+    EN: {
+      name: input.names.EN,
+      description: input.descriptions.EN,
+    },
+  };
+}
+
 const modifierGroups: SeedGroup[] = [
   {
     id: 'size',
-    label: 'Size',
+    labels: {
+      ID_ID: 'Ukuran',
+      MS_MY: 'Saiz',
+      EN: 'Size',
+    },
     required: true,
     options: [
-      { id: 'regular', label: 'Regular', isDefault: true },
-      { id: 'large', label: 'Large', priceDelta: 5000 },
+      {
+        id: 'regular',
+        labels: { ID_ID: 'Regular', MS_MY: 'Biasa', EN: 'Regular' },
+        isDefault: true,
+      },
+      {
+        id: 'large',
+        labels: { ID_ID: 'Besar', MS_MY: 'Besar', EN: 'Large' },
+        priceDelta: 5000,
+      },
     ],
   },
   {
     id: 'temperature',
-    label: 'Temperature',
+    labels: {
+      ID_ID: 'Suhu',
+      MS_MY: 'Suhu',
+      EN: 'Temperature',
+    },
     required: true,
     options: [
-      { id: 'iced', label: 'Iced', isDefault: true },
-      { id: 'hot', label: 'Hot' },
+      {
+        id: 'iced',
+        labels: { ID_ID: 'Dingin', MS_MY: 'Ais', EN: 'Iced' },
+        isDefault: true,
+      },
+      {
+        id: 'hot',
+        labels: { ID_ID: 'Panas', MS_MY: 'Panas', EN: 'Hot' },
+      },
     ],
   },
   {
     id: 'sugar',
-    label: 'Sugar Level',
+    labels: {
+      ID_ID: 'Gula',
+      MS_MY: 'Tahap Gula',
+      EN: 'Sugar Level',
+    },
     required: true,
     options: [
-      { id: 'sugar-0', label: '0%' },
-      { id: 'sugar-25', label: '25%' },
-      { id: 'sugar-50', label: '50%', isDefault: true },
-      { id: 'sugar-75', label: '75%' },
-      { id: 'sugar-100', label: '100%' },
+      { id: 'sugar-0', labels: { ID_ID: '0%', MS_MY: '0%', EN: '0%' } },
+      { id: 'sugar-25', labels: { ID_ID: '25%', MS_MY: '25%', EN: '25%' } },
+      {
+        id: 'sugar-50',
+        labels: { ID_ID: '50%', MS_MY: '50%', EN: '50%' },
+        isDefault: true,
+      },
+      { id: 'sugar-75', labels: { ID_ID: '75%', MS_MY: '75%', EN: '75%' } },
+      { id: 'sugar-100', labels: { ID_ID: '100%', MS_MY: '100%', EN: '100%' } },
     ],
   },
   {
     id: 'ice',
-    label: 'Ice Level',
+    labels: {
+      ID_ID: 'Es',
+      MS_MY: 'Tahap Ais',
+      EN: 'Ice Level',
+    },
     required: true,
     options: [
-      { id: 'no-ice', label: 'No Ice' },
-      { id: 'less-ice', label: 'Less Ice' },
-      { id: 'normal-ice', label: 'Normal Ice', isDefault: true },
+      {
+        id: 'no-ice',
+        labels: { ID_ID: 'Tanpa Es', MS_MY: 'Tanpa Ais', EN: 'No Ice' },
+      },
+      {
+        id: 'less-ice',
+        labels: { ID_ID: 'Sedikit Es', MS_MY: 'Kurang Ais', EN: 'Less Ice' },
+      },
+      {
+        id: 'normal-ice',
+        labels: { ID_ID: 'Es Normal', MS_MY: 'Ais Biasa', EN: 'Normal Ice' },
+        isDefault: true,
+      },
     ],
   },
   {
     id: 'milk',
-    label: 'Milk',
+    labels: {
+      ID_ID: 'Susu',
+      MS_MY: 'Susu',
+      EN: 'Milk',
+    },
     required: true,
     options: [
-      { id: 'fresh-milk', label: 'Fresh Milk', isDefault: true },
-      { id: 'oat-milk', label: 'Oat Milk', priceDelta: 8000 },
+      {
+        id: 'fresh-milk',
+        labels: {
+          ID_ID: 'Susu Segar',
+          MS_MY: 'Susu Segar',
+          EN: 'Fresh Milk',
+        },
+        isDefault: true,
+      },
+      {
+        id: 'oat-milk',
+        labels: {
+          ID_ID: 'Susu Oat',
+          MS_MY: 'Susu Oat',
+          EN: 'Oat Milk',
+        },
+        priceDelta: 8000,
+      },
     ],
   },
   {
     id: 'addons',
-    label: 'Add-ons',
+    labels: {
+      ID_ID: 'Tambahan',
+      MS_MY: 'Tambahan',
+      EN: 'Add-ons',
+    },
     allowMultiple: true,
     options: [
-      { id: 'extra-shot', label: 'Extra Shot', priceDelta: 7000 },
-      { id: 'coffee-jelly', label: 'Coffee Jelly', priceDelta: 5000 },
-      { id: 'caramel', label: 'Caramel', priceDelta: 4000 },
+      {
+        id: 'extra-shot',
+        labels: { ID_ID: 'Extra Shot', MS_MY: 'Extra Shot', EN: 'Extra Shot' },
+        priceDelta: 7000,
+      },
+      {
+        id: 'coffee-jelly',
+        labels: { ID_ID: 'Jeli Kopi', MS_MY: 'Jeli Kopi', EN: 'Coffee Jelly' },
+        priceDelta: 5000,
+      },
+      {
+        id: 'caramel',
+        labels: { ID_ID: 'Karamel', MS_MY: 'Karamel', EN: 'Caramel' },
+        priceDelta: 4000,
+      },
     ],
   },
 ];
 
 async function seedProduct(input: {
   id: string;
-  name: string;
-  description: string;
+  names: LocalizedName;
+  descriptions: LocalizedName;
   basePrice: number;
   categoryId: string;
   isBestseller?: boolean;
 }) {
+  const translations = contentTranslations(input);
+
   await prisma.product.upsert({
     where: { id: input.id },
     update: {
-      name: input.name,
-      description: input.description,
+      name: input.names.EN,
+      description: input.descriptions.EN,
+      translations,
       basePrice: input.basePrice,
       categoryId: input.categoryId,
       active: true,
@@ -108,8 +224,9 @@ async function seedProduct(input: {
     },
     create: {
       id: input.id,
-      name: input.name,
-      description: input.description,
+      name: input.names.EN,
+      description: input.descriptions.EN,
+      translations,
       basePrice: input.basePrice,
       categoryId: input.categoryId,
       active: true,
@@ -126,14 +243,16 @@ async function seedProduct(input: {
       data: {
         id: `${input.id}-${group.id}`,
         productId: input.id,
-        name: group.label,
+        name: group.labels.EN,
+        translations: nameTranslations(group.labels),
         required: group.required ?? false,
         allowMultiple: group.allowMultiple ?? false,
         sortOrder: groupIndex,
         options: {
           create: group.options.map((option, optionIndex) => ({
             id: `${input.id}-${group.id}-${option.id}`,
-            name: option.label,
+            name: option.labels.EN,
+            translations: nameTranslations(option.labels),
             priceDelta: option.priceDelta ?? 0,
             isDefault: option.isDefault ?? false,
             active: true,
@@ -146,11 +265,27 @@ async function seedProduct(input: {
 }
 
 async function main() {
+  const outletTranslations = {
+    ID_ID: {
+      name: 'Fusionify Coffee Preview Store',
+      note: 'Data pengembangan yang berasal dari database.',
+    },
+    MS_MY: {
+      name: 'Fusionify Coffee Preview Store',
+      note: 'Data pembangunan yang bersumber daripada pangkalan data.',
+    },
+    EN: {
+      name: 'Fusionify Coffee Preview Store',
+      note: 'Database-backed development fixture.',
+    },
+  };
+
   await prisma.outlet.upsert({
     where: { id: 'preview-outlet' },
     update: {
       name: 'Fusionify Coffee Preview Store',
       note: 'Database-backed development fixture.',
+      translations: outletTranslations,
       pickupEnabled: true,
       deliveryEnabled: false,
     },
@@ -158,27 +293,58 @@ async function main() {
       id: 'preview-outlet',
       name: 'Fusionify Coffee Preview Store',
       note: 'Database-backed development fixture.',
+      translations: outletTranslations,
       pickupEnabled: true,
       deliveryEnabled: false,
     },
   });
 
-  await prisma.category.upsert({
-    where: { id: 'coffee' },
-    update: { name: 'Coffee', sortOrder: 0 },
-    create: { id: 'coffee', name: 'Coffee', sortOrder: 0 },
-  });
+  const categories = [
+    {
+      id: 'coffee',
+      sortOrder: 0,
+      labels: { ID_ID: 'Kopi', MS_MY: 'Kopi', EN: 'Coffee' } satisfies LocalizedName,
+    },
+    {
+      id: 'non-coffee',
+      sortOrder: 1,
+      labels: {
+        ID_ID: 'Non-Kopi',
+        MS_MY: 'Bukan Kopi',
+        EN: 'Non Coffee',
+      } satisfies LocalizedName,
+    },
+  ];
 
-  await prisma.category.upsert({
-    where: { id: 'non-coffee' },
-    update: { name: 'Non Coffee', sortOrder: 1 },
-    create: { id: 'non-coffee', name: 'Non Coffee', sortOrder: 1 },
-  });
+  for (const category of categories) {
+    await prisma.category.upsert({
+      where: { id: category.id },
+      update: {
+        name: category.labels.EN,
+        translations: nameTranslations(category.labels),
+        sortOrder: category.sortOrder,
+      },
+      create: {
+        id: category.id,
+        name: category.labels.EN,
+        translations: nameTranslations(category.labels),
+        sortOrder: category.sortOrder,
+      },
+    });
+  }
 
   await seedProduct({
     id: 'aren-latte',
-    name: 'Aren Latte',
-    description: 'Espresso, fresh milk, dan rasa gula aren yang seimbang.',
+    names: {
+      ID_ID: 'Aren Latte',
+      MS_MY: 'Aren Latte',
+      EN: 'Aren Latte',
+    },
+    descriptions: {
+      ID_ID: 'Espresso, susu segar, dan gula aren yang seimbang.',
+      MS_MY: 'Espresso, susu segar dan gula aren yang seimbang.',
+      EN: 'Espresso, fresh milk, and balanced palm sugar sweetness.',
+    },
     basePrice: 28000,
     categoryId: 'coffee',
     isBestseller: true,
@@ -186,16 +352,32 @@ async function main() {
 
   await seedProduct({
     id: 'sea-salt-latte',
-    name: 'Sea Salt Latte',
-    description: 'Latte lembut dengan sentuhan sea salt cream.',
+    names: {
+      ID_ID: 'Sea Salt Latte',
+      MS_MY: 'Sea Salt Latte',
+      EN: 'Sea Salt Latte',
+    },
+    descriptions: {
+      ID_ID: 'Latte lembut dengan sentuhan krim sea salt.',
+      MS_MY: 'Latte lembut dengan sentuhan krim garam laut.',
+      EN: 'Smooth latte finished with sea-salt cream.',
+    },
     basePrice: 32000,
     categoryId: 'coffee',
   });
 
   await seedProduct({
     id: 'matcha-cloud',
-    name: 'Matcha Cloud',
-    description: 'Matcha creamy untuk pilihan non-coffee.',
+    names: {
+      ID_ID: 'Matcha Cloud',
+      MS_MY: 'Matcha Cloud',
+      EN: 'Matcha Cloud',
+    },
+    descriptions: {
+      ID_ID: 'Matcha creamy untuk pilihan tanpa kopi.',
+      MS_MY: 'Matcha berkrim untuk pilihan tanpa kopi.',
+      EN: 'Creamy matcha for a coffee-free choice.',
+    },
     basePrice: 30000,
     categoryId: 'non-coffee',
   });
