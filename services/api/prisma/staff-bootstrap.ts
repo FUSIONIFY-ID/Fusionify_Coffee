@@ -1,19 +1,21 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { StaffRole } from '../src/generated/prisma/enums';
-import { PrismaClient } from '../src/generated/prisma/client';
 import { hashPassword } from '../src/auth/crypto.util';
+import { PrismaClient } from '../src/generated/prisma/client';
+import { StaffRole } from '../src/generated/prisma/enums';
 
-const databaseUrl = process.env.DATABASE_URL;
-const email = process.env.STAFF_BOOTSTRAP_EMAIL?.trim().toLowerCase();
-const fullName = process.env.STAFF_BOOTSTRAP_NAME?.trim();
-const password = process.env.STAFF_BOOTSTRAP_PASSWORD;
-
-if (!databaseUrl || !email || !fullName || !password) {
-  throw new Error(
-    'DATABASE_URL, STAFF_BOOTSTRAP_EMAIL, STAFF_BOOTSTRAP_NAME, and STAFF_BOOTSTRAP_PASSWORD are required.',
-  );
+function requireEnv(name: string) {
+  const value = process.env[name]?.trim();
+  if (!value) {
+    throw new Error(`${name} is required.`);
+  }
+  return value;
 }
+
+const databaseUrl = requireEnv('DATABASE_URL');
+const email = requireEnv('STAFF_BOOTSTRAP_EMAIL').toLowerCase();
+const fullName = requireEnv('STAFF_BOOTSTRAP_NAME');
+const password = requireEnv('STAFF_BOOTSTRAP_PASSWORD');
 
 const adapter = new PrismaPg({ connectionString: databaseUrl });
 const prisma = new PrismaClient({ adapter });

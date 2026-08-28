@@ -3,6 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { Prisma } from '../generated/prisma/client';
 import { StaffStatus } from '../generated/prisma/enums';
 import { PrismaService } from '../database/prisma.service';
 import {
@@ -251,7 +252,7 @@ export class StaffAuthService {
       userAgent?: string;
       targetType?: string;
       targetId?: string;
-      metadata?: Record<string, unknown>;
+      metadata?: Prisma.InputJsonValue;
     },
   ) {
     await this.prisma.staffAuditLog.create({
