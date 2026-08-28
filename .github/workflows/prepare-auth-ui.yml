@@ -6,6 +6,7 @@ name: Prepare Auth UI
 # Includes constant-time auth hash checks.
 # Final rerun after Dart syntax correction.
 # Final rerun after analyzer deprecation cleanup.
+# Strict e2e response typing checkpoint.
 
 on:
   push:
