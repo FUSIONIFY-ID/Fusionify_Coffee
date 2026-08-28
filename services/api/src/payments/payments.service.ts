@@ -36,6 +36,7 @@ export class PaymentsService {
 
   async createForOrder(
     orderId: string,
+    userId: string,
     idempotencyKey: string,
     requestedChannel?: string,
   ) {
@@ -69,7 +70,7 @@ export class PaymentsService {
       },
     });
 
-    if (!order) {
+    if (!order || order.userId !== userId) {
       throw new NotFoundException('Order not found.');
     }
 
@@ -142,12 +143,12 @@ export class PaymentsService {
     }
   }
 
-  async getView(paymentId: string) {
-    return this.toView(await this.getPayment(paymentId));
+  async getView(paymentId: string, userId: string) {
+    return this.toView(await this.getPayment(paymentId, userId));
   }
 
-  async check(paymentId: string) {
-    const payment = await this.getPayment(paymentId);
+  async check(paymentId: string, userId: string) {
+    const payment = await this.getPayment(paymentId, userId);
 
     if (payment.status !== PaymentStatus.PENDING) {
       return this.toView(payment);
@@ -157,8 +158,8 @@ export class PaymentsService {
     return this.applyProviderResult(payment.id, result);
   }
 
-  async cancel(paymentId: string) {
-    const payment = await this.getPayment(paymentId);
+  async cancel(paymentId: string, userId: string) {
+    const payment = await this.getPayment(paymentId, userId);
 
     if (payment.status !== PaymentStatus.PENDING) {
       throw new ConflictException('Only pending payments can be cancelled.');
@@ -271,9 +272,12 @@ export class PaymentsService {
     return this.toView(updated);
   }
 
-  private async getPayment(paymentId: string) {
-    const payment = await this.prisma.payment.findUnique({
-      where: { id: paymentId },
+  private async getPayment(paymentId: string, userId?: string) {
+    const payment = await this.prisma.payment.findFirst({
+      where: {
+        id: paymentId,
+        ...(userId ? { order: { userId } } : {}),
+      },
     });
 
     if (!payment) {

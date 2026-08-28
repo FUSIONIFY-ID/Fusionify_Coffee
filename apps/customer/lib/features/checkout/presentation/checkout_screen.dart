@@ -7,6 +7,7 @@ import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
 import '../../../core/utils/idempotency_key.dart';
 import '../../cart/application/cart_controller.dart';
+import '../../auth/application/auth_controller.dart';
 import '../../cart/domain/cart_item.dart';
 import '../../catalog/application/catalog_provider.dart';
 import '../application/checkout_provider.dart';
@@ -110,6 +111,49 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final items = ref.watch(cartProvider);
     final localSubtotal = ref.watch(cartSubtotalProvider);
     final catalog = ref.watch(catalogProvider);
+    final profile = ref.watch(authControllerProvider).value;
+
+    if (profile == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Checkout')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(CoffeeSpacing.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.lock_person_outlined,
+                  size: 52,
+                  color: CoffeeColors.primary,
+                ),
+                const SizedBox(height: CoffeeSpacing.md),
+                Text(
+                  'Sign in before checkout',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: CoffeeSpacing.xs),
+                Text(
+                  'Your order, payment, and history need to belong to a verified Fusionify account.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: CoffeeSpacing.lg),
+                FilledButton(
+                  onPressed: () => context.push('/auth/login'),
+                  child: const Text('Log in'),
+                ),
+                const SizedBox(height: CoffeeSpacing.sm),
+                OutlinedButton(
+                  onPressed: () => context.push('/auth/register'),
+                  child: const Text('Create account'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Checkout')),

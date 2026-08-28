@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -14,7 +15,7 @@ import {
 export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(input: CreateOrderInput, checkoutKey: string) {
+  async create(input: CreateOrderInput, checkoutKey: string, userId: string) {
     this.validateCheckoutKey(checkoutKey);
     this.validateInput(input);
 
@@ -24,6 +25,9 @@ export class OrdersService {
     });
 
     if (existing) {
+      if (existing.userId !== userId) {
+        throw new ConflictException('Checkout key is already in use.');
+      }
       return existing;
     }
 
@@ -146,6 +150,7 @@ export class OrdersService {
       return await this.prisma.order.create({
         data: {
           checkoutKey,
+          userId,
           outletId: outlet.id,
           subtotal,
           totalAmount: subtotal,
@@ -169,9 +174,9 @@ export class OrdersService {
     }
   }
 
-  async getById(orderId: string) {
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
+  async getById(orderId: string, userId: string) {
+    const order = await this.prisma.order.findFirst({
+      where: { id: orderId, userId },
       include: {
         items: true,
         payments: {
