@@ -42,7 +42,9 @@ class _ChangePhoneScreenState extends ConsumerState<ChangePhoneScreen> {
     try {
       final language =
           ref.read(localeControllerProvider).value ?? AppLanguage.indonesia;
-      _challenge = await ref.read(authRepositoryProvider).requestChangePhoneOtp(
+      _challenge = await ref
+          .read(authRepositoryProvider)
+          .requestChangePhoneOtp(
             country: _country,
             phone: _phone.text,
             channel: _channel,
@@ -66,11 +68,12 @@ class _ChangePhoneScreenState extends ConsumerState<ChangePhoneScreen> {
       _error = null;
     });
     try {
-      final verification = await ref.read(authRepositoryProvider).verifyOtp(
-            challengeId: challenge.challengeId,
-            code: _code.text,
-          );
-      final profile = await ref.read(authRepositoryProvider).confirmChangePhone(
+      final verification = await ref
+          .read(authRepositoryProvider)
+          .verifyOtp(challengeId: challenge.challengeId, code: _code.text);
+      final profile = await ref
+          .read(authRepositoryProvider)
+          .confirmChangePhone(
             challengeId: verification.challengeId,
             verificationToken: verification.verificationToken,
           );

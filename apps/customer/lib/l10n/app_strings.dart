@@ -414,8 +414,7 @@ class AppStrings {
     'Kata laluan telah diubah. Sila log masuk semula.',
     'Password updated. Please log in again.',
   );
-  String get requestCode =>
-      _pick('Kirim kode', 'Hantar kod', 'Send code');
+  String get requestCode => _pick('Kirim kode', 'Hantar kod', 'Send code');
   String get changePhone =>
       _pick('Ganti nomor HP', 'Tukar nombor telefon', 'Change phone number');
   String get newPhoneNumber =>
@@ -479,11 +478,9 @@ class AppStrings {
       _pick('Siap diambil', 'Sedia diambil', 'Ready for pickup');
   String get orderStatusPickedUp =>
       _pick('Sudah diambil', 'Sudah diambil', 'Picked up');
-  String get orderStatusCompleted =>
-      _pick('Selesai', 'Selesai', 'Completed');
+  String get orderStatusCompleted => _pick('Selesai', 'Selesai', 'Completed');
   String get orderStatusCancelled =>
       _pick('Dibatalkan', 'Dibatalkan', 'Cancelled');
-
 }
 
 extension AppStringsContext on BuildContext {

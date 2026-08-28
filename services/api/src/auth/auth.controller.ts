@@ -102,10 +102,7 @@ export class AuthController {
     @Req() request: AuthenticatedRequest,
     @Body() body: RequestDeleteAccountOtpInput,
   ) {
-    return this.authService.requestDeleteAccountOtp(
-      request.auth!.userId,
-      body,
-    );
+    return this.authService.requestDeleteAccountOtp(request.auth!.userId, body);
   }
 
   @UseGuards(CustomerAuthGuard)

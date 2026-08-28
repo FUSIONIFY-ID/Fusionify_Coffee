@@ -47,7 +47,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     try {
       final language =
           ref.read(localeControllerProvider).value ?? AppLanguage.indonesia;
-      _challenge = await ref.read(authRepositoryProvider).requestOtp(
+      _challenge = await ref
+          .read(authRepositoryProvider)
+          .requestOtp(
             country: _country,
             phone: _phone.text,
             channel: _channel,
@@ -72,10 +74,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       _error = null;
     });
     try {
-      _verification = await ref.read(authRepositoryProvider).verifyOtp(
-            challengeId: challenge.challengeId,
-            code: _code.text,
-          );
+      _verification = await ref
+          .read(authRepositoryProvider)
+          .verifyOtp(challengeId: challenge.challengeId, code: _code.text);
       if (mounted) setState(() => _step = 2);
     } catch (error) {
       if (mounted) {
@@ -94,7 +95,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       _error = null;
     });
     try {
-      await ref.read(authRepositoryProvider).resetPassword(
+      await ref
+          .read(authRepositoryProvider)
+          .resetPassword(
             challengeId: verification.challengeId,
             verificationToken: verification.verificationToken,
             newPassword: _password.text,

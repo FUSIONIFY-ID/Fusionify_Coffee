@@ -156,10 +156,7 @@ class AuthRepository {
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       '/v1/account/delete/request-otp',
-      data: {
-        'channel': channel,
-        'language': language.apiValue,
-      },
+      data: {'channel': channel, 'language': language.apiValue},
     );
     return OtpChallengeView.fromJson(_requireData(response));
   }
@@ -187,9 +184,8 @@ class AuthRepository {
     return data
         .whereType<Map>()
         .map(
-          (entry) => AccountSessionView.fromJson(
-            Map<String, dynamic>.from(entry),
-          ),
+          (entry) =>
+              AccountSessionView.fromJson(Map<String, dynamic>.from(entry)),
         )
         .toList();
   }

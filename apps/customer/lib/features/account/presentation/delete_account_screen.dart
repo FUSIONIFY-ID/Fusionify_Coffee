@@ -42,10 +42,9 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
     try {
       final language =
           ref.read(localeControllerProvider).value ?? AppLanguage.indonesia;
-      _challenge = await ref.read(authRepositoryProvider).requestDeleteAccountOtp(
-            channel: _channel,
-            language: language,
-          );
+      _challenge = await ref
+          .read(authRepositoryProvider)
+          .requestDeleteAccountOtp(channel: _channel, language: language);
       if (mounted) setState(() => _step = 1);
     } catch (error) {
       if (mounted) {
@@ -64,10 +63,9 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
       _error = null;
     });
     try {
-      _verification = await ref.read(authRepositoryProvider).verifyOtp(
-            challengeId: challenge.challengeId,
-            code: _code.text,
-          );
+      _verification = await ref
+          .read(authRepositoryProvider)
+          .verifyOtp(challengeId: challenge.challengeId, code: _code.text);
       if (mounted) setState(() => _step = 2);
     } catch (error) {
       if (mounted) {
@@ -86,7 +84,9 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
       _error = null;
     });
     try {
-      await ref.read(authRepositoryProvider).confirmDeleteAccount(
+      await ref
+          .read(authRepositoryProvider)
+          .confirmDeleteAccount(
             challengeId: verification.challengeId,
             verificationToken: verification.verificationToken,
           );

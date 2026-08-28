@@ -119,7 +119,6 @@ class AuthSessionView {
   final String refreshToken;
 }
 
-
 class AccountSessionView {
   const AccountSessionView({
     required this.id,
@@ -136,9 +135,11 @@ class AccountSessionView {
       id: json['id'] as String? ?? '',
       isCurrent: json['isCurrent'] as bool? ?? false,
       createdAt:
-          DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime(2026),
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime(2026),
       updatedAt:
-          DateTime.tryParse(json['updatedAt'] as String? ?? '') ?? DateTime(2026),
+          DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
+          DateTime(2026),
       refreshExpiresAt:
           DateTime.tryParse(json['refreshExpiresAt'] as String? ?? '') ??
           DateTime(2026),

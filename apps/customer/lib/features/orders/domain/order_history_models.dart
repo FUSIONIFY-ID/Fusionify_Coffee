@@ -15,8 +15,9 @@ class CustomerOrderSummary {
         ? Map<String, dynamic>.from(json['outlet'] as Map)
         : const <String, dynamic>{};
     final rawItems = json['items'] is List ? json['items'] as List : const [];
-    final rawPayments =
-        json['payments'] is List ? json['payments'] as List : const [];
+    final rawPayments = json['payments'] is List
+        ? json['payments'] as List
+        : const [];
 
     return CustomerOrderSummary(
       id: json['id'] as String? ?? '',
@@ -24,14 +25,14 @@ class CustomerOrderSummary {
       currency: json['currency'] as String? ?? 'IDR',
       totalAmount: json['totalAmount'] as int? ?? 0,
       createdAt:
-          DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime(2026),
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime(2026),
       outletName: outlet['name'] as String? ?? 'Fusionify Coffee',
       items: rawItems
           .whereType<Map>()
           .map(
-            (item) => CustomerOrderItem.fromJson(
-              Map<String, dynamic>.from(item),
-            ),
+            (item) =>
+                CustomerOrderItem.fromJson(Map<String, dynamic>.from(item)),
           )
           .toList(),
       paymentStatus: rawPayments.isEmpty

@@ -558,10 +558,7 @@ export class AuthService {
     });
   }
 
-  async confirmDeleteAccount(
-    userId: string,
-    input: ConfirmDeleteAccountInput,
-  ) {
+  async confirmDeleteAccount(userId: string, input: ConfirmDeleteAccountInput) {
     const challenge = await this.requireVerifiedChallenge(
       input.challengeId,
       input.verificationToken,

@@ -31,10 +31,7 @@ class OrdersScreen extends ConsumerWidget {
                   color: CoffeeColors.primary,
                 ),
                 const SizedBox(height: CoffeeSpacing.md),
-                Text(
-                  strings.signInToSeeOrders,
-                  textAlign: TextAlign.center,
-                ),
+                Text(strings.signInToSeeOrders, textAlign: TextAlign.center),
                 const SizedBox(height: CoffeeSpacing.md),
                 FilledButton(
                   onPressed: () => context.push('/auth/login'),
@@ -83,8 +80,7 @@ class OrdersScreen extends ConsumerWidget {
               itemCount: items.length,
               separatorBuilder: (_, _) =>
                   const SizedBox(height: CoffeeSpacing.sm),
-              itemBuilder: (context, index) =>
-                  _OrderCard(order: items[index]),
+              itemBuilder: (context, index) => _OrderCard(order: items[index]),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -93,9 +89,7 @@ class OrdersScreen extends ConsumerWidget {
             children: [
               SizedBox(
                 height: MediaQuery.sizeOf(context).height * 0.65,
-                child: Center(
-                  child: Text(strings.orderHistoryLoadFailed),
-                ),
+                child: Center(child: Text(strings.orderHistoryLoadFailed)),
               ),
             ],
           ),
@@ -113,9 +107,12 @@ class _OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
-    final firstItems = order.items.take(2).map((item) {
-      return item.quantity.toString() + '× ' + item.productName;
-    }).join(' • ');
+    final firstItems = order.items
+        .take(2)
+        .map((item) {
+          return item.quantity.toString() + '× ' + item.productName;
+        })
+        .join(' • ');
 
     return Card(
       child: Padding(
@@ -193,10 +190,7 @@ class _OrderCard extends StatelessWidget {
 }
 
 class _StatusChip extends StatelessWidget {
-  const _StatusChip({
-    required this.label,
-    required this.status,
-  });
+  const _StatusChip({required this.label, required this.status});
 
   final String label;
   final String status;

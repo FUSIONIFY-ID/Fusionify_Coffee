@@ -13,9 +13,8 @@ class OrdersRepository {
     return data
         .whereType<Map>()
         .map(
-          (entry) => CustomerOrderSummary.fromJson(
-            Map<String, dynamic>.from(entry),
-          ),
+          (entry) =>
+              CustomerOrderSummary.fromJson(Map<String, dynamic>.from(entry)),
         )
         .toList();
   }
