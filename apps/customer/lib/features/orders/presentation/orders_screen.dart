@@ -81,7 +81,10 @@ class OrdersScreen extends ConsumerWidget {
               itemCount: items.length,
               separatorBuilder: (_, _) =>
                   const SizedBox(height: CoffeeSpacing.sm),
-              itemBuilder: (context, index) => _OrderCard(order: items[index]),
+              itemBuilder: (context, index) => _OrderCard(
+                order: items[index],
+                onTap: () => context.push('/orders/${items[index].id}'),
+              ),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
