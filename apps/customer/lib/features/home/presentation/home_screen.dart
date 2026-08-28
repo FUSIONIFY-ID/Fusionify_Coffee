@@ -163,7 +163,7 @@ class _OutletCard extends StatelessWidget {
         border: Border.all(color: CoffeeColors.border),
         borderRadius: BorderRadius.circular(CoffeeRadius.card),
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(Icons.store_outlined, color: CoffeeColors.primary),
