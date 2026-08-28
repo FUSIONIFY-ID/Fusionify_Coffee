@@ -18,8 +18,7 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
       _ProductDetailScreenState();
 }
 
-class _ProductDetailScreenState
-    extends ConsumerState<ProductDetailScreen> {
+class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   late final Map<String, Set<String>> _selection;
   int _quantity = 1;
 
@@ -85,7 +84,9 @@ class _ProductDetailScreenState
   }
 
   void _addToCart() {
-    ref.read(cartProvider.notifier).add(
+    ref
+        .read(cartProvider.notifier)
+        .add(
           CartItem.fromProduct(
             product: widget.product,
             selectedOptions: _selectedOptions,

@@ -4,9 +4,7 @@ import 'package:fusionify_coffee/app/app.dart';
 
 void main() {
   testWidgets('renders Fusionify Coffee ordering foundation', (tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(child: FusionifyCoffeeApp()),
-    );
+    await tester.pumpWidget(const ProviderScope(child: FusionifyCoffeeApp()));
     await tester.pumpAndSettle();
 
     expect(find.text('Fusionify Coffee'), findsOneWidget);

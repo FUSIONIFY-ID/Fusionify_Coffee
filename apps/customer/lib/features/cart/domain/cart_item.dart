@@ -37,7 +37,8 @@ class CartItem {
   int get lineTotal => unitPrice * quantity;
 
   String get signature {
-    final optionIds = selectedOptions.map((option) => option.id).toList()..sort();
+    final optionIds = selectedOptions.map((option) => option.id).toList()
+      ..sort();
     return '$productId|${optionIds.join(',')}';
   }
 

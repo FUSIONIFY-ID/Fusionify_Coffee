@@ -28,8 +28,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     final visibleProducts = _category == 'All'
         ? demoProducts
         : demoProducts
-            .where((product) => product.category == _category)
-            .toList();
+              .where((product) => product.category == _category)
+              .toList();
 
     return SafeArea(
       child: CustomScrollView(
@@ -88,16 +88,13 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
           SliverPadding(
             padding: const EdgeInsets.all(CoffeeSpacing.md),
             sliver: SliverGrid(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final product = visibleProducts[index];
-                  return ProductCard(
-                    product: product,
-                    onTap: () => context.push('/product/${product.id}'),
-                  );
-                },
-                childCount: visibleProducts.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final product = visibleProducts[index];
+                return ProductCard(
+                  product: product,
+                  onTap: () => context.push('/product/${product.id}'),
+                );
+              }, childCount: visibleProducts.length),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: CoffeeSpacing.sm,

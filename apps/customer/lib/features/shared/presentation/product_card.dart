@@ -5,11 +5,7 @@ import '../../../core/formatters/currency.dart';
 import '../../catalog/domain/catalog_models.dart';
 
 class ProductCard extends StatelessWidget {
-  const ProductCard({
-    super.key,
-    required this.product,
-    required this.onTap,
-  });
+  const ProductCard({super.key, required this.product, required this.onTap});
 
   final Product product;
   final VoidCallback onTap;

@@ -210,8 +210,9 @@ class _FulfillmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final foreground =
-        enabled ? CoffeeColors.textPrimary : CoffeeColors.textSecondary;
+    final foreground = enabled
+        ? CoffeeColors.textPrimary
+        : CoffeeColors.textSecondary;
 
     return Material(
       color: CoffeeColors.surface,
