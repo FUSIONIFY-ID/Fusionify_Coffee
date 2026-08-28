@@ -1,0 +1,26 @@
+---
+description: Security and privacy constraints
+alwaysApply: true
+---
+
+Never expose or commit:
+- `.env` secrets
+- API keys
+- payment secrets
+- database credentials
+- `*.jks`
+- `*.keystore`
+- `android/key.properties`
+- signing passwords or private keys
+
+Payment:
+- Flutter talks to Fusionify backend, not private provider APIs.
+- Verify webhook authenticity.
+- Enforce idempotency.
+- Validate amount, transaction ownership, order state, and allowed transitions.
+
+Mobile:
+- Minimum necessary permissions only.
+- No background location without an accepted product/policy change.
+- No broad photo/media permission when a system picker is sufficient.
+- Never disable TLS verification.
