@@ -9,7 +9,7 @@ Flutter Customer App
   v
 NestJS API
   |
-  +-- Catalog / Orders / Payments
+  +-- Auth / Accounts / Catalog / Orders / Payments
   |
   v
 Prisma 7 + @prisma/adapter-pg
@@ -71,6 +71,33 @@ Flutter Screen
  -> PrismaService
  -> PostgreSQL
 ```
+
+## Localization Path
+
+```text
+Language setting
+ -> LocaleController
+ -> id-ID / ms-MY / en
+ -> Dio Accept-Language
+ -> Catalog API
+ -> translated JSON catalog fields
+ -> localized Flutter models/UI
+```
+
+The catalog endpoint also accepts an explicit `lang` query parameter for compatibility. The backend normalizes both API enum values and standard HTTP language tags, then safely falls back to default stored text when a translation is missing.
+
+## Authentication Boundary
+
+```text
+Flutter
+ -> OTP request/verify
+ -> register/login
+ -> secure local token storage
+ -> Bearer access session
+ -> authenticated account/order/payment APIs
+```
+
+Orders and payments are customer-owned resources. Knowing an order or payment ID is not sufficient authorization.
 
 ## Checkout Path
 
@@ -184,7 +211,6 @@ Future realtime/socket/push updates are an optimization and must not replace aut
 ## Operations / Future Modules
 
 Create modules only when implementation begins:
-- authentication/users
 - POS/KDS
 - rewards
 - vouchers
