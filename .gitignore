@@ -1,0 +1,66 @@
+# General
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+# Secrets and environment
+.env
+.env.*
+!.env.example
+secrets/
+credentials/
+
+# Android signing
+*.jks
+*.keystore
+android/key.properties
+**/android/key.properties
+**/keystore/
+**/keystores/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+**/ios/Flutter/.last_build_id
+
+# Android build
+.gradle/
+**/android/.gradle/
+**/android/local.properties
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+
+# iOS / Xcode
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/ephemeral/
+**/ios/Runner.xcworkspace/xcuserdata/
+*.xcuserstate
+
+# Node / NestJS
+node_modules/
+dist/
+.nest/
+.npm/
+.pnpm-store/
+
+# Prisma local database files
+*.db
+*.db-journal
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Local tooling
+.tooling/
