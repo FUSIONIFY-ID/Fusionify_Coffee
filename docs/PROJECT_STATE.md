@@ -7,7 +7,7 @@ Last updated: 2026-08-28
 - Repository: `FUSIONIFY-ID/Fusionify_Coffee`
 - Default branch: `main`
 - Visibility: public
-- Latest fully validated implementation head: `035379c16378d599cde8d8d626bae8106ff3b984`
+- Latest fully validated implementation head: `2157747ed46862ede416b6f60b22a81fca8c7172`
 
 ## Current Milestone
 
@@ -42,6 +42,32 @@ The application can render a provider QR string natively and manage local paymen
 - Android compileSdk/targetSdk 36
 - No gradients
 - Repository secret/signing policy
+
+### Authentication / Customer Account
+- Indonesia (+62) and Malaysia (+60) phone normalization
+- 6-digit OTP challenge flow
+- WhatsApp/SMS delivery adapter boundary
+- password authentication
+- hashed OTP/password/session secrets
+- access + refresh sessions
+- secure Flutter token storage
+- logout + logout-all
+- authenticated account/profile endpoints
+- order/payment ownership bound to authenticated customer
+
+### Localization
+- Bahasa Indonesia (`id-ID` / `ID_ID`)
+- Bahasa Melayu (`ms-MY` / `MS_MY`)
+- English (`en` / `EN`)
+- saved customer language preference
+- global Flutter locale switching
+- localized navigation/auth/account/checkout/payment states
+- localized backend catalog content
+- localized outlet/category/product/modifier data
+- `Accept-Language` sent automatically by the Flutter API client
+- catalog API still supports explicit `lang` for compatibility
+- fallback to default catalog text when a translation is missing
+- golden account UI coverage for all three supported languages
 
 ### Catalog / Cart
 - PostgreSQL-backed development catalog
@@ -154,7 +180,7 @@ See:
 
 ## Validation Evidence
 
-GitHub Actions run for implementation head `035379c16378d599cde8d8d626bae8106ff3b984`: **PASS**
+GitHub Actions run for implementation head `2157747ed46862ede416b6f60b22a81fca8c7172`: **PASS**
 
 Customer:
 - Dart format: PASS
@@ -233,8 +259,7 @@ Current rule:
 
 ## Not Implemented Yet
 
-- authentication
-- customer accounts
+- production OTP provider credentials/live delivery validation
 - production catalog/media
 - scheduled pickup
 - realtime socket/push delivery of payment changes
