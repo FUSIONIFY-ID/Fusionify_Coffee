@@ -1,0 +1,19 @@
+---
+description: Fusionify Coffee UI and design-system rules
+globs: ["apps/customer/**/*.dart", "apps/admin/**/*", "apps/pos/**/*", "apps/kds/**/*"]
+alwaysApply: false
+---
+
+Follow `docs/DESIGN_SYSTEM.md`.
+
+Rules:
+- Gradients are prohibited.
+- Use design tokens for color, spacing, radius, typography, and elevation.
+- Do not invent official logos or recolor locked assets.
+- Do not copy another coffee brand's UI or assets.
+- UI should feel like a premium consumer coffee app, not a SaaS dashboard.
+- Product photography should carry much of the visual personality.
+- Avoid excessive cards, shadows, rounded containers, popups, and banners.
+- Use purposeful empty/loading/error states.
+- Emoji are not production iconography.
+- Keep customer copy short, natural, and task-oriented.
