@@ -1,6 +1,7 @@
 name: Prepare Auth UI
 
 # Localization formatter/golden checkpoint for ID, MS, and EN.
+# Re-run after catalog fixture category id update.
 
 on:
   push:
