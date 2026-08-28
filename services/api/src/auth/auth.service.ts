@@ -18,6 +18,7 @@ import {
   hashOpaqueToken,
   hashOtp,
   hashPassword,
+  secureHashEqual,
   verifyPassword,
 } from './crypto.util';
 import { OtpDeliveryService } from './otp-delivery.service';
@@ -157,7 +158,7 @@ export class AuthService {
       input.code,
     );
 
-    if (expected !== challenge.codeHash) {
+    if (!secureHashEqual(expected, challenge.codeHash)) {
       await this.prisma.otpChallenge.update({
         where: { id: challenge.id },
         data: { attempts: { increment: 1 } },
@@ -205,8 +206,10 @@ export class AuthService {
     }
 
     if (
-      hashOpaqueToken(input.verificationToken) !==
-      challenge.verificationTokenHash
+      !secureHashEqual(
+        hashOpaqueToken(input.verificationToken),
+        challenge.verificationTokenHash,
+      )
     ) {
       throw new UnauthorizedException('Phone verification token is invalid.');
     }
