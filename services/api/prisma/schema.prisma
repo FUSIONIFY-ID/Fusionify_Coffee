@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -8,8 +9,9 @@ datasource db {
 }
 
 model Outlet {
-  id              String   @id @default(cuid())
+  id              String   @id
   name            String
+  note            String   @default("")
   pickupEnabled   Boolean  @default(true)
   deliveryEnabled Boolean  @default(false)
   createdAt       DateTime @default(now())
@@ -17,7 +19,7 @@ model Outlet {
 }
 
 model Category {
-  id        String    @id @default(cuid())
+  id        String    @id
   name      String
   sortOrder Int       @default(0)
   products  Product[]
@@ -26,11 +28,12 @@ model Category {
 }
 
 model Product {
-  id             String          @id @default(cuid())
+  id             String          @id
   name           String
   description    String
   basePrice      Int
   active         Boolean         @default(true)
+  isBestseller   Boolean         @default(false)
   categoryId     String
   category       Category        @relation(fields: [categoryId], references: [id])
   modifierGroups ModifierGroup[]
@@ -39,7 +42,7 @@ model Product {
 }
 
 model ModifierGroup {
-  id            String           @id @default(cuid())
+  id            String           @id
   productId     String
   product       Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
   name          String
@@ -52,7 +55,7 @@ model ModifierGroup {
 }
 
 model ModifierOption {
-  id              String        @id @default(cuid())
+  id              String        @id
   modifierGroupId String
   modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
   name            String

@@ -1,7 +1,5 @@
 name: CI
 
-# Validates the formatted API-backed Material 3 customer foundation.
-
 on:
   push:
     paths:
@@ -38,9 +36,29 @@ jobs:
 
   api:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: fusionify_coffee_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d fusionify_coffee_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fusionify_coffee_ci?schema=public
+
     defaults:
       run:
         working-directory: services/api
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -49,6 +67,9 @@ jobs:
           cache: npm
           cache-dependency-path: services/api/package-lock.json
       - run: npm ci
+      - run: npm run prisma:generate
+      - run: npm run db:migrate:deploy
+      - run: npm run db:seed
       - run: npm run lint
       - run: npm test -- --runInBand
       - run: npm run test:e2e

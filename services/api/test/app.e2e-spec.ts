@@ -23,14 +23,15 @@ describe('Fusionify Coffee API (e2e)', () => {
     });
   });
 
-  it('/v1/catalog/preview (GET) exposes modifier-aware preview data', () => {
+  it('/v1/catalog/preview (GET) reads seeded PostgreSQL data', () => {
     return request(app.getHttpServer())
       .get('/v1/catalog/preview')
       .expect(200)
       .then((response) => {
         expect(response.text).toContain('"preview":true');
-        expect(response.text).toContain('"modifierGroups"');
-        expect(response.text).toContain('"oat-milk"');
+        expect(response.text).toContain('"aren-latte"');
+        expect(response.text).toContain('"Database-backed development fixture."');
+        expect(response.text).toContain('"Oat Milk"');
       });
   });
 
