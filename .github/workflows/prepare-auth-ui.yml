@@ -1,12 +1,6 @@
 name: Prepare Auth UI
 
-# Latest auth/e2e checkpoint.
-# Includes localized navigation + OTP input fix.
-# Includes authenticated checkout ownership tests.
-# Includes constant-time auth hash checks.
-# Final rerun after Dart syntax correction.
-# Final rerun after analyzer deprecation cleanup.
-# Strict e2e response typing checkpoint.
+# Localization formatter/golden checkpoint for ID, MS, and EN.
 
 on:
   push:
@@ -41,7 +35,7 @@ jobs:
         working-directory: apps/customer
         run: flutter analyze
 
-      - name: Generate account profile screenshot
+      - name: Generate multilingual account screenshots
         working-directory: apps/customer
         run: flutter test --update-goldens test/account_profile_golden_test.dart
 
@@ -65,21 +59,21 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fusionify_coffee_preview
         run: npm run prisma:generate
 
-      - name: Format auth backend
+      - name: Format API source
         working-directory: services/api
-        run: npx prettier --write "src/auth/**/*.ts" "src/app.module.ts"
+        run: npm run format
 
-      - name: Lint auth backend
+      - name: Lint API
         working-directory: services/api
         run: npm run lint
 
-      - name: Commit generated changes
+      - name: Commit generated formatting and goldens
         run: |
-          if git status --porcelain apps/customer services/api/src/auth services/api/src/app.module.ts | grep . >/dev/null; then
+          if git status --porcelain apps/customer services/api/src services/api/test services/api/prisma/seed.ts | grep . >/dev/null; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add apps/customer services/api/src/auth services/api/src/app.module.ts
-            git commit -m "style: normalize auth UI and backend"
+            git add apps/customer services/api/src services/api/test services/api/prisma/seed.ts
+            git commit -m "style: normalize multilingual customer and API"
             git push
           else
             echo "No generated changes."
