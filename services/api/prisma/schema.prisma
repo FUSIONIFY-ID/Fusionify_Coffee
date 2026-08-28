@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -10,4 +5,61 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model Outlet {
+  id              String   @id @default(cuid())
+  name            String
+  pickupEnabled   Boolean  @default(true)
+  deliveryEnabled Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  sortOrder Int       @default(0)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id             String          @id @default(cuid())
+  name           String
+  description    String
+  basePrice      Int
+  active         Boolean         @default(true)
+  categoryId     String
+  category       Category        @relation(fields: [categoryId], references: [id])
+  modifierGroups ModifierGroup[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model ModifierGroup {
+  id            String           @id @default(cuid())
+  productId     String
+  product       Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name          String
+  required      Boolean          @default(false)
+  allowMultiple Boolean          @default(false)
+  sortOrder     Int              @default(0)
+  options       ModifierOption[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model ModifierOption {
+  id              String        @id @default(cuid())
+  modifierGroupId String
+  modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id], onDelete: Cascade)
+  name            String
+  priceDelta      Int           @default(0)
+  isDefault       Boolean       @default(false)
+  active          Boolean       @default(true)
+  sortOrder       Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
