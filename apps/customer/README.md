@@ -128,3 +128,18 @@ Read:
 - `../../docs/PROJECT_STATE.md`
 
 No gradients. No AI slop. No fake functionality.
+
+
+## Order Detail + Fulfillment Timeline
+
+The authenticated Orders tab now opens a dedicated order-detail route.
+
+Implemented customer behavior:
+- order item breakdown
+- total amount
+- current order status
+- persisted fulfillment timeline from backend status events
+- pull-to-refresh reconciliation
+- localized status labels for Indonesian, Malay, and English
+
+Fulfillment status events are authoritative backend data. The customer app does not synthesize fake progress from timestamps.
