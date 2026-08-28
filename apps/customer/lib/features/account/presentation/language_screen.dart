@@ -26,37 +26,83 @@ class LanguageScreen extends ConsumerWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: CoffeeSpacing.md),
-          for (final language in AppLanguage.values)
-            RadioListTile<AppLanguage>(
-              value: language,
-              groupValue: current,
-              title: Text(language.label),
-              onChanged: (value) async {
-                if (value == null) return;
-
-                await ref
-                    .read(localeControllerProvider.notifier)
-                    .setLanguage(value);
-
-                try {
-                  await ref
-                      .read(authControllerProvider.notifier)
-                      .syncLanguage(value);
-                } catch (_) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Language changed on this device. Account sync will retry later.',
-                        ),
-                      ),
-                    );
-                  }
-                }
-              },
+          Card(
+            child: Column(
+              children: [
+                for (var index = 0;
+                    index < AppLanguage.values.length;
+                    index++) ...[
+                  _LanguageTile(
+                    language: AppLanguage.values[index],
+                    selected: AppLanguage.values[index] == current,
+                    onTap: () => _selectLanguage(
+                      context,
+                      ref,
+                      AppLanguage.values[index],
+                    ),
+                  ),
+                  if (index < AppLanguage.values.length - 1) const Divider(),
+                ],
+              ],
             ),
+          ),
         ],
       ),
+    );
+  }
+
+  Future<void> _selectLanguage(
+    BuildContext context,
+    WidgetRef ref,
+    AppLanguage language,
+  ) async {
+    await ref.read(localeControllerProvider.notifier).setLanguage(language);
+
+    try {
+      await ref.read(authControllerProvider.notifier).syncLanguage(language);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Language changed on this device. Account sync will retry later.',
+            ),
+          ),
+        );
+      }
+    }
+  }
+}
+
+class _LanguageTile extends StatelessWidget {
+  const _LanguageTile({
+    required this.language,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final AppLanguage language;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: CoffeeSpacing.md,
+        vertical: CoffeeSpacing.xs,
+      ),
+      title: Text(language.label),
+      trailing: selected
+          ? const Icon(
+              Icons.check_circle,
+              color: CoffeeColors.primary,
+            )
+          : const Icon(
+              Icons.circle_outlined,
+              color: CoffeeColors.textSecondary,
+            ),
     );
   }
 }
