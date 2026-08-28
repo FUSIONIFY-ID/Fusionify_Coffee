@@ -1,5 +1,6 @@
-import { Controller, Headers, Post, RawBodyRequest, Req } from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Headers, Post, Req } from '@nestjs/common';
+import type { RawBodyRequest } from '@nestjs/common';
+import type { Request } from 'express';
 import { PaymentsService } from './payments.service';
 
 @Controller('v1/webhooks')
