@@ -3,8 +3,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
-import { hashOtp } from './../src/auth/crypto.util';
+import { hashOtp, hashPassword } from './../src/auth/crypto.util';
 import { PrismaService } from './../src/database/prisma.service';
+import { StaffRole } from './../src/generated/prisma/enums';
+import { totpAtCounter } from './../src/staff/totp.util';
 
 type OrderResponse = {
   id: string;
@@ -40,6 +42,37 @@ type ProfileResponse = {
   preferredLanguage: string;
 };
 
+type StaffLoginResponse = {
+  challengeToken: string;
+  requiresTotpSetup: boolean;
+  requiresTotp: boolean;
+};
+
+type StaffTotpSetupResponse = {
+  secret: string;
+  otpauthUri: string;
+};
+
+type StaffSessionResponse = {
+  accessToken: string;
+  refreshToken: string;
+  staff: {
+    id: string;
+    email: string;
+    role: string;
+    totpEnabled: boolean;
+    permissions: string[];
+  };
+};
+
+type StaffMeResponse = {
+  id: string;
+  email: string;
+  role: string;
+  totpEnabled: boolean;
+  permissions: string[];
+};
+
 describe('Fusionify Coffee API (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
@@ -54,6 +87,52 @@ describe('Fusionify Coffee API (e2e)', () => {
     app = moduleFixture.createNestApplication({ rawBody: true });
     await app.init();
   });
+
+  async function createAndLoginStaff(role: StaffRole) {
+    userSequence += 1;
+    const email = `staff-${Date.now()}-${userSequence}@example.com`;
+    const password = 'Fusionify-Staff-2026';
+
+    await prisma.staffUser.create({
+      data: {
+        email,
+        fullName: 'Fusionify Staff Test',
+        passwordHash: await hashPassword(password),
+        role,
+      },
+    });
+
+    const loginResponse = await request(app.getHttpServer())
+      .post('/v1/staff/auth/login')
+      .send({ email, password })
+      .expect(201);
+    const login = loginResponse.body as unknown as StaffLoginResponse;
+
+    expect(login.requiresTotpSetup).toBe(true);
+    expect(login.requiresTotp).toBe(false);
+
+    const setupResponse = await request(app.getHttpServer())
+      .post('/v1/staff/auth/totp/setup')
+      .send({ challengeToken: login.challengeToken })
+      .expect(201);
+    const setup = setupResponse.body as unknown as StaffTotpSetupResponse;
+
+    expect(setup.otpauthUri).toContain('otpauth://totp/');
+    const code = totpAtCounter(
+      setup.secret,
+      Math.floor(Date.now() / 30_000),
+    );
+
+    const verifiedResponse = await request(app.getHttpServer())
+      .post('/v1/staff/auth/totp/verify')
+      .send({
+        challengeToken: login.challengeToken,
+        code,
+      })
+      .expect(201);
+
+    return verifiedResponse.body as unknown as StaffSessionResponse;
+  }
 
   async function registerCustomer() {
     userSequence += 1;
@@ -163,6 +242,41 @@ describe('Fusionify Coffee API (e2e)', () => {
     expect(profileBody.phoneCountry).toBe('ID');
     expect(profileBody.phoneVerified).toBe(true);
     expect(profileBody.preferredLanguage).toBe('ID_ID');
+  });
+
+  it('requires staff password + TOTP and creates an audited staff session', async () => {
+    const session = await createAndLoginStaff(StaffRole.SUPER_ADMIN);
+
+    expect(session.staff.role).toBe('SUPER_ADMIN');
+    expect(session.staff.totpEnabled).toBe(true);
+    expect(session.staff.permissions).toContain('audit.read');
+
+    const meResponse = await request(app.getHttpServer())
+      .get('/v1/staff/me')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .expect(200);
+    const me = meResponse.body as unknown as StaffMeResponse;
+
+    expect(me.email).toBe(session.staff.email);
+    expect(me.totpEnabled).toBe(true);
+
+    const auditResponse = await request(app.getHttpServer())
+      .get('/v1/staff/audit-logs')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .expect(200);
+
+    expect(Array.isArray(auditResponse.body)).toBe(true);
+  });
+
+  it('enforces staff RBAC for audit access', async () => {
+    const session = await createAndLoginStaff(StaffRole.CASHIER);
+
+    expect(session.staff.permissions).not.toContain('audit.read');
+
+    await request(app.getHttpServer())
+      .get('/v1/staff/audit-logs')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .expect(403);
   });
 
   it('/v1/orders (POST) requires authentication', async () => {
