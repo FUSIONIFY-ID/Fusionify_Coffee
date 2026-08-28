@@ -117,10 +117,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         data: (snapshot) => ListView(
           padding: const EdgeInsets.all(CoffeeSpacing.md),
           children: [
-            Text(
-              'Pickup',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            Text('Pickup', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: CoffeeSpacing.sm),
             Card(
               child: Padding(
@@ -268,9 +265,7 @@ class _OrderLine extends StatelessWidget {
               ),
               const SizedBox(height: CoffeeSpacing.xxs),
               Text(
-                item.selectedOptions
-                    .map((option) => option.label)
-                    .join(' · '),
+                item.selectedOptions.map((option) => option.label).join(' · '),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],

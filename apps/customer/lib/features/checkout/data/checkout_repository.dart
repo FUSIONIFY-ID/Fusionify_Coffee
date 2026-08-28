@@ -15,9 +15,7 @@ class CheckoutRepository {
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       '/v1/orders',
-      options: Options(
-        headers: {'Idempotency-Key': idempotencyKey},
-      ),
+      options: Options(headers: {'Idempotency-Key': idempotencyKey}),
       data: {
         'outletId': outletId,
         'items': [
@@ -47,9 +45,7 @@ class CheckoutRepository {
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       '/v1/orders/$orderId/payments',
-      options: Options(
-        headers: {'Idempotency-Key': idempotencyKey},
-      ),
+      options: Options(headers: {'Idempotency-Key': idempotencyKey}),
       data: const {'channel': 'GOPAY_QRIS'},
     );
 
