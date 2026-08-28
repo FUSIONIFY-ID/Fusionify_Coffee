@@ -1,0 +1,19 @@
+---
+description: Core Fusionify Coffee repository rules
+alwaysApply: true
+---
+
+Read `AGENTS.md` and `docs/PROJECT_STATE.md` before material changes.
+
+Non-negotiable:
+- No AI slop.
+- No vibe coding.
+- No AI-style overengineering.
+- No gradients.
+- No fake functionality or fake production data.
+- No secrets, API keys, keystores, or signing credentials in Git.
+- Do not expose payment-provider private credentials to Flutter.
+- Do not rewrite working architecture without documented justification.
+- Do not claim a test passed if it was not run.
+
+Prefer the smallest correct change. Inspect existing code before creating new abstractions.
