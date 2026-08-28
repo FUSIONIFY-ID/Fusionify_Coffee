@@ -120,17 +120,32 @@ describe('Fusionify Coffee API (e2e)', () => {
     });
   });
 
-  it('/v1/catalog/preview (GET) reads seeded PostgreSQL data', () => {
+  it('/v1/catalog/preview (GET) returns English localized seeded data', () => {
     return request(app.getHttpServer())
-      .get('/v1/catalog/preview')
+      .get('/v1/catalog/preview?lang=EN')
       .expect(200)
       .then((response) => {
         expect(response.text).toContain('"preview":true');
+        expect(response.text).toContain('"language":"EN"');
         expect(response.text).toContain('"aren-latte"');
         expect(response.text).toContain(
           '"Database-backed development fixture."',
         );
         expect(response.text).toContain('"Oat Milk"');
+      });
+  });
+
+  it('/v1/catalog/preview (GET) returns Malay localized seeded data', () => {
+    return request(app.getHttpServer())
+      .get('/v1/catalog/preview?lang=MS_MY')
+      .expect(200)
+      .then((response) => {
+        expect(response.text).toContain('"language":"MS_MY"');
+        expect(response.text).toContain('"category":"Kopi"');
+        expect(response.text).toContain('"Susu Oat"');
+        expect(response.text).toContain(
+          '"Data pembangunan yang bersumber daripada pangkalan data."',
+        );
       });
   });
 
