@@ -118,10 +118,7 @@ describe('Fusionify Coffee API (e2e)', () => {
     const setup = setupResponse.body as unknown as StaffTotpSetupResponse;
 
     expect(setup.otpauthUri).toContain('otpauth://totp/');
-    const code = totpAtCounter(
-      setup.secret,
-      Math.floor(Date.now() / 30_000),
-    );
+    const code = totpAtCounter(setup.secret, Math.floor(Date.now() / 30_000));
 
     const verifiedResponse = await request(app.getHttpServer())
       .post('/v1/staff/auth/totp/verify')
