@@ -38,6 +38,7 @@ jobs:
 
             python3 - <<'PY'
           from pathlib import Path
+
           plist = Path("apps/customer/ios/Runner/Info.plist")
           text = plist.read_text()
           text = text.replace(
@@ -58,7 +59,6 @@ jobs:
         run: |
           set -euo pipefail
           file="apps/customer/android/app/build.gradle.kts"
-
           sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' "$file"
           sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 28/' "$file"
           sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 36/' "$file"
@@ -67,8 +67,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24"
-          cache: npm
-          cache-dependency-path: services/api/package-lock.json
 
       - name: Scaffold NestJS API
         shell: bash
