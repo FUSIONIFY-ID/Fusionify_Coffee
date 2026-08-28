@@ -38,6 +38,36 @@ enum PaymentChannel {
   INTERACTIVE_QRIS
 }
 
+enum CustomerStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum PhoneCountry {
+  ID
+  MY
+}
+
+enum AppLanguage {
+  ID_ID
+  MS_MY
+  EN
+}
+
+enum OtpChannel {
+  WHATSAPP
+  SMS
+}
+
+enum OtpPurpose {
+  REGISTER
+  LOGIN_CHALLENGE
+  RESET_PASSWORD
+  CHANGE_PHONE
+  DELETE_ACCOUNT
+}
+
 model Outlet {
   id              String   @id
   name            String
@@ -100,10 +130,12 @@ model ModifierOption {
 }
 
 model Order {
-  id             String      @id @default(cuid())
-  checkoutKey    String      @unique
+  id             String        @id @default(cuid())
+  checkoutKey    String        @unique
+  userId         String?
+  user           CustomerUser? @relation(fields: [userId], references: [id])
   outletId       String
-  outlet         Outlet      @relation(fields: [outletId], references: [id])
+  outlet         Outlet        @relation(fields: [outletId], references: [id])
   status         OrderStatus @default(AWAITING_PAYMENT)
   currency       String      @default("IDR")
   subtotal       Int
@@ -114,6 +146,7 @@ model Order {
   updatedAt      DateTime    @updatedAt
 
   @@index([outletId, status])
+  @@index([userId, createdAt])
 }
 
 model OrderItem {
@@ -159,4 +192,63 @@ model Payment {
   updatedAt             DateTime        @updatedAt
 
   @@index([orderId, status])
+}
+
+
+model CustomerUser {
+  id                String         @id @default(cuid())
+  fullName          String
+  phoneCountry      PhoneCountry
+  phoneE164         String         @unique
+  phoneVerifiedAt   DateTime
+  email             String?        @unique
+  passwordHash      String
+  preferredLanguage AppLanguage    @default(ID_ID)
+  birthDate         DateTime?
+  avatarUrl         String?
+  status            CustomerStatus @default(ACTIVE)
+  orders            Order[]
+  sessions          UserSession[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([phoneCountry, status])
+}
+
+model UserSession {
+  id               String       @id @default(cuid())
+  userId           String
+  user             CustomerUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessTokenHash  String       @unique
+  refreshTokenHash String       @unique
+  deviceName       String?
+  platform         String?
+  accessExpiresAt  DateTime
+  refreshExpiresAt DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([userId, revokedAt])
+}
+
+model OtpChallenge {
+  id                      String       @id @default(cuid())
+  phoneCountry            PhoneCountry
+  phoneE164               String
+  channel                 OtpChannel
+  purpose                 OtpPurpose
+  language                AppLanguage
+  codeHash                String
+  expiresAt               DateTime
+  attempts                Int          @default(0)
+  maxAttempts             Int          @default(5)
+  verifiedAt              DateTime?
+  verificationTokenHash   String?
+  verificationExpiresAt   DateTime?
+  consumedAt              DateTime?
+  createdAt               DateTime     @default(now())
+  updatedAt               DateTime     @updatedAt
+
+  @@index([phoneE164, purpose, createdAt])
 }
