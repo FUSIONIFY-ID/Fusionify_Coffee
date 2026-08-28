@@ -1,0 +1,44 @@
+name: Feature request
+description: Propose a product or engineering capability
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or operational problem needs solving?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe the outcome, not just a preferred implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: What must be true for this to be considered complete?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Customer app
+        - Backend/API
+        - Payment
+        - Pickup
+        - Delivery
+        - Rewards/Membership
+        - Inventory/Operations
+        - Android/Play
+        - iOS
+        - Documentation
+        - Other
+    validations:
+      required: true
