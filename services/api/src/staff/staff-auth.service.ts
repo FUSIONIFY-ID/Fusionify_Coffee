@@ -140,8 +140,12 @@ export class StaffAuthService {
 
     await this.audit(user.id, 'STAFF_LOGIN_SUCCEEDED', context);
 
+    const refreshedUser = await this.prisma.staffUser.findUniqueOrThrow({
+      where: { id: user.id },
+    });
+
     return {
-      staff: this.staffView(user),
+      staff: this.staffView(refreshedUser),
       accessToken: session.accessToken,
       refreshToken: session.refreshToken,
       accessExpiresAt: session.accessExpiresAt,
