@@ -80,4 +80,31 @@ describe('CatalogService', () => {
       'Susu Oat',
     );
   });
+
+  it.each([
+    ['ms-MY,ms;q=0.9,en;q=0.8', 'MS_MY'],
+    ['en-US,en;q=0.9', 'EN'],
+    ['id-ID,id;q=0.9', 'ID_ID'],
+    [undefined, 'ID_ID'],
+  ])('normalizes HTTP language value %s', async (requested, expected) => {
+    const prisma = {
+      outlet: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'preview-outlet',
+          name: 'Preview Store',
+          note: '',
+          translations: null,
+          pickupEnabled: true,
+        }),
+      },
+      product: {
+        findMany: jest.fn().mockResolvedValue([]),
+      },
+    } as unknown as PrismaService;
+
+    const service = new CatalogService(prisma);
+    const catalog = await service.getPreviewCatalog(requested);
+
+    expect(catalog.language).toBe(expected);
+  });
 });

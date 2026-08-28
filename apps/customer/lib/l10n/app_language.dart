@@ -11,7 +11,17 @@ enum AppLanguage {
   final String apiValue;
   final String label;
 
-  Locale get locale => Locale(localeCode);
+  Locale get locale => switch (this) {
+    AppLanguage.indonesia => const Locale('id', 'ID'),
+    AppLanguage.malaysia => const Locale('ms', 'MY'),
+    AppLanguage.english => const Locale('en'),
+  };
+
+  String get httpLanguageTag => switch (this) {
+    AppLanguage.indonesia => 'id-ID',
+    AppLanguage.malaysia => 'ms-MY',
+    AppLanguage.english => 'en',
+  };
 
   static AppLanguage fromLocale(Locale locale) {
     return switch (locale.languageCode) {

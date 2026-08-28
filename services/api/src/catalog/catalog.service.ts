@@ -119,16 +119,27 @@ export class CatalogService {
 }
 
 function switchLanguage(value?: string): CatalogLanguage {
-  switch (value) {
-    case 'MS_MY':
-    case 'ms':
-      return 'MS_MY';
-    case 'EN':
-    case 'en':
-      return 'EN';
-    case 'ID_ID':
-    case 'id':
-    default:
-      return 'ID_ID';
+  const normalized = value?.trim().toLowerCase();
+
+  if (!normalized) {
+    return 'ID_ID';
   }
+
+  if (
+    normalized === 'ms_my' ||
+    normalized.startsWith('ms-my') ||
+    normalized.startsWith('ms')
+  ) {
+    return 'MS_MY';
+  }
+
+  if (
+    normalized === 'en' ||
+    normalized.startsWith('en-') ||
+    normalized.startsWith('en,')
+  ) {
+    return 'EN';
+  }
+
+  return 'ID_ID';
 }
