@@ -55,6 +55,10 @@ class CartController extends Notifier<List<CartItem>> {
     state = state.where((item) => item.signature != signature).toList();
   }
 
+  void clear() {
+    state = const [];
+  }
+
   void _setQuantity(String signature, int Function(int current) update) {
     final index = state.indexWhere((item) => item.signature == signature);
     if (index == -1) return;

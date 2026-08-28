@@ -7,6 +7,7 @@ import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
 import '../../../core/utils/idempotency_key.dart';
 import '../../cart/application/cart_controller.dart';
+import '../../cart/domain/cart_item.dart';
 import '../../catalog/application/catalog_provider.dart';
 import '../application/checkout_provider.dart';
 
@@ -250,7 +251,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 class _OrderLine extends StatelessWidget {
   const _OrderLine({required this.item});
 
-  final dynamic item;
+  final CartItem item;
 
   @override
   Widget build(BuildContext context) {
@@ -269,7 +270,7 @@ class _OrderLine extends StatelessWidget {
               Text(
                 item.selectedOptions
                     .map((option) => option.label)
-                    .join(' · ') as String,
+                    .join(' · '),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
@@ -277,7 +278,7 @@ class _OrderLine extends StatelessWidget {
         ),
         const SizedBox(width: CoffeeSpacing.sm),
         Text(
-          formatRupiah(item.lineTotal as int),
+          formatRupiah(item.lineTotal),
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ],
