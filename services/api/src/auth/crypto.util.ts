@@ -44,6 +44,16 @@ export function hashOpaqueToken(token: string) {
     .digest('hex');
 }
 
+export function secureHashEqual(left: string, right: string) {
+  const leftBuffer = Buffer.from(left, 'utf8');
+  const rightBuffer = Buffer.from(right, 'utf8');
+
+  return (
+    leftBuffer.length === rightBuffer.length &&
+    timingSafeEqual(leftBuffer, rightBuffer)
+  );
+}
+
 export async function hashPassword(password: string) {
   validatePassword(password);
   const salt = randomBytes(16);
