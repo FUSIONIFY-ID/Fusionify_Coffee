@@ -5,6 +5,7 @@
 ```text
 Customer App (Flutter)
         |
+        | Dio / Riverpod async state
         v
 Fusionify Coffee API (NestJS)
         |
@@ -47,27 +48,55 @@ Do not create empty application shells merely to suggest progress.
 
 Use feature-based organization rather than a global dumping-ground structure.
 
-Target direction:
+Current direction:
 
 ```text
 lib/
   app/
   core/
+    network/
   features/
     auth/
     home/
-    outlets/
     menu/
     product/
     cart/
-    checkout/
     payment/
     orders/
     rewards/
-    profile/
+    account/
+    catalog/
 ```
 
 Business logic should not live inside large presentation widgets.
+
+## Customer Data Boundary
+
+Catalog runtime flow:
+
+```text
+Screen
+  |
+  v
+Riverpod FutureProvider
+  |
+  v
+CatalogRepository
+  |
+  v
+Dio
+  |
+  v
+GET /v1/catalog/preview
+```
+
+Rules:
+- UI does not silently fall back to fake local data on network failure.
+- Loading, error, retry, and refresh states are explicit.
+- Tests may override providers with test fixtures.
+- API base URL is configuration, not hardcoded production infrastructure.
+- Production API should use HTTPS.
+- Development HTTP allowance is isolated to platform development configuration.
 
 ## Backend Modules
 
@@ -90,6 +119,19 @@ src/
 ```
 
 Create modules only when implementation requires them.
+
+## Persistence
+
+Prisma schema currently defines catalog foundation models, but runtime preview data is still hardcoded at the API layer.
+
+Next persistence step:
+- Prisma service
+- PostgreSQL environment
+- Initial migration
+- Development seed
+- Database-backed catalog query
+
+Do not claim PostgreSQL-backed behavior until this is implemented and validated.
 
 ## Payment Architecture
 

@@ -18,6 +18,39 @@ It should not feel like:
 - A generic AI-generated landing page
 - A clone of another coffee brand
 
+## Material 3 Foundation
+
+Flutter Material 3 is the UI foundation.
+
+Current implementation uses:
+- `useMaterial3: true`
+- Material 3 seed-based `ColorScheme`
+- Material 2021 typography baseline
+- Material 3 AppBar
+- NavigationBar
+- NavigationRail for wide layouts
+- Filled/Outlined/Text buttons
+- ChoiceChip / FilterChip
+- Material cards
+- Bottom sheet theme
+- Snackbar theme
+- Input decoration theme
+- Progress indicators
+- Edge-to-edge system UI
+
+Material 3 is the component/interaction foundation, not permission to make the product visually identical to Google apps.
+
+Fusionify brand identity remains authoritative.
+
+System Dynamic Color / Material You recoloring is intentionally not enabled because it could replace locked Fusionify brand colors. Revisit only through a deliberate design decision.
+
+## Adaptive Navigation
+
+- Phone layouts use Material 3 `NavigationBar`.
+- Wide/tablet layouts use Material 3 `NavigationRail`.
+- Current breakpoint is an implementation baseline and may be tuned after device testing.
+- Tablet/foldable layouts must remain functional even if phone remains the primary commercial target.
+
 ## Hard Rule: No Gradients
 
 Gradients are prohibited.
@@ -53,6 +86,7 @@ Examples:
 - onPrimary
 - surface
 - surfaceWarm
+- surfaceBlue
 - textPrimary
 - textSecondary
 - border
@@ -77,7 +111,7 @@ Avoid novelty typography for core ordering flows.
 
 Use a documented spacing scale. Do not introduce arbitrary values for individual screens.
 
-Suggested initial scale for implementation validation:
+Current scale:
 - 4
 - 8
 - 12
@@ -87,19 +121,17 @@ Suggested initial scale for implementation validation:
 - 40
 - 48
 
-This scale can evolve through design review.
-
 ## Radius
 
 Use a small controlled set.
 
-Suggested initial direction:
+Current direction:
 - Small controls: 8
-- Inputs/buttons: 10–12
-- Cards: 12–16
-- Sheets: 20–24 top corners
+- Inputs/buttons: 12
+- Cards: 16
+- Sheets: 24
 
-Do not make every object a pill or 30px rounded rectangle.
+Do not make every object a pill or oversized rounded rectangle.
 
 ## Elevation
 
@@ -116,11 +148,11 @@ Elevation is appropriate for:
 Target hierarchy:
 
 1. Context/greeting and current outlet/order mode
-2. Fusion Points/rewards visibility
-3. One meaningful campaign area
+2. Fusion Points/rewards visibility when implemented
+3. One meaningful campaign area when real campaign content exists
 4. Pickup / Delivery
 5. Recommended products
-6. Buy Again
+6. Buy Again when order history exists
 7. Category/menu discovery
 
 Avoid stacking multiple promotional banners before ordering actions.
@@ -155,6 +187,12 @@ Use a persistent bottom action for quantity and final add-to-cart price where ap
 
 Prefer skeleton/loading placeholders for content lists when they improve perceived performance.
 
+Current catalog flow includes:
+- Skeleton loading
+- Explicit error state
+- Retry action
+- Pull-to-refresh on Home
+
 Use a spinner/progress indicator for short operations such as:
 - Applying voucher
 - Checking payment
@@ -181,6 +219,10 @@ Every meaningful empty/error state should:
 ## Iconography
 
 Use a consistent production icon set.
+
+Material icons are acceptable during application foundation work.
+
+Official/custom brand iconography should replace temporary generic product imagery when approved assets exist.
 
 Do not use emoji as primary product iconography.
 
