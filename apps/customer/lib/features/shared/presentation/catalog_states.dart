@@ -26,8 +26,7 @@ class CatalogLoading extends StatelessWidget {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: cardCount,
-            separatorBuilder: (_, _) =>
-                const SizedBox(width: CoffeeSpacing.sm),
+            separatorBuilder: (_, _) => const SizedBox(width: CoffeeSpacing.sm),
             itemBuilder: (_, _) {
               return Container(
                 width: 176,
@@ -75,10 +74,7 @@ class CatalogLoading extends StatelessWidget {
 }
 
 class CatalogErrorState extends StatelessWidget {
-  const CatalogErrorState({
-    super.key,
-    required this.onRetry,
-  });
+  const CatalogErrorState({super.key, required this.onRetry});
 
   final VoidCallback onRetry;
 

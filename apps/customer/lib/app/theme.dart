@@ -56,9 +56,9 @@ ThemeData buildFusionifyCoffeeTheme() {
   );
 
   final textTheme = Typography.material2021().black.apply(
-        bodyColor: CoffeeColors.textPrimary,
-        displayColor: CoffeeColors.textPrimary,
-      );
+    bodyColor: CoffeeColors.textPrimary,
+    displayColor: CoffeeColors.textPrimary,
+  );
 
   final controlShape = RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(CoffeeRadius.control),
@@ -76,18 +76,12 @@ ThemeData buildFusionifyCoffeeTheme() {
       headlineSmall: textTheme.headlineSmall?.copyWith(
         fontWeight: FontWeight.w700,
       ),
-      titleLarge: textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.w700,
-      ),
-      titleMedium: textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
+      titleLarge: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+      titleMedium: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
       bodyMedium: textTheme.bodyMedium?.copyWith(
         color: CoffeeColors.textSecondary,
       ),
-      labelLarge: textTheme.labelLarge?.copyWith(
-        fontWeight: FontWeight.w700,
-      ),
+      labelLarge: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: CoffeeColors.background,
@@ -172,10 +166,7 @@ ThemeData buildFusionifyCoffeeTheme() {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(CoffeeRadius.control),
-        borderSide: const BorderSide(
-          color: CoffeeColors.primary,
-          width: 2,
-        ),
+        borderSide: const BorderSide(color: CoffeeColors.primary, width: 2),
       ),
     ),
     bottomSheetTheme: const BottomSheetThemeData(

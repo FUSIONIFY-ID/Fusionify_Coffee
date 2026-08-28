@@ -22,16 +22,8 @@ const catalogFixture = CatalogSnapshot(
           label: 'Size',
           required: true,
           options: [
-            ModifierOption(
-              id: 'regular',
-              label: 'Regular',
-              isDefault: true,
-            ),
-            ModifierOption(
-              id: 'large',
-              label: 'Large',
-              priceDelta: 5000,
-            ),
+            ModifierOption(id: 'regular', label: 'Regular', isDefault: true),
+            ModifierOption(id: 'large', label: 'Large', priceDelta: 5000),
           ],
         ),
       ],

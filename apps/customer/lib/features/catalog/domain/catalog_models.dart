@@ -8,14 +8,10 @@ class CatalogSnapshot {
   factory CatalogSnapshot.fromJson(Map<String, dynamic> json) {
     return CatalogSnapshot(
       preview: json['preview'] as bool? ?? false,
-      outlet: Outlet.fromJson(
-        Map<String, dynamic>.from(json['outlet'] as Map),
-      ),
+      outlet: Outlet.fromJson(Map<String, dynamic>.from(json['outlet'] as Map)),
       products: (json['products'] as List<dynamic>? ?? const [])
           .map(
-            (item) => Product.fromJson(
-              Map<String, dynamic>.from(item as Map),
-            ),
+            (item) => Product.fromJson(Map<String, dynamic>.from(item as Map)),
           )
           .toList(growable: false),
     );
@@ -89,9 +85,8 @@ class ModifierGroup {
       allowMultiple: json['allowMultiple'] as bool? ?? false,
       options: (json['options'] as List<dynamic>? ?? const [])
           .map(
-            (item) => ModifierOption.fromJson(
-              Map<String, dynamic>.from(item as Map),
-            ),
+            (item) =>
+                ModifierOption.fromJson(Map<String, dynamic>.from(item as Map)),
           )
           .toList(growable: false),
     );
@@ -125,9 +120,8 @@ class Product {
       isBestseller: json['isBestseller'] as bool? ?? false,
       modifierGroups: (json['modifierGroups'] as List<dynamic>? ?? const [])
           .map(
-            (item) => ModifierGroup.fromJson(
-              Map<String, dynamic>.from(item as Map),
-            ),
+            (item) =>
+                ModifierGroup.fromJson(Map<String, dynamic>.from(item as Map)),
           )
           .toList(growable: false),
     );

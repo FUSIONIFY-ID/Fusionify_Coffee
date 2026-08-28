@@ -11,10 +11,7 @@ import '../../catalog/domain/catalog_models.dart';
 import '../../shared/presentation/catalog_states.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
-  const ProductDetailScreen({
-    super.key,
-    required this.productId,
-  });
+  const ProductDetailScreen({super.key, required this.productId});
 
   final String productId;
 
@@ -43,9 +40,7 @@ class ProductDetailScreen extends ConsumerWidget {
         return _ProductDetailContent(product: product);
       },
       loading: () => const Scaffold(
-        body: SafeArea(
-          child: Center(child: CircularProgressIndicator()),
-        ),
+        body: SafeArea(child: Center(child: CircularProgressIndicator())),
       ),
       error: (_, _) => Scaffold(
         appBar: AppBar(),
@@ -72,8 +67,7 @@ class _ProductDetailContent extends ConsumerStatefulWidget {
       _ProductDetailContentState();
 }
 
-class _ProductDetailContentState
-    extends ConsumerState<_ProductDetailContent> {
+class _ProductDetailContentState extends ConsumerState<_ProductDetailContent> {
   late final Map<String, Set<String>> _selection;
   int _quantity = 1;
 
@@ -139,7 +133,9 @@ class _ProductDetailContentState
   }
 
   void _addToCart() {
-    ref.read(cartProvider.notifier).add(
+    ref
+        .read(cartProvider.notifier)
+        .add(
           CartItem.fromProduct(
             product: widget.product,
             selectedOptions: _selectedOptions,

@@ -108,8 +108,8 @@ class _MenuContent extends StatelessWidget {
     final visibleProducts = activeCategory == 'All'
         ? snapshot.products
         : snapshot.products
-            .where((product) => product.category == activeCategory)
-            .toList(growable: false);
+              .where((product) => product.category == activeCategory)
+              .toList(growable: false);
 
     return CustomScrollView(
       slivers: [
@@ -135,9 +135,7 @@ class _MenuContent extends StatelessWidget {
           child: SizedBox(
             height: 48,
             child: ListView.separated(
-              padding: const EdgeInsets.symmetric(
-                horizontal: CoffeeSpacing.md,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: CoffeeSpacing.md),
               scrollDirection: Axis.horizontal,
               itemCount: categories.length,
               separatorBuilder: (_, _) =>
@@ -156,16 +154,13 @@ class _MenuContent extends StatelessWidget {
         SliverPadding(
           padding: const EdgeInsets.all(CoffeeSpacing.md),
           sliver: SliverGrid(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final product = visibleProducts[index];
-                return ProductCard(
-                  product: product,
-                  onTap: () => context.push('/product/${product.id}'),
-                );
-              },
-              childCount: visibleProducts.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final product = visibleProducts[index];
+              return ProductCard(
+                product: product,
+                onTap: () => context.push('/product/${product.id}'),
+              );
+            }, childCount: visibleProducts.length),
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 220,
               mainAxisSpacing: CoffeeSpacing.sm,
