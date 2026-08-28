@@ -73,13 +73,17 @@ class AuthRepository {
     required String password,
     String? country,
   }) async {
+    final data = <String, dynamic>{
+      'login': login,
+      'password': password,
+    };
+    if (country != null) {
+      data['country'] = country;
+    }
+
     final response = await _dio.post<Map<String, dynamic>>(
       '/v1/auth/login',
-      data: {
-        'login': login,
-        'password': password,
-        if (country != null) 'country': country,
-      },
+      data: data,
     );
 
     return _saveSession(response);
