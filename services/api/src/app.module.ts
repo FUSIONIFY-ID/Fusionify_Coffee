@@ -7,7 +7,13 @@ import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 
 @Module({
-  imports: [DatabaseModule, AuthModule, CatalogModule, OrdersModule, PaymentsModule],
+  imports: [
+    DatabaseModule,
+    AuthModule,
+    CatalogModule,
+    OrdersModule,
+    PaymentsModule,
+  ],
   controllers: [AppController],
 })
 export class AppModule {}
