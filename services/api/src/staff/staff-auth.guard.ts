@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { StaffAuthService } from './staff-auth.service';
+import type { StaffRole } from '../generated/prisma/enums';
 import type { StaffPermission } from './staff.types';
 
 export type AuthenticatedStaffRequest = Request & {
@@ -13,6 +14,8 @@ export type AuthenticatedStaffRequest = Request & {
     staffUserId: string;
     sessionId: string;
     permissions: StaffPermission[];
+    role: StaffRole;
+    outletId: string | null;
   };
 };
 
@@ -40,6 +43,8 @@ export class StaffAuthGuard implements CanActivate {
       staffUserId: result.staff.id,
       sessionId: result.session.id,
       permissions: result.permissions,
+      role: result.staff.role,
+      outletId: result.staff.outletId,
     };
     return true;
   }

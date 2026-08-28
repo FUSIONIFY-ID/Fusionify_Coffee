@@ -1,3 +1,5 @@
+import type { StaffRole, StaffStatus } from '../generated/prisma/enums';
+
 export enum StaffPermission {
   OrdersRead = 'orders.read',
   OrdersManage = 'orders.manage',
@@ -23,4 +25,23 @@ export type StaffTotpVerifyInput = {
 
 export type StaffRefreshInput = {
   refreshToken: string;
+};
+
+export type CreateStaffInput = {
+  fullName: string;
+  email: string;
+  role: StaffRole;
+  outletId?: string | null;
+  initialPassword: string;
+};
+
+export type UpdateStaffInput = {
+  fullName?: string;
+  role?: StaffRole;
+  status?: StaffStatus;
+  outletId?: string | null;
+};
+
+export type ResetStaffPasswordInput = {
+  newPassword: string;
 };

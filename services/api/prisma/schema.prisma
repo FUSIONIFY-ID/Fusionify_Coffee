@@ -165,6 +165,7 @@ model Order {
   totalAmount    Int
   items          OrderItem[]
   payments       Payment[]
+  statusEvents   OrderStatusEvent[]
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
@@ -291,6 +292,7 @@ model StaffUser {
   sessions            StaffSession[]
   loginChallenges     StaffLoginChallenge[]
   auditLogs           StaffAuditLog[]
+  orderStatusEvents   OrderStatusEvent[]
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 
@@ -339,4 +341,20 @@ model StaffAuditLog {
 
   @@index([staffUserId, createdAt])
   @@index([action, createdAt])
+}
+
+
+model OrderStatusEvent {
+  id          String      @id @default(cuid())
+  orderId     String
+  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus  OrderStatus?
+  toStatus    OrderStatus
+  staffUserId String?
+  staffUser   StaffUser?  @relation(fields: [staffUserId], references: [id], onDelete: SetNull)
+  note        String?
+  createdAt   DateTime    @default(now())
+
+  @@index([orderId, createdAt])
+  @@index([staffUserId, createdAt])
 }

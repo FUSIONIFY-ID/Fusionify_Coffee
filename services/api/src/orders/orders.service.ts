@@ -205,6 +205,16 @@ export class OrdersService {
         payments: {
           orderBy: { createdAt: 'desc' },
         },
+        statusEvents: {
+          select: {
+            id: true,
+            fromStatus: true,
+            toStatus: true,
+            note: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
       },
     });
 

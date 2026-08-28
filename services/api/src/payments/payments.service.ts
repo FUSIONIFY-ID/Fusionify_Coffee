@@ -257,13 +257,24 @@ export class PaymentsService {
       });
 
       if (status === PaymentStatus.PAID) {
-        await tx.order.updateMany({
+        const confirmed = await tx.order.updateMany({
           where: {
             id: payment.orderId,
             status: OrderStatus.AWAITING_PAYMENT,
           },
           data: { status: OrderStatus.CONFIRMED },
         });
+
+        if (confirmed.count === 1) {
+          await tx.orderStatusEvent.create({
+            data: {
+              orderId: payment.orderId,
+              fromStatus: OrderStatus.AWAITING_PAYMENT,
+              toStatus: OrderStatus.CONFIRMED,
+              note: 'Payment confirmed.',
+            },
+          });
+        }
       }
 
       return nextPayment;
