@@ -91,17 +91,37 @@ export class PaymentsService {
       return this.toView(pending);
     }
 
-    const reserved = await this.prisma.payment.create({
-      data: {
-        idempotencyKey,
-        orderId,
-        provider: PaymentProvider.AUTOGOPAY,
-        channel,
-        status: PaymentStatus.PENDING,
-        amount: order.totalAmount,
-        currency: order.currency,
-      },
-    });
+    let reserved;
+    try {
+      reserved = await this.prisma.payment.create({
+        data: {
+          idempotencyKey,
+          orderId,
+          provider: PaymentProvider.AUTOGOPAY,
+          channel,
+          status: PaymentStatus.PENDING,
+          amount: order.totalAmount,
+          currency: order.currency,
+        },
+      });
+    } catch (error: unknown) {
+      const concurrentPending = await this.prisma.payment.findFirst({
+        where: {
+          orderId,
+          status: PaymentStatus.PENDING,
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      if (concurrentPending) {
+        if (!concurrentPending.providerTransactionId) {
+          throw new ConflictException('Payment attempt is still initializing.');
+        }
+        return this.toView(concurrentPending);
+      }
+
+      throw error;
+    }
 
     try {
       const providerResult = await this.autoGoPay.createPayment({

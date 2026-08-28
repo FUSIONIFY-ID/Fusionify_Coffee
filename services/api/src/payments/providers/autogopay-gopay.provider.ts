@@ -1,5 +1,9 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  ServiceUnavailableException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import {
   CreatePaymentInput,
   ExternalPaymentProvider,
@@ -136,7 +140,7 @@ export class AutoGoPayGoPayProvider implements ExternalPaymentProvider {
       expectedBuffer.length !== signatureBuffer.length ||
       !timingSafeEqual(expectedBuffer, signatureBuffer)
     ) {
-      throw new ServiceUnavailableException(
+      throw new UnauthorizedException(
         'Invalid payment provider webhook signature.',
       );
     }
