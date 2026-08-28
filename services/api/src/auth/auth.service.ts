@@ -77,10 +77,7 @@ export class AuthService {
       orderBy: { createdAt: 'desc' },
     });
 
-    if (
-      latest &&
-      latest.createdAt.getTime() + resendWindowMs > Date.now()
-    ) {
+    if (latest && latest.createdAt.getTime() + resendWindowMs > Date.now()) {
       throw new ConflictException('Please wait before requesting another OTP.');
     }
 
@@ -173,9 +170,7 @@ export class AuthService {
       data: {
         verifiedAt: new Date(),
         verificationTokenHash: hashOpaqueToken(verificationToken),
-        verificationExpiresAt: new Date(
-          Date.now() + verificationLifetimeMs,
-        ),
+        verificationExpiresAt: new Date(Date.now() + verificationLifetimeMs),
       },
     });
 
@@ -220,8 +215,7 @@ export class AuthService {
     }
 
     const email = this.normalizeEmail(input.email);
-    const preferredLanguage =
-      input.preferredLanguage ?? challenge.language;
+    const preferredLanguage = input.preferredLanguage ?? challenge.language;
     const passwordHash = await hashPassword(input.password).catch(() => {
       throw new BadRequestException(
         'Password must contain between 8 and 128 characters.',
@@ -230,10 +224,7 @@ export class AuthService {
 
     const existing = await this.prisma.customerUser.findFirst({
       where: {
-        OR: [
-          { phoneE164: challenge.phoneE164 },
-          ...(email ? [{ email }] : []),
-        ],
+        OR: [{ phoneE164: challenge.phoneE164 }, ...(email ? [{ email }] : [])],
       },
     });
 
@@ -262,11 +253,7 @@ export class AuthService {
       return user;
     });
 
-    return this.createSession(
-      result.id,
-      input.deviceName,
-      input.platform,
-    );
+    return this.createSession(result.id, input.deviceName, input.platform);
   }
 
   async login(input: LoginInput) {
@@ -301,11 +288,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid login credentials.');
     }
 
-    return this.createSession(
-      user.id,
-      input.deviceName,
-      input.platform,
-    );
+    return this.createSession(user.id, input.deviceName, input.platform);
   }
 
   async refresh(input: RefreshInput) {
@@ -488,10 +471,7 @@ export class AuthService {
     }
 
     const email = value.trim().toLowerCase();
-    if (
-      email.length > 254 ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    ) {
+    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw new BadRequestException('Email address is invalid.');
     }
 

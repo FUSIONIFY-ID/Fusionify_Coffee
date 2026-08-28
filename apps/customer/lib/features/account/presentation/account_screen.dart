@@ -101,10 +101,7 @@ class AccountHubView extends StatelessWidget {
         ),
         const SizedBox(height: CoffeeSpacing.lg),
         _SectionTitle(strings.support),
-        _AccountTile(
-          icon: Icons.help_outline,
-          title: strings.helpCenter,
-        ),
+        _AccountTile(icon: Icons.help_outline, title: strings.helpCenter),
         _AccountTile(
           icon: Icons.policy_outlined,
           title: strings.privacyAndTerms,
@@ -186,10 +183,7 @@ class _ProfileHeader extends StatelessWidget {
           foregroundColor: CoffeeColors.deep,
           child: Text(
             profile.initials,
-            style: const TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 20,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
           ),
         ),
         const SizedBox(width: CoffeeSpacing.md),
@@ -248,10 +242,7 @@ class _MemberCard extends StatelessWidget {
                 color: CoffeeColors.primary,
                 borderRadius: BorderRadius.circular(CoffeeRadius.control),
               ),
-              child: const Icon(
-                Icons.local_cafe_outlined,
-                color: Colors.white,
-              ),
+              child: const Icon(Icons.local_cafe_outlined, color: Colors.white),
             ),
             const SizedBox(width: CoffeeSpacing.md),
             Expanded(
@@ -293,10 +284,10 @@ class _SectionTitle extends StatelessWidget {
       child: Text(
         title.toUpperCase(),
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: CoffeeColors.textSecondary,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
-            ),
+          color: CoffeeColors.textSecondary,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.8,
+        ),
       ),
     );
   }

@@ -43,14 +43,18 @@ class _RegisterPhoneScreenState extends ConsumerState<RegisterPhoneScreen> {
     try {
       final language =
           ref.read(localeControllerProvider).value ?? AppLanguage.indonesia;
-      final challenge = await ref.read(authRepositoryProvider).requestOtp(
+      final challenge = await ref
+          .read(authRepositoryProvider)
+          .requestOtp(
             country: _country,
             phone: _phoneController.text,
             channel: channel,
             language: language,
           );
 
-      ref.read(registrationProvider.notifier).start(
+      ref
+          .read(registrationProvider.notifier)
+          .start(
             country: _country,
             phone: _phoneController.text.trim(),
             channel: channel,
@@ -109,8 +113,8 @@ class _RegisterPhoneScreenState extends ConsumerState<RegisterPhoneScreen> {
             onSelectionChanged: _submitting
                 ? null
                 : (selection) => setState(() {
-                      _country = selection.first;
-                    }),
+                    _country = selection.first;
+                  }),
           ),
           const SizedBox(height: CoffeeSpacing.lg),
           TextField(

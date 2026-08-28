@@ -105,8 +105,7 @@ describe('Fusionify Coffee API (e2e)', () => {
       })
       .expect(201);
 
-    const registeredBody =
-      registered.body as unknown as RegisteredUserResponse;
+    const registeredBody = registered.body as unknown as RegisteredUserResponse;
 
     return {
       accessToken: registeredBody.accessToken,

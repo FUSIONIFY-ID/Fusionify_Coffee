@@ -39,7 +39,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       final login = _loginController.text.trim();
-      final profile = await ref.read(authRepositoryProvider).login(
+      final profile = await ref
+          .read(authRepositoryProvider)
+          .login(
             login: login,
             password: _passwordController.text,
             country: login.contains('@') ? null : _country,
@@ -89,9 +91,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             controller: _loginController,
             keyboardType: TextInputType.emailAddress,
             autofillHints: const [AutofillHints.username],
-            decoration: InputDecoration(
-              labelText: strings.phoneOrEmail,
-            ),
+            decoration: InputDecoration(labelText: strings.phoneOrEmail),
           ),
           const SizedBox(height: CoffeeSpacing.md),
           TextField(
@@ -105,7 +105,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   setState(() => _hidePassword = !_hidePassword);
                 },
                 icon: Icon(
-                  _hidePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  _hidePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
                 ),
               ),
             ),

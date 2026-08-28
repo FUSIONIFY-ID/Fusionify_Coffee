@@ -303,7 +303,11 @@ async function main() {
     {
       id: 'coffee',
       sortOrder: 0,
-      labels: { ID_ID: 'Kopi', MS_MY: 'Kopi', EN: 'Coffee' } satisfies LocalizedName,
+      labels: {
+        ID_ID: 'Kopi',
+        MS_MY: 'Kopi',
+        EN: 'Coffee',
+      } satisfies LocalizedName,
     },
     {
       id: 'non-coffee',

@@ -22,9 +22,7 @@ export function normalizeSupportedPhone(
     }
 
     if (!/^8\d{8,11}$/.test(national)) {
-      throw new BadRequestException(
-        'Enter a valid Indonesian mobile number.',
-      );
+      throw new BadRequestException('Enter a valid Indonesian mobile number.');
     }
 
     return {

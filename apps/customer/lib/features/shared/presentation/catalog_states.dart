@@ -52,9 +52,17 @@ class CatalogLoading extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: CoffeeSpacing.sm),
-                    Container(height: 14, width: 120, color: CoffeeColors.border),
+                    Container(
+                      height: 14,
+                      width: 120,
+                      color: CoffeeColors.border,
+                    ),
                     const SizedBox(height: CoffeeSpacing.xs),
-                    Container(height: 14, width: 84, color: CoffeeColors.border),
+                    Container(
+                      height: 14,
+                      width: 84,
+                      color: CoffeeColors.border,
+                    ),
                   ],
                 ),
               );

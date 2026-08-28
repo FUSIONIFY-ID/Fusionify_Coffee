@@ -26,13 +26,12 @@ class PersonalInformationScreen extends ConsumerWidget {
                   value: profile.phone,
                   verified: profile.phoneVerified,
                 ),
-                _InfoRow(
-                  label: strings.email,
-                  value: profile.email ?? '—',
-                ),
+                _InfoRow(label: strings.email, value: profile.email ?? '—'),
                 _InfoRow(
                   label: strings.country,
-                  value: profile.phoneCountry == 'MY' ? strings.malaysia : strings.indonesia,
+                  value: profile.phoneCountry == 'MY'
+                      ? strings.malaysia
+                      : strings.indonesia,
                 ),
               ],
             ),

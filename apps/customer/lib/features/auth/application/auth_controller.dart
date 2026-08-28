@@ -7,10 +7,7 @@ import '../data/auth_repository.dart';
 import '../domain/auth_models.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository(
-    ref.watch(dioProvider),
-    ref.watch(secureStoreProvider),
-  );
+  return AuthRepository(ref.watch(dioProvider), ref.watch(secureStoreProvider));
 });
 
 final authControllerProvider =
@@ -32,8 +29,9 @@ class AuthController extends AsyncNotifier<CustomerProfile?> {
       return;
     }
 
-    final updated =
-        await ref.read(authRepositoryProvider).updateLanguage(language);
+    final updated = await ref
+        .read(authRepositoryProvider)
+        .updateLanguage(language);
     state = AsyncData(updated);
   }
 

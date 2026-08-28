@@ -50,7 +50,9 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
     try {
       final language =
           ref.read(localeControllerProvider).value ?? AppLanguage.indonesia;
-      final profile = await ref.read(authRepositoryProvider).register(
+      final profile = await ref
+          .read(authRepositoryProvider)
+          .register(
             challengeId: verification.challengeId,
             verificationToken: verification.verificationToken,
             fullName: _nameController.text,
@@ -116,7 +118,9 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
                   setState(() => _hidePassword = !_hidePassword);
                 },
                 icon: Icon(
-                  _hidePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  _hidePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
                 ),
               ),
             ),

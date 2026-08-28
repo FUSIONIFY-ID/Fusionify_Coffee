@@ -24,10 +24,7 @@ class SecurityScreen extends ConsumerWidget {
             leading: const Icon(Icons.phone_android_outlined),
             title: Text(strings.phoneVerified),
             subtitle: Text(profile?.phone ?? '—'),
-            trailing: const Icon(
-              Icons.verified,
-              color: CoffeeColors.success,
-            ),
+            trailing: const Icon(Icons.verified, color: CoffeeColors.success),
           ),
           const Divider(),
           ListTile(

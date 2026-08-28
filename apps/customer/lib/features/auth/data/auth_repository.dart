@@ -36,10 +36,7 @@ class AuthRepository {
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       '/v1/auth/otp/verify',
-      data: {
-        'challengeId': challengeId,
-        'code': code,
-      },
+      data: {'challengeId': challengeId, 'code': code},
     );
 
     return OtpVerificationView.fromJson(_requireData(response));
@@ -73,10 +70,7 @@ class AuthRepository {
     required String password,
     String? country,
   }) async {
-    final data = <String, dynamic>{
-      'login': login,
-      'password': password,
-    };
+    final data = <String, dynamic>{'login': login, 'password': password};
     if (country != null) {
       data['country'] = country;
     }
@@ -145,9 +139,7 @@ class AuthRepository {
     return session.user;
   }
 
-  Map<String, dynamic> _requireData(
-    Response<Map<String, dynamic>> response,
-  ) {
+  Map<String, dynamic> _requireData(Response<Map<String, dynamic>> response) {
     final data = response.data;
     if (data == null) {
       throw StateError('Authentication response is empty.');

@@ -12,10 +12,7 @@ class OrdersScreen extends StatelessWidget {
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(CoffeeSpacing.xl),
-          child: Text(
-            context.strings.ordersEmpty,
-            textAlign: TextAlign.center,
-          ),
+          child: Text(context.strings.ordersEmpty, textAlign: TextAlign.center),
         ),
       ),
     );

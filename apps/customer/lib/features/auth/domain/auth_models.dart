@@ -63,7 +63,8 @@ class CustomerProfile {
       phone: json['phone'] as String? ?? '',
       phoneVerified: json['phoneVerified'] as bool? ?? false,
       preferredLanguage: json['preferredLanguage'] as String? ?? 'ID_ID',
-      memberSince: DateTime.tryParse(json['memberSince'] as String? ?? '') ??
+      memberSince:
+          DateTime.tryParse(json['memberSince'] as String? ?? '') ??
           DateTime(2026),
       email: json['email'] as String?,
       birthDate: json['birthDate'] as String?,

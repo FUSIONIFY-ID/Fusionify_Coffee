@@ -172,7 +172,11 @@ class _PreviewNotice extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.science_outlined, size: 20, color: CoffeeColors.deep),
+          const Icon(
+            Icons.science_outlined,
+            size: 20,
+            color: CoffeeColors.deep,
+          ),
           const SizedBox(width: CoffeeSpacing.xs),
           Expanded(
             child: Text(

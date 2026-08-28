@@ -51,11 +51,7 @@ void main() {
             debugShowCheckedModeBanner: false,
             theme: buildFusionifyCoffeeTheme(),
             locale: caseData.locale,
-            supportedLocales: const [
-              Locale('id'),
-              Locale('ms'),
-              Locale('en'),
-            ],
+            supportedLocales: const [Locale('id'), Locale('ms'), Locale('en')],
             localizationsDelegates: GlobalMaterialLocalizations.delegates,
             home: Scaffold(
               body: SafeArea(
@@ -77,10 +73,7 @@ void main() {
         expect(find.text('Muhammad Jundy Rabbani'), findsOneWidget);
         expect(find.text(caseData.languageLabel), findsOneWidget);
         expect(find.text(caseData.accountLabel), findsWidgets);
-        expectLater(
-          find.byType(Scaffold),
-          matchesGoldenFile(caseData.golden),
-        );
+        expectLater(find.byType(Scaffold), matchesGoldenFile(caseData.golden));
       },
     );
   }

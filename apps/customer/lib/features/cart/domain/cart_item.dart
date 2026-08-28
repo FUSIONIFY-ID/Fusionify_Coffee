@@ -37,7 +37,8 @@ class CartItem {
   int get lineTotal => unitPrice * quantity;
 
   String get signature {
-    final optionIds = selectedOptions.map((option) => option.id).toList()..sort();
+    final optionIds = selectedOptions.map((option) => option.id).toList()
+      ..sort();
     return '$productId|${optionIds.join(',')}';
   }
 
@@ -48,7 +49,9 @@ class CartItem {
   List<String> displayOptionLabels(CatalogSnapshot? catalog) {
     final product = _localizedProduct(catalog);
     if (product == null) {
-      return selectedOptions.map((option) => option.label).toList(growable: false);
+      return selectedOptions
+          .map((option) => option.label)
+          .toList(growable: false);
     }
 
     final localizedById = <String, String>{

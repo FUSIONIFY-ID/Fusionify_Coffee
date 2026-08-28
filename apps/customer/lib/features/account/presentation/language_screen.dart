@@ -29,9 +29,11 @@ class LanguageScreen extends ConsumerWidget {
           Card(
             child: Column(
               children: [
-                for (var index = 0;
-                    index < AppLanguage.values.length;
-                    index++) ...[
+                for (
+                  var index = 0;
+                  index < AppLanguage.values.length;
+                  index++
+                ) ...[
                   _LanguageTile(
                     language: AppLanguage.values[index],
                     selected: AppLanguage.values[index] == current,
@@ -95,10 +97,7 @@ class _LanguageTile extends StatelessWidget {
       ),
       title: Text(language.label),
       trailing: selected
-          ? const Icon(
-              Icons.check_circle,
-              color: CoffeeColors.primary,
-            )
+          ? const Icon(Icons.check_circle, color: CoffeeColors.primary)
           : const Icon(
               Icons.circle_outlined,
               color: CoffeeColors.textSecondary,

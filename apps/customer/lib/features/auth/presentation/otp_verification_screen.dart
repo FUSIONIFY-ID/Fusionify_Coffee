@@ -19,8 +19,7 @@ class OtpVerificationScreen extends ConsumerStatefulWidget {
       _OtpVerificationScreenState();
 }
 
-class _OtpVerificationScreenState
-    extends ConsumerState<OtpVerificationScreen> {
+class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
   final _codeController = TextEditingController();
   bool _submitting = false;
   String? _error;
@@ -45,7 +44,9 @@ class _OtpVerificationScreenState
     });
 
     try {
-      final verified = await ref.read(authRepositoryProvider).verifyOtp(
+      final verified = await ref
+          .read(authRepositoryProvider)
+          .verifyOtp(
             challengeId: challenge.challengeId,
             code: _codeController.text,
           );
@@ -67,8 +68,7 @@ class _OtpVerificationScreenState
 
   Future<void> _switchChannel() async {
     final registration = ref.read(registrationProvider);
-    final nextChannel =
-        registration.channel == 'WHATSAPP' ? 'SMS' : 'WHATSAPP';
+    final nextChannel = registration.channel == 'WHATSAPP' ? 'SMS' : 'WHATSAPP';
 
     setState(() {
       _submitting = true;
@@ -78,14 +78,18 @@ class _OtpVerificationScreenState
     try {
       final language =
           ref.read(localeControllerProvider).value ?? AppLanguage.indonesia;
-      final challenge = await ref.read(authRepositoryProvider).requestOtp(
+      final challenge = await ref
+          .read(authRepositoryProvider)
+          .requestOtp(
             country: registration.country,
             phone: registration.phone,
             channel: nextChannel,
             language: language,
           );
 
-      ref.read(registrationProvider.notifier).start(
+      ref
+          .read(registrationProvider.notifier)
+          .start(
             country: registration.country,
             phone: registration.phone,
             channel: nextChannel,
@@ -121,8 +125,9 @@ class _OtpVerificationScreenState
       );
     }
 
-    final channelLabel =
-        registration.channel == 'WHATSAPP' ? 'WhatsApp' : 'SMS';
+    final channelLabel = registration.channel == 'WHATSAPP'
+        ? 'WhatsApp'
+        : 'SMS';
 
     return Scaffold(
       appBar: AppBar(),
@@ -144,9 +149,8 @@ class _OtpVerificationScreenState
             autofocus: true,
             keyboardType: TextInputType.number,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  letterSpacing: 10,
-                ),
+            style: Theme.of(context).textTheme.headlineSmall
+                ?.copyWith(letterSpacing: 10),
             maxLength: 6,
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
@@ -175,8 +179,9 @@ class _OtpVerificationScreenState
           ],
           const SizedBox(height: CoffeeSpacing.lg),
           FilledButton(
-            onPressed:
-                _submitting || _codeController.text.length != 6 ? null : _verify,
+            onPressed: _submitting || _codeController.text.length != 6
+                ? null
+                : _verify,
             child: Text(strings.verify),
           ),
           const SizedBox(height: CoffeeSpacing.sm),

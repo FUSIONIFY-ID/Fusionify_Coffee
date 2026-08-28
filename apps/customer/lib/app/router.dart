@@ -42,15 +42,17 @@ final appRouter = GoRouter(
     GoRoute(path: '/checkout', builder: (_, _) => const CheckoutScreen()),
     GoRoute(
       path: '/payment/:paymentId',
-      builder: (context, state) => PaymentScreen(
-        paymentId: state.pathParameters['paymentId'] ?? '',
-      ),
+      builder: (context, state) =>
+          PaymentScreen(paymentId: state.pathParameters['paymentId'] ?? ''),
     ),
     GoRoute(
       path: '/auth/register',
       builder: (_, _) => const RegisterPhoneScreen(),
     ),
-    GoRoute(path: '/auth/otp', builder: (_, _) => const OtpVerificationScreen()),
+    GoRoute(
+      path: '/auth/otp',
+      builder: (_, _) => const OtpVerificationScreen(),
+    ),
     GoRoute(
       path: '/auth/complete-profile',
       builder: (_, _) => const CompleteProfileScreen(),

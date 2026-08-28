@@ -47,12 +47,7 @@ export class CatalogService {
       },
       products: products.map((product) => ({
         id: product.id,
-        name: this.text(
-          product.translations,
-          language,
-          'name',
-          product.name,
-        ),
+        name: this.text(product.translations, language, 'name', product.name),
         description: this.text(
           product.translations,
           language,
@@ -70,12 +65,7 @@ export class CatalogService {
         isBestseller: product.isBestseller,
         modifierGroups: product.modifierGroups.map((group) => ({
           id: group.id,
-          label: this.text(
-            group.translations,
-            language,
-            'name',
-            group.name,
-          ),
+          label: this.text(group.translations, language, 'name', group.name),
           required: group.required,
           allowMultiple: group.allowMultiple,
           options: group.options.map((option) => ({

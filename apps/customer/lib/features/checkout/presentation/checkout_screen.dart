@@ -146,7 +146,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         data: (snapshot) => ListView(
           padding: const EdgeInsets.all(CoffeeSpacing.md),
           children: [
-            Text(strings.pickup, style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              strings.pickup,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const SizedBox(height: CoffeeSpacing.sm),
             Card(
               child: Padding(
