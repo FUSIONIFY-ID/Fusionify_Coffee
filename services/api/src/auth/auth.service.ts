@@ -25,8 +25,13 @@ import { OtpDeliveryService } from './otp-delivery.service';
 import { normalizeSupportedPhone } from './phone.util';
 import type {
   LoginInput,
+  ConfirmChangePhoneInput,
+  ConfirmDeleteAccountInput,
   RefreshInput,
   RegisterInput,
+  RequestChangePhoneOtpInput,
+  RequestDeleteAccountOtpInput,
+  ResetPasswordInput,
   RequestOtpInput,
   SupportedLanguage,
   SupportedOtpChannel,
@@ -55,6 +60,12 @@ export class AuthService {
     this.assertLanguage(input.language);
     this.assertChannel(input.channel);
     this.assertPurpose(purpose);
+
+    if (purpose === 'CHANGE_PHONE' || purpose === 'DELETE_ACCOUNT') {
+      throw new BadRequestException(
+        'This OTP purpose requires an authenticated account.',
+      );
+    }
 
     if (purpose === 'REGISTER') {
       const existingUser = await this.prisma.customerUser.findUnique({
@@ -405,6 +416,241 @@ export class AuthService {
     }
   }
 
+  async resetPassword(input: ResetPasswordInput) {
+    const challenge = await this.requireVerifiedChallenge(
+      input.challengeId,
+      input.verificationToken,
+      OtpPurpose.RESET_PASSWORD,
+    );
+
+    const user = await this.prisma.customerUser.findUnique({
+      where: { phoneE164: challenge.phoneE164 },
+    });
+
+    if (!user || user.status !== CustomerStatus.ACTIVE) {
+      throw new BadRequestException('Password reset cannot be completed.');
+    }
+
+    const passwordHash = await hashPassword(input.newPassword).catch(() => {
+      throw new BadRequestException(
+        'Password must contain between 8 and 128 characters.',
+      );
+    });
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.customerUser.update({
+        where: { id: user.id },
+        data: { passwordHash },
+      });
+
+      await tx.otpChallenge.update({
+        where: { id: challenge.id },
+        data: { consumedAt: new Date() },
+      });
+
+      await tx.userSession.updateMany({
+        where: { userId: user.id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+    });
+
+    return { success: true };
+  }
+
+  async requestChangePhoneOtp(
+    userId: string,
+    input: RequestChangePhoneOtpInput,
+  ) {
+    const user = await this.requireActiveUser(userId);
+    const phone = normalizeSupportedPhone(input.country, input.phone);
+
+    if (phone.e164 === user.phoneE164) {
+      throw new BadRequestException('New phone number must be different.');
+    }
+
+    const existing = await this.prisma.customerUser.findUnique({
+      where: { phoneE164: phone.e164 },
+    });
+
+    if (existing && existing.status !== CustomerStatus.DELETED) {
+      throw new ConflictException(
+        'An account already exists for this phone number.',
+      );
+    }
+
+    return this.createOtpChallenge({
+      phoneCountry: phone.country,
+      phoneE164: phone.e164,
+      channel: input.channel,
+      language: input.language,
+      purpose: 'CHANGE_PHONE',
+    });
+  }
+
+  async confirmChangePhone(
+    userId: string,
+    currentSessionId: string,
+    input: ConfirmChangePhoneInput,
+  ) {
+    const challenge = await this.requireVerifiedChallenge(
+      input.challengeId,
+      input.verificationToken,
+      OtpPurpose.CHANGE_PHONE,
+    );
+    const user = await this.requireActiveUser(userId);
+
+    const existing = await this.prisma.customerUser.findUnique({
+      where: { phoneE164: challenge.phoneE164 },
+    });
+
+    if (
+      existing &&
+      existing.id !== user.id &&
+      existing.status !== CustomerStatus.DELETED
+    ) {
+      throw new ConflictException(
+        'An account already exists for this phone number.',
+      );
+    }
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const nextUser = await tx.customerUser.update({
+        where: { id: user.id },
+        data: {
+          phoneCountry: challenge.phoneCountry,
+          phoneE164: challenge.phoneE164,
+          phoneVerifiedAt: new Date(),
+        },
+      });
+
+      await tx.otpChallenge.update({
+        where: { id: challenge.id },
+        data: { consumedAt: new Date() },
+      });
+
+      await tx.userSession.updateMany({
+        where: {
+          userId: user.id,
+          revokedAt: null,
+          id: { not: currentSessionId },
+        },
+        data: { revokedAt: new Date() },
+      });
+
+      return nextUser;
+    });
+
+    return this.toProfile(updated);
+  }
+
+  async requestDeleteAccountOtp(
+    userId: string,
+    input: RequestDeleteAccountOtpInput,
+  ) {
+    const user = await this.requireActiveUser(userId);
+
+    return this.createOtpChallenge({
+      phoneCountry: user.phoneCountry,
+      phoneE164: user.phoneE164,
+      channel: input.channel,
+      language: input.language,
+      purpose: 'DELETE_ACCOUNT',
+    });
+  }
+
+  async confirmDeleteAccount(
+    userId: string,
+    input: ConfirmDeleteAccountInput,
+  ) {
+    const challenge = await this.requireVerifiedChallenge(
+      input.challengeId,
+      input.verificationToken,
+      OtpPurpose.DELETE_ACCOUNT,
+    );
+    const user = await this.requireActiveUser(userId);
+
+    if (challenge.phoneE164 !== user.phoneE164) {
+      throw new UnauthorizedException(
+        'Account deletion verification does not match this account.',
+      );
+    }
+
+    const tombstonePhone = `deleted:${user.id}`;
+    const tombstonePassword = await hashPassword(createOpaqueToken());
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.customerUser.update({
+        where: { id: user.id },
+        data: {
+          fullName: 'Deleted Account',
+          phoneE164: tombstonePhone,
+          email: null,
+          passwordHash: tombstonePassword,
+          birthDate: null,
+          avatarUrl: null,
+          status: CustomerStatus.DELETED,
+        },
+      });
+
+      await tx.otpChallenge.update({
+        where: { id: challenge.id },
+        data: { consumedAt: new Date() },
+      });
+
+      await tx.userSession.updateMany({
+        where: { userId: user.id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+    });
+
+    return { success: true };
+  }
+
+  async listSessions(userId: string, currentSessionId: string) {
+    const sessions = await this.prisma.userSession.findMany({
+      where: {
+        userId,
+        revokedAt: null,
+        refreshExpiresAt: { gt: new Date() },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    return sessions.map((session) => ({
+      id: session.id,
+      deviceName: session.deviceName,
+      platform: session.platform,
+      createdAt: session.createdAt,
+      updatedAt: session.updatedAt,
+      refreshExpiresAt: session.refreshExpiresAt,
+      isCurrent: session.id === currentSessionId,
+    }));
+  }
+
+  async revokeSession(
+    userId: string,
+    sessionId: string,
+    currentSessionId: string,
+  ) {
+    const session = await this.prisma.userSession.findFirst({
+      where: { id: sessionId, userId, revokedAt: null },
+    });
+
+    if (!session) {
+      throw new NotFoundException('Session not found.');
+    }
+
+    await this.prisma.userSession.update({
+      where: { id: session.id },
+      data: { revokedAt: new Date() },
+    });
+
+    return {
+      success: true,
+      currentSessionRevoked: session.id === currentSessionId,
+    };
+  }
+
   async logout(sessionId: string) {
     await this.prisma.userSession.update({
       where: { id: sessionId },
@@ -419,6 +665,122 @@ export class AuthService {
       data: { revokedAt: new Date() },
     });
     return { success: true };
+  }
+
+  private async createOtpChallenge(input: {
+    phoneCountry: PhoneCountry;
+    phoneE164: string;
+    channel: SupportedOtpChannel;
+    language: SupportedLanguage;
+    purpose: SupportedOtpPurpose;
+  }) {
+    this.assertLanguage(input.language);
+    this.assertChannel(input.channel);
+    this.assertPurpose(input.purpose);
+
+    const latest = await this.prisma.otpChallenge.findFirst({
+      where: {
+        phoneE164: input.phoneE164,
+        purpose: input.purpose,
+        consumedAt: null,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (latest && latest.createdAt.getTime() + resendWindowMs > Date.now()) {
+      throw new ConflictException('Please wait before requesting another OTP.');
+    }
+
+    await this.prisma.otpChallenge.updateMany({
+      where: {
+        phoneE164: input.phoneE164,
+        purpose: input.purpose,
+        consumedAt: null,
+      },
+      data: { consumedAt: new Date() },
+    });
+
+    const code = createOtpCode();
+    const challenge = await this.prisma.otpChallenge.create({
+      data: {
+        phoneCountry: input.phoneCountry,
+        phoneE164: input.phoneE164,
+        channel: input.channel,
+        purpose: input.purpose,
+        language: input.language,
+        codeHash: hashOtp(input.phoneE164, input.purpose, code),
+        expiresAt: new Date(Date.now() + otpLifetimeMs),
+      },
+    });
+
+    try {
+      await this.delivery.send({
+        phoneE164: input.phoneE164,
+        code,
+        channel: input.channel,
+        language: input.language,
+        purpose: input.purpose,
+      });
+    } catch (error: unknown) {
+      await this.prisma.otpChallenge.update({
+        where: { id: challenge.id },
+        data: { consumedAt: new Date() },
+      });
+      throw error;
+    }
+
+    return {
+      challengeId: challenge.id,
+      phone: this.maskPhone(input.phoneE164),
+      channel: challenge.channel,
+      expiresInSeconds: Math.floor(otpLifetimeMs / 1000),
+      resendAfterSeconds: Math.floor(resendWindowMs / 1000),
+    };
+  }
+
+  private async requireVerifiedChallenge(
+    challengeId: string,
+    verificationToken: string,
+    purpose: OtpPurpose,
+  ) {
+    const challenge = await this.prisma.otpChallenge.findUnique({
+      where: { id: challengeId },
+    });
+
+    if (
+      !challenge ||
+      challenge.purpose !== purpose ||
+      challenge.consumedAt ||
+      !challenge.verifiedAt ||
+      !challenge.verificationTokenHash ||
+      !challenge.verificationExpiresAt ||
+      challenge.verificationExpiresAt.getTime() <= Date.now()
+    ) {
+      throw new BadRequestException('Verification must be completed again.');
+    }
+
+    if (
+      !secureHashEqual(
+        hashOpaqueToken(verificationToken),
+        challenge.verificationTokenHash,
+      )
+    ) {
+      throw new UnauthorizedException('Verification token is invalid.');
+    }
+
+    return challenge;
+  }
+
+  private async requireActiveUser(userId: string) {
+    const user = await this.prisma.customerUser.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || user.status !== CustomerStatus.ACTIVE) {
+      throw new NotFoundException('Account not found.');
+    }
+
+    return user;
   }
 
   private async createSession(

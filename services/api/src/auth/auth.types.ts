@@ -52,3 +52,31 @@ export type UpdateProfileInput = {
   birthDate?: string | null;
   preferredLanguage?: SupportedLanguage;
 };
+
+export type ResetPasswordInput = {
+  challengeId: string;
+  verificationToken: string;
+  newPassword: string;
+};
+
+export type RequestChangePhoneOtpInput = {
+  country: SupportedPhoneCountry;
+  phone: string;
+  channel: SupportedOtpChannel;
+  language: SupportedLanguage;
+};
+
+export type ConfirmChangePhoneInput = {
+  challengeId: string;
+  verificationToken: string;
+};
+
+export type RequestDeleteAccountOtpInput = {
+  channel: SupportedOtpChannel;
+  language: SupportedLanguage;
+};
+
+export type ConfirmDeleteAccountInput = {
+  challengeId: string;
+  verificationToken: string;
+};
