@@ -24,8 +24,9 @@ export class StaffPermissionsGuard implements CanActivate {
       return true;
     }
 
-    const request =
-      context.switchToHttp().getRequest<AuthenticatedStaffRequest>();
+    const request = context
+      .switchToHttp()
+      .getRequest<AuthenticatedStaffRequest>();
     const granted = request.staffAuth?.permissions ?? [];
 
     if (!required.every((permission) => granted.includes(permission))) {
