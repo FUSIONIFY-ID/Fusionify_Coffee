@@ -5,6 +5,7 @@ import { CatalogModule } from './catalog/catalog.module';
 import { DatabaseModule } from './database/database.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
+import { StaffModule } from './staff/staff.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { PaymentsModule } from './payments/payments.module';
     CatalogModule,
     OrdersModule,
     PaymentsModule,
+    StaffModule,
   ],
   controllers: [AppController],
 })

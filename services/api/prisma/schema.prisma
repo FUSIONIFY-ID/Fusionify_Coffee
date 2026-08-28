@@ -68,6 +68,23 @@ enum OtpPurpose {
   DELETE_ACCOUNT
 }
 
+enum StaffRole {
+  SUPER_ADMIN
+  OWNER
+  OPERATIONS_MANAGER
+  OUTLET_MANAGER
+  CASHIER
+  BARISTA
+  INVENTORY_STAFF
+  CUSTOMER_SUPPORT
+  FINANCE
+}
+
+enum StaffStatus {
+  ACTIVE
+  SUSPENDED
+}
+
 model Outlet {
   id              String   @id
   name            String
@@ -76,6 +93,7 @@ model Outlet {
   pickupEnabled   Boolean  @default(true)
   deliveryEnabled Boolean  @default(false)
   orders          Order[]
+  staffUsers      StaffUser[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -256,4 +274,69 @@ model OtpChallenge {
   updatedAt               DateTime     @updatedAt
 
   @@index([phoneE164, purpose, createdAt])
+}
+
+
+model StaffUser {
+  id                  String                @id @default(cuid())
+  fullName            String
+  email               String                @unique
+  passwordHash        String
+  role                StaffRole
+  status              StaffStatus           @default(ACTIVE)
+  outletId            String?
+  outlet              Outlet?               @relation(fields: [outletId], references: [id])
+  totpSecretEncrypted String?
+  totpEnabledAt       DateTime?
+  sessions            StaffSession[]
+  loginChallenges     StaffLoginChallenge[]
+  auditLogs           StaffAuditLog[]
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+
+  @@index([role, status])
+  @@index([outletId])
+}
+
+model StaffSession {
+  id               String    @id @default(cuid())
+  staffUserId      String
+  staffUser        StaffUser @relation(fields: [staffUserId], references: [id], onDelete: Cascade)
+  accessTokenHash  String    @unique
+  refreshTokenHash String    @unique
+  accessExpiresAt  DateTime
+  refreshExpiresAt DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([staffUserId, revokedAt])
+}
+
+model StaffLoginChallenge {
+  id          String    @id @default(cuid())
+  staffUserId String
+  staffUser   StaffUser @relation(fields: [staffUserId], references: [id], onDelete: Cascade)
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([staffUserId, expiresAt])
+}
+
+model StaffAuditLog {
+  id          String     @id @default(cuid())
+  staffUserId String?
+  staffUser   StaffUser? @relation(fields: [staffUserId], references: [id], onDelete: SetNull)
+  action      String
+  targetType  String?
+  targetId    String?
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime   @default(now())
+
+  @@index([staffUserId, createdAt])
+  @@index([action, createdAt])
 }
