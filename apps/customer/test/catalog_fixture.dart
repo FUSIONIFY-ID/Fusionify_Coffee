@@ -12,6 +12,7 @@ const catalogFixture = CatalogSnapshot(
     Product(
       id: 'aren-latte',
       name: 'Aren Latte',
+      categoryId: 'coffee',
       description: 'Espresso dan fresh milk.',
       category: 'Coffee',
       basePrice: 28000,
