@@ -9,39 +9,108 @@ NestJS backend for Fusionify Coffee.
 - TypeScript
 - PostgreSQL
 - Prisma 7
+- `@prisma/adapter-pg`
 
-## Current Scope
+## Implemented APIs
 
-Milestone 0.1 currently includes:
+Catalog:
 - `GET /v1/health`
 - `GET /v1/catalog/preview`
-- Initial Prisma schema for outlet, category, product, modifier group, and modifier option
-- Preview catalog tests
 
-The preview endpoint is development data and is not connected to PostgreSQL yet.
+Orders:
+- `POST /v1/orders`
+- `GET /v1/orders/:orderId`
 
-## Development
+Payments:
+- `POST /v1/orders/:orderId/payments`
+- `GET /v1/payments/:paymentId`
+- `POST /v1/payments/:paymentId/check`
+- `POST /v1/payments/:paymentId/cancel`
+
+Webhook:
+- `POST /v1/webhooks/autogopay`
+
+## Database
+
+Current database-backed development flow includes:
+- outlet
+- category
+- product
+- modifier group/option
+- order/order item
+- payment
+
+Run:
 
 ```bash
 npm ci
+npm run prisma:generate
+npm run db:migrate:deploy
+npm run db:seed
 npm run start:dev
 ```
 
+Environment template:
+
+```text
+DATABASE_URL=...
+AUTOGOPAY_API_KEY=
+AUTOGOPAY_BASE_URL=https://v1-gateway.autogopay.site
+```
+
+Never commit real credentials.
+
+## Checkout Authority
+
+Mobile prices are presentation only.
+
+The API reloads products/modifiers from PostgreSQL and calculates the authoritative order amount before payment creation.
+
+Both order and payment creation require `Idempotency-Key`.
+
+## AutoGoPay
+
+Current runtime adapter enables:
+- provider: `AUTOGOPAY`
+- channel: `GOPAY_QRIS`
+
+Implemented:
+- generate
+- status
+- cancel pending
+- raw-body webhook HMAC
+- local state normalization
+
+Not yet live-validated.
+
 ## Validation
 
+CI runs:
+
 ```bash
+npm ci
+npm run prisma:generate
+npm run db:migrate:deploy
+npm run db:seed
 npm run lint
 npm test -- --runInBand
 npm run test:e2e
 npm run build
 ```
 
+CI uses PostgreSQL 17.
+
+Latest validated implementation head: `035379c16378d599cde8d8d626bae8106ff3b984`.
+
 ## Security
 
-Provider credentials, payment secrets, database credentials, and signing material must not be committed.
+- payment-provider key stays server-side
+- webhook signature is verified from raw request body
+- client-supplied totals are not trusted
+- payment amount is checked against local order
+- signing/database/provider secrets are not committed
 
-Payment-provider integrations belong behind the server-side provider adapter described in `../../docs/integrations/PAYMENTS.md`.
-
-## Repository Rules
-
-Read the root `AGENTS.md` and `docs/PROJECT_STATE.md` before material changes.
+Read:
+- `../../docs/integrations/PAYMENTS.md`
+- `../../docs/integrations/AUTOGOPAY.md`
+- `../../SECURITY.md`

@@ -1,8 +1,42 @@
 # AutoGoPay Integration
 
-Status: planned for Milestone 0.2, not implemented yet.
+Status: GoPay QRIS integration code implemented for Milestone 0.2; live provider validation pending.
 
 Documentation re-validated: 2026-08-28
+
+## Implementation State
+
+Implemented in the Fusionify Coffee backend:
+- GoPay QRIS provider adapter
+- server-side Bearer authentication
+- create QRIS
+- manual status check
+- pending cancellation
+- raw-body HMAC-SHA256 webhook verification
+- provider status normalization
+- amount verification
+- local payment persistence
+- one-pending-payment-per-order database guard
+- order confirmation when payment becomes PAID
+- idempotency keys at Fusionify checkout/payment boundaries
+
+Implemented in Flutter:
+- server-authoritative checkout
+- native QR rendering from `qr_string`
+- local Fusionify payment-status polling
+- manual provider reconciliation through Fusionify API
+- pending cancel action
+- payment expiry countdown when provider expiry parses successfully
+- cart clearing only after PAID
+
+Not yet validated live:
+- real AutoGoPay QR generation
+- real provider webhook delivery
+- real manual status response
+- real pending cancellation response shape
+- production callback URL/network configuration
+
+Automated tests use mocked provider responses and an intentionally unconfigured provider path. No real API key is stored in the repository.
 
 Provider documentation:
 - https://autogopay.site/docs

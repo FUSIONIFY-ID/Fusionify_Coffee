@@ -1,169 +1,162 @@
 # Architecture
 
-## High-Level Architecture
+## Current Runtime Path
 
 ```text
-Customer App (Flutter)
+Flutter Customer App
+  |
+  | Dio + Riverpod
+  v
+NestJS API
+  |
+  +-- Catalog / Orders / Payments
+  |
+  v
+Prisma 7 + @prisma/adapter-pg
+  |
+  v
+PostgreSQL
+
+Payments:
+NestJS
+  |
+  v
+Payment Provider Adapter
+  |
+  +-- AutoGoPay
         |
-        | Dio / Riverpod async state
-        v
-Fusionify Coffee API (NestJS)
-        |
-        +---- PostgreSQL / Prisma 7
-        |
-        +---- Payment Provider Adapter
-        |         |
-        |         +---- AutoGoPay
-        |         |       |
-        |         |       +---- GoPay QRIS
-        |         |       +---- ShopeePay QRIS
-        |         |       +---- QRIS Interactive
-        |         |
-        |         +---- Future providers
-        |
-        +---- Maps / Routing Adapter
-        |
-        +---- Notification Service
-        |
-        +---- Realtime / Event Delivery
-        |
-        +---- Future Digital Benefits
+        +-- GoPay QRIS       [enabled]
+        +-- ShopeePay QRIS   [modeled, not enabled]
+        +-- Interactive QRIS [modeled, not enabled]
 ```
 
-Operations applications such as Admin, POS, and KDS will consume the same backend domain model with role-appropriate APIs.
+## Customer Architecture
 
-## Repository Direction
-
-```text
-apps/
-  customer/
-  admin/       # create when implementation begins
-  pos/         # create when implementation begins
-  kds/         # create when implementation begins
-
-services/
-  api/
-
-docs/
-```
-
-Do not create empty application shells merely to suggest progress.
-
-## Customer App
-
-Use feature-based organization rather than a global dumping-ground structure.
-
-Current direction:
+Feature-oriented Flutter structure:
 
 ```text
 lib/
   app/
   core/
     network/
+    utils/
   features/
-    auth/
+    catalog/
     home/
     menu/
     product/
     cart/
+    checkout/
     payment/
     orders/
     rewards/
     account/
-    catalog/
-```
-
-Business logic should not live inside large presentation widgets.
-
-## Customer Data Boundary
-
-Catalog runtime flow:
-
-```text
-Screen
-  |
-  v
-Riverpod FutureProvider
-  |
-  v
-CatalogRepository
-  |
-  v
-Dio
-  |
-  v
-GET /v1/catalog/preview
-  |
-  v
-NestJS CatalogService
-  |
-  v
-PrismaService
-  |
-  v
-PostgreSQL
 ```
 
 Rules:
-- UI does not silently fall back to fake local data on network failure.
-- Loading, error, retry, and refresh states are explicit.
-- Tests may override providers with test fixtures.
-- API base URL is configuration.
-- Production API uses HTTPS.
-- Development HTTP allowance is isolated to platform development configuration.
+- presentation does not own provider credentials
+- local UI totals are not checkout authority
+- network errors do not silently fall back to fake runtime data
+- tests may use fixtures/provider overrides
 
-## Persistence
-
-Current catalog persistence is implemented and validated:
-- Prisma 7
-- `@prisma/adapter-pg`
-- PostgreSQL
-- initial migration
-- development seed
-- database-backed catalog query
-- CI against PostgreSQL 17
-
-The current seeded records are development fixtures, not production menu data.
-
-## Backend Modules
-
-Current/near-term direction:
+## Catalog Path
 
 ```text
-src/
-  database/
-  catalog/
-  auth/
-  users/
-  outlets/
-  categories/
-  products/
-  modifiers/
-  carts/
-  orders/
-  payments/
-  rewards/
-  integrations/
-  common/
+Flutter Screen
+ -> Riverpod
+ -> CatalogRepository
+ -> Dio
+ -> GET /v1/catalog/preview
+ -> CatalogService
+ -> PrismaService
+ -> PostgreSQL
 ```
 
-Create modules only when implementation requires them.
+## Checkout Path
 
-## Payment Architecture
+```text
+Cart
+ -> POST /v1/orders
+ -> OrdersService
+ -> reload active products/modifiers
+ -> validate selections
+ -> calculate prices
+ -> persist Order + snapshot OrderItems
+```
 
-Provider-specific behavior belongs behind a stable application-facing contract.
+Client sends identifiers and quantities only.
 
-Conceptual operations:
-- createPayment
-- getPaymentStatus
-- cancelPendingPayment when supported
-- verifyWebhook
-- normalizeProviderStatus
-- expose provider/channel capabilities
+## Payment Creation Path
 
-Application payment states must not depend on provider vocabulary.
+```text
+Checkout
+ -> POST /v1/orders/:orderId/payments
+ -> reserve local Payment
+ -> AutoGoPay GoPay adapter
+ -> /qris/generate
+ -> validate provider amount
+ -> persist transaction/QR/expiry
+ -> return safe Payment view
+ -> Flutter renders qrString
+```
 
-Normalized states:
+A database constraint prevents more than one local PENDING payment per order.
+
+## Payment Detection
+
+Automatic user-facing loop:
+
+```text
+AutoGoPay webhook
+ -> raw-body HMAC verification
+ -> payment lookup + amount check
+ -> normalized state
+ -> Payment PAID
+ -> Order CONFIRMED
+
+Flutter payment screen
+ -> GET local Fusionify Payment every ~3 sec
+ -> sees webhook-updated state
+```
+
+Flutter does not poll AutoGoPay every three seconds.
+
+Manual fallback:
+
+```text
+Check Status
+ -> Fusionify API
+ -> AutoGoPay /qris/status
+ -> normalize/persist
+ -> return local state
+```
+
+App resume also performs provider reconciliation while a payment remains pending.
+
+## Payment Security Boundary
+
+- AutoGoPay key server-side only
+- production callback uses HTTPS
+- webhook signature checked against raw body
+- HMAC-SHA256
+- constant-time comparison
+- provider amount checked against local payment
+- client cannot assert payment completion
+- client cannot assert final order amount
+- provider raw status stored separately
+- checkout/payment idempotency keys are local Fusionify controls
+
+## Provider Create Ambiguity
+
+The reviewed GoPay create contract does not show a caller-supplied external idempotency key.
+
+Therefore a timeout after provider acceptance but before response receipt can be ambiguous.
+
+Do not blindly auto-retry provider QR creation until a safe reconciliation strategy is validated.
+
+## Order and Payment States
+
+Payment:
 - PENDING
 - PAID
 - EXPIRED
@@ -171,7 +164,7 @@ Normalized states:
 - FAILED
 - REFUNDED
 
-Order states are separate:
+Order:
 - AWAITING_PAYMENT
 - CONFIRMED
 - PREPARING
@@ -180,131 +173,25 @@ Order states are separate:
 - COMPLETED
 - CANCELLED
 
-A paid payment does not imply a completed order.
-
-## Payment Provider vs Payment Channel
-
-External provider and provider channel are different concepts.
-
-Example:
-
-```text
-provider = AUTOGOPAY
-channel  = GOPAY_QRIS
-```
-
-Other channels may be:
-- `SHOPEEPAY_QRIS`
-- `INTERACTIVE_QRIS`
-
-The channel determines:
-- external reference shape
-- create/status endpoint
-- whether automatic provider polling exists
-- whether a webhook arrives independently
-- whether pending cancellation is supported
-- whether Fusionify backend polling is required
-
-Do not expose these distinctions to Flutter business logic.
-
-See:
-- `docs/adr/0006-autogopay-channel-capabilities.md`
-- `docs/integrations/AUTOGOPAY.md`
-
-## AutoGoPay Channel Behavior
-
-Current reviewed behavior:
-
-### GoPay QRIS
-- create: `POST /qris/generate`
-- status: `POST /qris/status`
-- key reference: `transaction_id`
-- provider auto-poller: yes
-- webhook: automatic
-- pending cancel: documented
-
-### ShopeePay QRIS
-- create: `POST /shopeepay/qris/create`
-- status: `GET /shopeepay/qris/status`
-- key reference: `order_sn`
-- provider auto-poller: yes
-- webhook: automatic
-- pending cancel: not documented in reviewed docs
-
-### QRIS Interactive
-- create: `POST /interactive/qris/create`
-- status: `POST /interactive/qris/status`
-- references: `invoice_id` + `ref_no`
-- provider auto-poller: not documented
-- webhook: triggered by status checking
-- pending cancel: not documented
-
-If Interactive is enabled, Fusionify backend owns the bounded polling/reconciliation strategy.
-
-## Webhook Security Boundary
-
-Provider webhooks are untrusted until authenticated.
-
-For AutoGoPay:
-- verify HMAC-SHA256 against the raw request body
-- use API key only server-side
-- use constant-time comparison
-- reject invalid signatures before state mutation
-- return success quickly after durable/idempotent processing
-- deduplicate provider transaction/event identifiers
-
-Do not trust a reconstructed JSON string as canonical signature input unless the provider explicitly guarantees it.
-
-## Checkout Authority
-
-Flutter may submit:
-- selected outlet
-- requested product IDs
-- requested modifier IDs
-- quantities
-- voucher/reward intent
-
-Flutter must not be authoritative for:
-- final item price
-- modifier price
-- discount amount
-- tax/fee
-- payment amount
-- payment completion
-
-The backend recalculates the payable amount from trusted database state before creating a provider payment.
+Payment and fulfillment state remain separate.
 
 ## Realtime
 
-Realtime is a UX optimization, not the only source of truth.
+Current payment UI polls local Fusionify state.
 
-If a realtime update or webhook is missed, the client must retrieve authoritative current order/payment state through Fusionify API.
+Future realtime/socket/push updates are an optimization and must not replace authoritative GET/reconciliation APIs.
 
-## Ledgers
+## Operations / Future Modules
 
-Use auditable movement/transaction records for:
-- Rewards points
-- Inventory stock movement
-- Payment events where appropriate
-
-Do not rely only on mutable balance fields when auditability matters.
-
-## Multi-Outlet
-
-Inventory, availability, order routing, menu availability, and operations are outlet-aware.
-
-Do not model stock as one global quantity when actual inventory belongs to an outlet.
-
-## Security Boundaries
-
-Untrusted boundaries include:
-- Mobile client input
-- Webhook payloads until authenticated
-- External provider responses
-- Admin/operator input
-
-Validate at boundaries. Never trust client-supplied payment amount or payment completion.
+Create modules only when implementation begins:
+- authentication/users
+- POS/KDS
+- rewards
+- vouchers
+- inventory/procurement/assets
+- delivery/maps
+- digital benefits
 
 ## Architectural Change
 
-A durable architecture change requires an ADR under `docs/adr/`.
+Durable architecture changes require an ADR under `docs/adr/`.

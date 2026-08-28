@@ -1,138 +1,133 @@
 # Roadmap
 
-Roadmap items describe planned sequencing, not completed work.
+Roadmap items describe planned sequencing and verified status.
 
 ## Foundation
 
-- Repository rules and project memory
-- Architecture and product documentation
-- Android/iOS platform policy
-- Payment architecture
-- Design system
+Status: **Complete**
+
+- Repository rules/project memory
+- Architecture/product documentation
+- Android/iOS policy
+- Material 3 design system
 - Security baseline
+- PostgreSQL/Prisma foundation
 
 ## Milestone 0.1: Ordering Foundation
 
 Status: **Complete**
 
 - Flutter Android/iOS scaffold
-- Backend scaffold
-- Material 3 theme/tokens
-- Adaptive navigation
-- Outlet model
-- Categories
-- Products
-- Dynamic modifier groups/options
-- Product detail/customization
-- Cart
+- NestJS API
+- Material 3
+- adaptive navigation
+- database-backed outlet/category/product/modifiers
+- product customization
+- cart
 - Dio/Riverpod API boundary
-- Prisma 7 PostgreSQL adapter
-- Initial migration
-- Development seed
-- Database-backed catalog
-- CI against PostgreSQL
+- PostgreSQL migration/seed/CI
 
-Success condition:
-A product can be configured and added to cart as a distinct configuration using a database-backed development catalog.
+Success condition met:
+A product can be configured and added to cart as a distinct configuration using database-backed development data.
 
 ## Milestone 0.2: Pickup Checkout + Payment
 
-Status: **Next**
+Status: **Implementation complete; live AutoGoPay validation pending**
 
-- Pickup outlet context
-- Server-authoritative cart/checkout validation
-- Order + OrderItem persistence
-- Payment persistence
-- Order state machine
-- Payment state machine
-- Payment provider abstraction
-- Payment channel capabilities
-- AutoGoPay GoPay QRIS adapter as first channel
-- QRIS generation
-- Native QR payment presentation
-- Payment status endpoint
-- Raw-body webhook HMAC verification
-- Webhook/status idempotency
-- Realtime/fallback reconciliation
-- Pending payment cancel when supported
-- Expiry
-- App background/resume reconciliation
-- Channel-specific external references
-- Preparation for ShopeePay/QRIS Interactive
-- Backend polling strategy for QRIS Interactive if enabled
+Implemented:
+- pickup outlet context
+- server-authoritative order calculation
+- Order + OrderItem
+- Payment
+- order/payment state enums
+- checkout idempotency
+- payment idempotency
+- one-pending-payment-per-order guard
+- payment provider/channel abstraction
+- AutoGoPay GoPay QRIS adapter
+- QRIS create/status/cancel integration code
+- raw-body HMAC webhook verification
+- native Flutter QR rendering
+- local payment polling
+- manual provider reconciliation
+- pending cancel UI
+- payment expiry/status UI
+- app-resume reconciliation
+- PAID -> Order CONFIRMED transition
 
-Success condition:
-A customer can place and pay for a pickup order, with server-authoritative automatic payment detection and safe recovery after missed realtime/webhook events.
+Still required before claiming milestone production-ready:
+- secure live API key configuration
+- HTTPS callback
+- real low-value provider transaction
+- real webhook verification
+- real status/cancel response validation
+- provider operational/settlement review
 
 ## Milestone 0.3: Fulfillment + Fusion Points
 
-- Order state tracking
-- POS/KDS minimum workflow
-- Preparing
-- Ready
-- Picked up
-- Completed
-- Rewards ledger
+Status: **Next after live payment validation**
+
+- order history/detail
+- order tracking
+- POS/KDS minimum flow
+- preparing
+- ready
+- picked up
+- completed
+- rewards ledger
 - Fusion Points earning
-- Order history
 
 ## Milestone 0.4: Retention
 
-- Rewards catalog
-- Point redemption
-- Vouchers
-- Favorites
-- Reorder
-- Membership tiers
-- Campaign multipliers/missions
+- rewards catalog
+- point redemption
+- vouchers
+- favorites
+- reorder
+- membership tiers
+- campaigns/missions
 
 ## Milestone 0.5: Operations
 
-- Recipes/BOM
-- Ingredients
-- Packaging
-- Operational supplies
-- Inventory by outlet
-- Stock movements
-- Waste
-- Stock opname
-- Transfers
-- Suppliers
-- Purchasing
-- Goods receiving
-- Recipe costing/COGS
-- Assets and maintenance
+- recipes/BOM
+- ingredients/packaging/supplies
+- outlet inventory
+- stock movements
+- waste
+- stock opname
+- transfer
+- supplier/purchasing/receiving
+- COGS
+- assets/maintenance
 
 ## Milestone 0.6: Delivery
 
-- Address management
-- Location permission UX
-- Maps/search/pin
-- Service area
-- Route distance
-- Delivery fees
-- Outlet routing
-- Courier/provider abstraction
-- Delivery states/tracking
+- saved addresses
+- location permission UX
+- maps/search/pin
+- serviceability
+- route distance/fees
+- outlet routing
+- courier abstraction
+- tracking
 
 ## Milestone 0.7: Digital Benefits
 
-- Digital receipt
+- digital receipt
 - Wi-Fi entitlement
 - AI entitlement/quota
-- Membership-linked benefits
+- membership-linked benefits
 
 ## Release Readiness
 
 Before production:
-- Re-validate payment provider operational/legal terms
+- live payment provider validation
 - Android Play policy re-check
 - iOS App Store policy re-check
-- Privacy policy
-- Data Safety mapping
-- Account deletion
-- Signing and package verification
-- Dependency/SDK audit
-- Security review
-- Crash/ANR monitoring
-- Accessibility review
+- privacy policy/Data Safety
+- account deletion
+- signing/package verification
+- SDK audit
+- security review
+- crash/ANR monitoring
+- accessibility review

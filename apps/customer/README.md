@@ -1,6 +1,6 @@
 # Fusionify Coffee Customer App
 
-Flutter customer application for Fusionify Coffee.
+Flutter customer application for Android and iOS.
 
 ## Stack
 
@@ -9,50 +9,78 @@ Flutter customer application for Fusionify Coffee.
 - Riverpod 3.4.2
 - GoRouter 18
 - Dio 5.11
-- Android API 28+ with compile/target API 36
-- iOS generated from the shared Flutter project and subject to final platform review
+- qr_flutter 4.1.0
+- Android minSdk 28
+- Android compileSdk/targetSdk 36
 
-## Current Scope
+## Current Customer Flow
 
-Milestone 0.1 includes:
-- Material 3 seed-based Fusionify theme
-- Edge-to-edge UI
-- Adaptive `NavigationBar` / `NavigationRail`
-- API-backed development catalog
-- Loading, error, retry, and refresh states
-- Outlet/menu/category discovery
-- Product modifier selection
-- Size, temperature, sugar, ice, milk, and add-ons
-- Cart with distinct configuration identity
-- Quantity and subtotal behavior
+Implemented development flow:
 
-Checkout, real payment, authentication, rewards, delivery, database-backed production catalog, and production assets are not implemented yet.
+```text
+Home
+ -> Menu
+ -> Product customization
+ -> Cart
+ -> Checkout
+ -> server-authoritative Order
+ -> GoPay QRIS Payment
+ -> native QR display
+ -> payment status/reconciliation
+```
+
+## Material 3
+
+- Fusionify seed-based ColorScheme
+- edge-to-edge
+- NavigationBar on phones
+- NavigationRail on wide layouts
+- Material cards/buttons/chips/sheets/snackbars
+- no gradients
+- no dynamic recoloring that overrides Fusionify brand
+
+## Checkout
+
+Cart subtotal is an estimate for display.
+
+Checkout sends:
+- outlet ID
+- product IDs
+- modifier IDs
+- quantities
+
+The backend calculates the final amount.
+
+## QRIS Payment
+
+Flutter does not contain an AutoGoPay API key and does not call AutoGoPay directly.
+
+The payment screen:
+- renders backend `qrString` using qr_flutter
+- polls local Fusionify payment state
+- provides Check Status through Fusionify API
+- provides pending Cancel through Fusionify API
+- reconciles pending state on app resume
+- clears cart only after PAID
+
+Live AutoGoPay transactions are not yet validated.
 
 ## API Configuration
-
-The customer app reads:
 
 ```text
 --dart-define=API_BASE_URL=https://your-api.example
 ```
 
-If it is omitted during development:
-- Android emulator uses `http://10.0.2.2:3000`
-- Other local mobile development uses `http://127.0.0.1:3000`
+Development defaults:
+- Android emulator: `http://10.0.2.2:3000`
+- other local mobile development: `http://127.0.0.1:3000`
 
-Android cleartext HTTP is allowed only in the debug manifest for local development.
-
-Production API traffic should use HTTPS.
-
-Example:
-
-```bash
-flutter run --dart-define=API_BASE_URL=https://api.example.com
-```
+Android cleartext HTTP is debug-only.
+Production API traffic must use HTTPS.
 
 ## Development
 
-Run the API first, then:
+Run the API first:
 
 ```bash
 flutter pub get
@@ -61,16 +89,28 @@ flutter test
 flutter run
 ```
 
-The API preview catalog is explicitly development data. Do not present it as production business data.
+Example:
+
+```bash
+flutter run --dart-define=API_BASE_URL=https://api.example.com
+```
 
 ## Android
 
-Current generated application ID is `id.fusionify.coffee`, but it remains provisional until the project explicitly locks the production package ID.
+Generated application ID remains provisional:
 
-Release signing with the real upload keystore is not configured in Git and must follow `../../docs/android/SIGNING.md`.
+```text
+id.fusionify.coffee
+```
+
+Production release signing is intentionally not configured in Git.
+
+See `../../docs/android/SIGNING.md`.
 
 ## Repository Rules
 
-Read the root `AGENTS.md` and `docs/PROJECT_STATE.md` before material changes.
+Read:
+- `../../AGENTS.md`
+- `../../docs/PROJECT_STATE.md`
 
 No gradients. No AI slop. No fake functionality.

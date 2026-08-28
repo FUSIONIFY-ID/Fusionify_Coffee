@@ -52,12 +52,13 @@ Start with:
 - [ADR 0003: Payment Provider Abstraction](./adr/0003-payment-provider-abstraction.md)
 - [ADR 0004: Android SDK Baseline](./adr/0004-android-sdk-baseline.md)
 - [ADR 0005: No-Gradient Design Language](./adr/0005-no-gradient-design-language.md)
+- [ADR 0006: AutoGoPay Channel Capabilities](./adr/0006-autogopay-channel-capabilities.md)
 
 ## Agent Instructions
 
 The primary repository instruction file is [../AGENTS.md](../AGENTS.md).
 
-Tool-specific adapters live under:
+Tool-specific adapters:
 - `.cursor/rules/`
 - `.claude/rules/`
 - `.claude/skills/`
@@ -65,4 +66,4 @@ Tool-specific adapters live under:
 - `CLAUDE.md`
 - `GEMINI.md`
 
-Do not treat tool-specific adapters as separate product truth. `AGENTS.md`, project docs, and ADRs are the source of truth.
+Tool-specific adapters are not separate product truth. `AGENTS.md`, project docs, and ADRs are the source of truth.

@@ -6,60 +6,55 @@ All notable project changes are documented by meaningful product and engineering
 
 ### Added
 
-- Repository foundation and documentation index
-- Primary AGENTS.md repository instruction policy
-- Cursor, Claude, Gemini, and Copilot agent guidance
-- Claude project skills
-- Contribution, security, issue, and pull-request policies
-- Product, architecture, design-system, engineering, testing, and privacy documentation
-- Android API 28/36, permission, Play, and signing policy
-- iOS platform direction
-- AutoGoPay/payment and maps integration planning
-- AutoGoPay channel capability matrix for GoPay, ShopeePay, and QRIS Interactive
-- ADR 0006 for channel-aware AutoGoPay integration
-- Initial architecture decision records
-- Flutter 3.47 Android/iOS customer application scaffold
-- Riverpod, GoRouter, and Dio customer stack
-- Full Material 3 component/theme foundation
-- Edge-to-edge system UI
-- Adaptive NavigationBar / NavigationRail
-- Fusionify Coffee solid-color design tokens
-- API base URL configuration via dart-define
-- Dio catalog repository and Riverpod async provider
-- Loading, retry, error, and refresh catalog states
-- API-backed preview outlet, menu, category, product customization, and cart flow
-- Size, temperature, sugar, ice, milk, and add-on modifiers
-- Modifier-aware cart identity and subtotal behavior
-- NestJS 11 + Node 24 API scaffold
-- Prisma 7 PostgreSQL driver adapter
-- Initial PostgreSQL catalog migration
-- Development database seed
-- Database-backed catalog endpoint
-- Flutter catalog parsing test
-- Flutter widget and cart tests
-- API unit and PostgreSQL e2e tests
-- Android debug APK compile validation in CI
-- CI for Flutter format/analyze/test/APK and API PostgreSQL migration/seed/lint/unit/e2e/build
-- Repository policy CI including no-gradient enforcement and signing/secret-file checks
+#### Foundation / Ordering
+- Repository/agent memory and engineering policies
+- Material 3 Flutter Android/iOS foundation
+- adaptive NavigationBar/NavigationRail
+- no-gradient policy
+- PostgreSQL/Prisma 7 catalog persistence
+- database-backed menu/modifiers
+- cart configuration identity
+- Android API 28/36 CI build
+
+#### Milestone 0.2 Checkout / Payment
+- OrderStatus and PaymentStatus domain enums
+- Order and OrderItem persistence
+- Payment persistence
+- server-authoritative order pricing
+- required/single-select modifier validation
+- checkout idempotency
+- payment idempotency
+- one pending payment per order database guard
+- AutoGoPay provider/channel model
+- GoPay QRIS adapter
+- generate/status/cancel provider calls
+- raw-body HMAC-SHA256 webhook verification
+- payment amount verification
+- transactionally confirm order on PAID
+- local payment status endpoint
+- mocked AutoGoPay provider unit tests
+- unconfigured-provider e2e safety test
+- Flutter Checkout screen
+- native QRIS rendering with qr_flutter
+- local payment polling
+- manual Check Status
+- pending Cancel Payment
+- payment expiry/status UI
+- app-resume reconciliation
 
 ### Changed
 
-- Runtime catalog now comes from PostgreSQL through NestJS/Prisma instead of an API-local fixture
-- Removed obsolete local runtime catalog fixture
-- Product detail resolves products from async API catalog state
-- Phone navigation remains Material 3 NavigationBar while wide layouts use NavigationRail
-- AutoGoPay planning now distinguishes provider from payment channel
-- GoPay QRIS is the recommended first Milestone 0.2 AutoGoPay channel because current docs include create/status/automatic webhook/pending cancel
-- QRIS Interactive is modeled as requiring Fusionify-side reconciliation/polling rather than assuming provider auto-polling
-- Removed Flutter/Nest generic project README content
-- Android release no longer uses the debug signing key
-- iOS display name corrected to Fusionify Coffee
+- Runtime catalog uses PostgreSQL through NestJS/Prisma
+- Cart checkout is now enabled
+- Payment operations remain entirely server-side
+- AutoGoPay is modeled as provider + channel, not one uniform QRIS contract
+- GoPay QRIS is the first enabled channel
+- repository docs now distinguish implemented integration code from live provider validation
 
 ### Fixed
 
-- Corrected Flutter router model import and dynamic preview outlet const usage discovered by CI
-- Bootstrap workflow now installs API dependencies before backend validation
-- Removed strict-analyzer unused router import
-- Prisma 7 generated-client import resolution for CommonJS/NestJS
-- Prisma 7 Jest e2e runner VM module compatibility
-- Prisma generated code excluded from source linting
+- Prisma 7 CommonJS/Jest compatibility
+- generated Prisma lint exclusion
+- Nest decorated signatures use type-only imports
+- payment reservation concurrency race guarded at database level
+- Android release no longer uses debug signing

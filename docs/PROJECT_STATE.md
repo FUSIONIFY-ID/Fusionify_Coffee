@@ -7,227 +7,265 @@ Last updated: 2026-08-28
 - Repository: `FUSIONIFY-ID/Fusionify_Coffee`
 - Default branch: `main`
 - Visibility: public
-- Latest fully validated implementation head before this documentation checkpoint: `93cc894fb725900f15db5a52c1aec6858f8c295c`
+- Latest fully validated implementation head: `035379c16378d599cde8d8d626bae8106ff3b984`
 
 ## Current Milestone
 
-**Milestone 0.1 Ordering Foundation is complete and validated.**
+**Milestone 0.2 Pickup Checkout + Payment is implemented through the provider-integration boundary. Live AutoGoPay validation is still pending.**
 
-The customer application consumes database-backed development catalog data through:
+The end-to-end application architecture now reaches:
 
 ```text
 Flutter
-  -> Dio
-  -> NestJS
-  -> Prisma 7
-  -> PostgreSQL
+  -> Fusionify Coffee API
+  -> server-authoritative checkout
+  -> Order + Payment persistence
+  -> AutoGoPay GoPay QRIS adapter
 ```
 
-The next implementation milestone is **0.2 Pickup Checkout + Payment**.
+The application can render a provider QR string natively and manage local payment state, but no real AutoGoPay API key or live transaction was used in repository CI.
 
 ## Completed
 
-### Repository Foundation
-- Repository rules and `AGENTS.md`
-- Claude, Gemini, Copilot, and Cursor guidance
-- Project skills and project-memory workflow
-- Security/contribution templates
-- No-gradient and signing/secret repository policy
-
-### Material 3 Customer Foundation
-- Flutter 3.47 Android+iOS scaffold
-- Material 3 `useMaterial3: true`
-- Fusionify seed-based Material 3 `ColorScheme`
-- Material 2021 typography baseline
-- Semantic solid-color tokens
-- Material-themed AppBar/cards/buttons/chips/inputs/sheets/snackbars/progress
-- Edge-to-edge UI
-- Material 3 `NavigationBar` on phone
-- Adaptive `NavigationRail` on wide/tablet layouts
-- No gradients
-- Dynamic system recoloring intentionally not enabled
-
-### Customer Ordering
+### Foundation
+- Flutter 3.47 Android+iOS
+- Material 3
 - Riverpod 3.4.2
 - GoRouter 18
 - Dio 5.11
-- Android minSdk 28, compileSdk 36, targetSdk 36
-- Async API-backed Home/Menu
-- Pull-to-refresh
-- Loading skeleton
-- Error + retry state
-- Database-backed development outlet/menu/categories
-- Product detail
-- Dynamic modifier groups
-- Size, temperature, sugar, ice, milk, add-ons
-- Modifier-aware pricing
-- Distinct cart configuration identity
-- Quantity changes/removal
-- Cart subtotal
-- Honest disabled states for unimplemented checkout/delivery/rewards/auth
-
-### API / Database
-- Node.js 24
 - NestJS 11
+- Node.js 24
 - Prisma 7
+- PostgreSQL 17 CI
 - `@prisma/adapter-pg`
-- PostgreSQL
-- Prisma service/database module
-- Initial catalog migration
-- Development seed
-- Database-backed catalog query
-- Outlet
-- Category
-- Product
-- ModifierGroup
-- ModifierOption
-- `GET /v1/health`
-- `GET /v1/catalog/preview`
+- Android minSdk 28
+- Android compileSdk/targetSdk 36
+- No gradients
+- Repository secret/signing policy
 
-### AutoGoPay Documentation Revalidation
+### Catalog / Cart
+- PostgreSQL-backed development catalog
+- Outlet/category/product/modifier models
+- Dynamic modifier groups
+- Server-backed product detail
+- Distinct cart identity by configuration
+- Quantity/subtotal behavior
 
-Provider docs were re-reviewed on 2026-08-28.
+### Order Persistence
+- `OrderStatus`
+- `Order`
+- `OrderItem`
+- unique checkout idempotency key
+- product/modifier snapshots
+- outlet relation
+- server-calculated subtotal/total
+- required modifier validation
+- single-select modifier validation
+- unknown/duplicate modifier rejection
 
-Current documented QRIS channels:
-- GoPay QRIS
-- ShopeePay QRIS
-- QRIS Interactive
+### Payment Persistence
+- `PaymentStatus`
+- `PaymentProvider`
+- `PaymentChannel`
+- `Payment`
+- unique payment idempotency key
+- AutoGoPay external reference fields
+- provider QR/expiry fields
+- payment timestamps
+- one pending payment per order enforced at database level
 
-QRIS Interactive is documented as replacing OrderKuota.
+### Order API
+- `POST /v1/orders`
+- `GET /v1/orders/:orderId`
 
-Important architecture update:
-- GoPay/ShopeePay document provider-side auto-polling + webhook.
-- QRIS Interactive requires status checking for payment detection and its webhook is triggered during manual status checking.
-- Cancellation is currently documented for GoPay QRIS, not for ShopeePay/Interactive in the reviewed docs.
-- AutoGoPay integration must therefore be channel-aware.
+Checkout only accepts product IDs, modifier option IDs, quantities, and outlet context from the client. Final price is recalculated from trusted database state.
 
-ADR:
+### Payment API
+- `POST /v1/orders/:orderId/payments`
+- `GET /v1/payments/:paymentId`
+- `POST /v1/payments/:paymentId/check`
+- `POST /v1/payments/:paymentId/cancel`
+- `POST /v1/webhooks/autogopay`
+
+Only `GOPAY_QRIS` is enabled in the first runtime adapter.
+
+### AutoGoPay GoPay Adapter
+- create via `POST /qris/generate`
+- status via `POST /qris/status`
+- cancel via `POST /qris/cancel`
+- Bearer API key server-side only
+- 10-second request timeout
+- amount verification
+- normalized payment state
+- raw-body webhook verification
+- HMAC-SHA256
+- constant-time signature comparison
+- QR/payment external references persisted
+
+### Payment State Effects
+- `PENDING`
+- `PAID`
+- `EXPIRED`
+- `CANCELLED`
+- `FAILED`
+- `REFUNDED`
+
+When a payment becomes `PAID`, the backend transactionally changes an `AWAITING_PAYMENT` order to `CONFIRMED`.
+
+### Flutter Checkout
+- Cart Checkout CTA
+- Pickup outlet summary
+- Order summary
+- local estimated subtotal
+- explicit server-price-authority disclosure
+- stable checkout idempotency key per screen operation
+- stable payment idempotency key per screen operation
+- error handling for unavailable backend/provider
+
+### Flutter QRIS Payment
+- `qr_flutter 4.1.0`
+- QR rendered natively from backend `qrString`
+- no camera permission required to display QR
+- amount display
+- provider expiry countdown when parseable
+- local payment status polling every ~3 seconds
+- local polling calls Fusionify API, not AutoGoPay
+- manual Check Status reconciliation
+- pending Cancel Payment
+- app-resume provider reconciliation
+- PAID/EXPIRED/CANCELLED/FAILED states
+- cart clears only after payment becomes PAID
+
+## AutoGoPay Channel Architecture
+
+Provider:
+- `AUTOGOPAY`
+
+Channels modeled:
+- `GOPAY_QRIS`
+- `SHOPEEPAY_QRIS`
+- `INTERACTIVE_QRIS`
+
+Only GoPay QRIS is enabled in current runtime code.
+
+See:
+- `docs/integrations/AUTOGOPAY.md`
 - `docs/adr/0006-autogopay-channel-capabilities.md`
 
-Detailed contract:
-- `docs/integrations/AUTOGOPAY.md`
+## Validation Evidence
 
-### Validation / CI
-
-Latest validated implementation pipeline: **PASS**
+GitHub Actions run for implementation head `035379c16378d599cde8d8d626bae8106ff3b984`: **PASS**
 
 Customer:
 - Dart format: PASS
 - Flutter analyze: PASS
 - Flutter tests: PASS
-- Android debug APK compile: PASS
+- Android debug APK build: PASS
 
 API:
-- PostgreSQL 17 service startup: PASS
+- PostgreSQL 17 startup: PASS
 - Prisma generate: PASS
-- Migration deploy: PASS
-- Database seed: PASS
-- API lint: PASS
-- API unit tests: PASS
-- API e2e tests against seeded PostgreSQL: PASS
-- API build: PASS
+- migrations: PASS
+- development seed: PASS
+- lint: PASS
+- unit tests: PASS
+- e2e tests: PASS
+- NestJS build: PASS
 
-Repository policy:
+Repository Policy:
 - PASS
-- No-gradient check: PASS
-- Secret/signing-file checks: PASS
-- Debug signing rejection policy: PASS
 
-## Accepted Decisions
+## What Automated Tests Prove
 
-- Customer app: Flutter + Dart
-- Material 3 UI foundation
-- Fusionify brand colors override dynamic system recoloring
-- Adaptive phone/tablet navigation
-- Riverpod
-- GoRouter
-- Dio
-- NestJS + TypeScript
-- PostgreSQL + Prisma
-- Prisma 7 PostgreSQL driver adapter
-- Android minSdk 28
-- Android compileSdk 36
-- Android targetSdk 36
-- Android AAB release
-- Play App Signing
-- AutoGoPay is the initial temporary payment provider
-- AutoGoPay integration is channel-aware
-- GoPay QRIS is the recommended Milestone 0.2 initial channel
-- Provider secrets remain server-side
-- Payment-provider abstraction is required
-- No gradients
-- No AI slop
-- No vibe coding
-- No AI-style overengineering
+Automated validation covers:
+- database migrations
+- seeded PostgreSQL catalog
+- server-authoritative order pricing
+- checkout idempotency
+- invalid modifier rejection
+- safe behavior when AutoGoPay is not configured
+- provider QR response normalization with mocked fetch
+- raw-body HMAC webhook verification
+- Flutter payment model parsing
+- Flutter application compilation/analyze/tests
+
+## What Is NOT Yet Proven
+
+No live AutoGoPay transaction has been executed from this repository/session.
+
+Still unverified against the real service:
+- API credential validity
+- production merchant/account readiness
+- real create response
+- real webhook payload/signature behavior
+- real status response
+- real cancel response shape
+- settlement/fund flow
+- production HTTPS callback reachability
+
+Do not describe AutoGoPay as production-validated yet.
+
+## Known Provider Limitation
+
+The reviewed `/qris/generate` contract accepts `amount` but does not document a caller-supplied idempotency key.
+
+If a network failure occurs after AutoGoPay receives a create request but before Fusionify receives the response, the backend may not have the provider transaction ID required for deterministic reconciliation.
+
+Current rule:
+- do not aggressively auto-retry ambiguous provider-create failures
+- keep Fusionify checkout/payment idempotency
+- validate live provider behavior before production
+- consider an operator/reconciliation flow if the provider cannot offer idempotent creation
 
 ## Explicitly Provisional / Not Final
 
-- Android generated application ID: `id.fusionify.coffee`
-- Official Fusionify Coffee logo assets
-- Coffee-specific warm accent palette
-- iOS minimum deployment target
-- Production API host/domain
-- Maps provider
-- Delivery/courier provider
-- Membership tier thresholds and benefits
-- Fusion Points earning/redemption rates
-- Refund provider/process
-- Long-term production payment provider
-- Whether ShopeePay/QRIS Interactive are exposed after initial GoPay integration
-
-## Development Preview Data
-
-The catalog is now PostgreSQL-backed, but the seeded outlet/products/prices/modifiers are fictional development fixtures.
-
-They are not production business data.
+- Android application ID `id.fusionify.coffee`
+- official Fusionify Coffee logo/media
+- coffee-specific accent palette
+- production API hostname
+- AutoGoPay as long-term production provider
+- ShopeePay/Interactive runtime enablement
+- refund automation
+- maps/courier provider
+- membership thresholds
+- Fusion Points rates
+- iOS deployment target
 
 ## Not Implemented Yet
 
-- Authentication
-- Real outlet discovery
-- Real product photography/assets
-- Pickup checkout
-- Server-authoritative order pricing
-- Order/Payment models
-- AutoGoPay runtime adapter
-- Payment webhook/reconciliation
-- QRIS UI
-- Order tracking
-- Fusion Points ledger
-- Membership
-- Delivery/maps
-- POS
-- KDS
-- Inventory
-- Procurement
-- Assets/maintenance
-- Wi-Fi benefit
-- AI benefit
-- Production release signing
+- authentication
+- customer accounts
+- production catalog/media
+- scheduled pickup
+- realtime socket/push delivery of payment changes
+- full order tracking UI
+- POS/KDS
+- Fusion Points
+- membership
+- vouchers
+- delivery/maps
+- inventory/procurement/assets
+- digital Wi-Fi/AI benefits
+- production release signing
+- live AutoGoPay validation
 
 ## Next Work
 
-### Milestone 0.2 Pickup Checkout + Payment
+### Milestone 0.2 Live Integration Validation
+1. Configure `AUTOGOPAY_API_KEY` only in a secure runtime secret store.
+2. Deploy Fusionify API behind HTTPS.
+3. Configure the AutoGoPay callback URL.
+4. Run a controlled low-value QRIS test.
+5. Validate actual create response and expiry behavior.
+6. Validate automatic webhook signature using raw body.
+7. Validate local Flutter polling observes webhook-updated state.
+8. Validate manual Check Status.
+9. Validate pending Cancel behavior and response shape.
+10. Record provider-specific evidence without committing credentials.
 
-1. Add Order + OrderItem + Payment persistence models.
-2. Add server-authoritative checkout calculation.
-3. Add normalized order/payment state machines.
-4. Implement payment provider interface + capability model.
-5. Implement AutoGoPay GoPay QRIS adapter first.
-6. Create QRIS server-side.
-7. Return only safe payment data to Flutter.
-8. Render `qr_string` natively in Flutter.
-9. Add authoritative payment status endpoint.
-10. Verify AutoGoPay raw-body HMAC webhook.
-11. Add webhook/status idempotency.
-12. Implement pending cancellation only when provider/channel supports it.
-13. Handle expiry/background/resume/reconnect reconciliation.
-14. Add bounded backend polling strategy for future QRIS Interactive support.
-15. Keep paid-order refund/cancellation separate from pending payment cancellation.
-
-## Validation Evidence
-
-GitHub Actions run for implementation head `93cc894fb725900f15db5a52c1aec6858f8c295c` completed successfully for:
-- Customer CI
-- API/PostgreSQL CI
-- Repository Policy
+### Then Milestone 0.3
+- order history
+- order detail
+- CONFIRMED -> PREPARING -> READY -> PICKED_UP -> COMPLETED
+- POS/KDS minimum workflow
+- Fusion Points ledger/earning
