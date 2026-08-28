@@ -8,7 +8,6 @@ import {
 import {
   AppLanguage,
   CustomerStatus,
-  OtpChannel,
   OtpPurpose,
   PhoneCountry,
 } from '../generated/prisma/enums';
@@ -71,7 +70,7 @@ export class AuthService {
     const latest = await this.prisma.otpChallenge.findFirst({
       where: {
         phoneE164: phone.e164,
-        purpose: purpose as OtpPurpose,
+        purpose,
         consumedAt: null,
       },
       orderBy: { createdAt: 'desc' },
@@ -87,7 +86,7 @@ export class AuthService {
     await this.prisma.otpChallenge.updateMany({
       where: {
         phoneE164: phone.e164,
-        purpose: purpose as OtpPurpose,
+        purpose,
         consumedAt: null,
       },
       data: { consumedAt: new Date() },
@@ -96,11 +95,11 @@ export class AuthService {
     const code = createOtpCode();
     const challenge = await this.prisma.otpChallenge.create({
       data: {
-        phoneCountry: phone.country as PhoneCountry,
+        phoneCountry: phone.country,
         phoneE164: phone.e164,
-        channel: input.channel as OtpChannel,
-        purpose: purpose as OtpPurpose,
-        language: input.language as AppLanguage,
+        channel: input.channel,
+        purpose,
+        language: input.language,
         codeHash: hashOtp(phone.e164, purpose, code),
         expiresAt: new Date(Date.now() + otpLifetimeMs),
       },
@@ -219,8 +218,7 @@ export class AuthService {
 
     const email = this.normalizeEmail(input.email);
     const preferredLanguage =
-      (input.preferredLanguage as AppLanguage | undefined) ??
-      challenge.language;
+      input.preferredLanguage ?? challenge.language;
     const passwordHash = await hashPassword(input.password).catch(() => {
       throw new BadRequestException(
         'Password must contain between 8 and 128 characters.',
@@ -407,7 +405,7 @@ export class AuthService {
 
     if (input.preferredLanguage !== undefined) {
       this.assertLanguage(input.preferredLanguage);
-      data.preferredLanguage = input.preferredLanguage as AppLanguage;
+      data.preferredLanguage = input.preferredLanguage;
     }
 
     try {
