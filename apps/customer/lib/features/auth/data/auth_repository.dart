@@ -192,7 +192,7 @@ class AuthRepository {
 
   Future<bool> revokeSession(String sessionId) async {
     final response = await _dio.post<Map<String, dynamic>>(
-      '/v1/account/sessions/' + sessionId + '/revoke',
+      '/v1/account/sessions/$sessionId/revoke',
     );
     final revokedCurrent =
         response.data?['currentSessionRevoked'] as bool? ?? false;

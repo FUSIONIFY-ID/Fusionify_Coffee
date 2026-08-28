@@ -142,9 +142,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
             ),
           ] else if (_step == 1) ...[
             Text(
-              (_challenge?.channel ?? _channel) +
-                  ' • ' +
-                  (_challenge?.phone ?? ''),
+              '${_challenge?.channel ?? _channel} • ${_challenge?.phone ?? ''}',
             ),
             const SizedBox(height: CoffeeSpacing.md),
             TextField(

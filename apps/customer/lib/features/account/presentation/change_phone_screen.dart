@@ -129,9 +129,7 @@ class _ChangePhoneScreenState extends ConsumerState<ChangePhoneScreen> {
             ),
           ] else if (_step == 1) ...[
             Text(
-              (_challenge?.channel ?? _channel) +
-                  ' • ' +
-                  (_challenge?.phone ?? ''),
+              '${_challenge?.channel ?? _channel} • ${_challenge?.phone ?? ''}',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: CoffeeSpacing.md),

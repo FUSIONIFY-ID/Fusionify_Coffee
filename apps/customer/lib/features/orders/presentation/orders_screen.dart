@@ -110,7 +110,7 @@ class _OrderCard extends StatelessWidget {
     final firstItems = order.items
         .take(2)
         .map((item) {
-          return item.quantity.toString() + '× ' + item.productName;
+          return '${item.quantity}× ${item.productName}';
         })
         .join(' • ');
 
@@ -177,15 +177,11 @@ class _OrderCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     final local = date.toLocal();
-    return local.day.toString().padLeft(2, '0') +
-        '/' +
-        local.month.toString().padLeft(2, '0') +
-        '/' +
-        local.year.toString() +
-        ' ' +
-        local.hour.toString().padLeft(2, '0') +
-        ':' +
-        local.minute.toString().padLeft(2, '0');
+    final day = local.day.toString().padLeft(2, '0');
+    final month = local.month.toString().padLeft(2, '0');
+    final hour = local.hour.toString().padLeft(2, '0');
+    final minute = local.minute.toString().padLeft(2, '0');
+    return '$day/$month/${local.year} $hour:$minute';
   }
 }
 
