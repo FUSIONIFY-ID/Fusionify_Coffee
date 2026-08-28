@@ -121,6 +121,10 @@ export class PaymentsService {
     }
   }
 
+  async getView(paymentId: string) {
+    return this.toView(await this.getPayment(paymentId));
+  }
+
   async check(paymentId: string) {
     const payment = await this.getPayment(paymentId);
 

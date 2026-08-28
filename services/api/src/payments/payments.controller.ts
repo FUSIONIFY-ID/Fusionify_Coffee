@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 
 @Controller('v1')
@@ -16,6 +16,11 @@ export class PaymentsController {
       idempotencyKey,
       body?.channel,
     );
+  }
+
+  @Get('payments/:paymentId')
+  get(@Param('paymentId') paymentId: string) {
+    return this.paymentsService.getView(paymentId);
   }
 
   @Post('payments/:paymentId/check')

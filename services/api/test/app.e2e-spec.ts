@@ -87,6 +87,47 @@ describe('Fusionify Coffee API (e2e)', () => {
     expect(repeatedBody.id).toBe(createdBody.id);
   });
 
+  it('fails payment creation safely when AutoGoPay is not configured', async () => {
+    const checkoutKey = `payment-order-e2e-${Date.now()}`;
+    const created = await request(app.getHttpServer())
+      .post('/v1/orders')
+      .set('Idempotency-Key', checkoutKey)
+      .send({
+        outletId: 'preview-outlet',
+        items: [
+          {
+            productId: 'aren-latte',
+            quantity: 1,
+            modifierOptionIds: [
+              'aren-latte-size-regular',
+              'aren-latte-temperature-iced',
+              'aren-latte-sugar-sugar-50',
+              'aren-latte-ice-normal-ice',
+              'aren-latte-milk-fresh-milk',
+            ],
+          },
+        ],
+      })
+      .expect(201);
+    const order = created.body as OrderResponse;
+
+    await request(app.getHttpServer())
+      .post(`/v1/orders/${order.id}/payments`)
+      .set('Idempotency-Key', `payment-e2e-${Date.now()}`)
+      .send({ channel: 'GOPAY_QRIS' })
+      .expect(503);
+
+    const refreshed = await request(app.getHttpServer())
+      .get(`/v1/orders/${order.id}`)
+      .expect(200);
+    const refreshedBody = refreshed.body as {
+      payments: Array<{ status: string }>;
+    };
+
+    expect(refreshedBody.payments).toHaveLength(1);
+    expect(refreshedBody.payments[0].status).toBe('FAILED');
+  });
+
   it('/v1/orders (POST) rejects missing required modifiers', async () => {
     await request(app.getHttpServer())
       .post('/v1/orders')
