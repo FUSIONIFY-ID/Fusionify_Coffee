@@ -1,0 +1,13 @@
+---
+description: Documentation and project-memory rules
+globs: ["**/*.md", "**/*.mdc"]
+alwaysApply: false
+---
+
+Documentation must match reality.
+
+When implementation state changes, update `docs/PROJECT_STATE.md`.
+When durable architecture changes, create or update an ADR.
+Do not mark planned work as implemented.
+Do not create empty docs merely to look complete.
+Keep `AGENTS.md` concise; put detailed procedures in skills and detailed domain knowledge in `docs/`.
