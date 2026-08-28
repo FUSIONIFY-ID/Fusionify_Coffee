@@ -1,0 +1,54 @@
+name: Prepare Auth UI
+
+on:
+  push:
+    paths:
+      - ".github/workflows/prepare-auth-ui.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.0"
+          channel: stable
+          cache: true
+
+      - name: Resolve Flutter dependencies
+        working-directory: apps/customer
+        run: flutter pub get
+
+      - name: Format source
+        working-directory: apps/customer
+        run: dart format lib test
+
+      - name: Analyze
+        working-directory: apps/customer
+        run: flutter analyze
+
+      - name: Generate account profile screenshot
+        working-directory: apps/customer
+        run: flutter test --update-goldens test/account_profile_golden_test.dart
+
+      - name: Run customer tests
+        working-directory: apps/customer
+        run: flutter test
+
+      - name: Commit lockfile, formatting, and golden
+        run: |
+          if git status --porcelain apps/customer | grep . >/dev/null; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add apps/customer
+            git commit -m "chore: resolve auth UI dependencies and golden"
+            git push
+          else
+            echo "No generated changes."
+          fi
