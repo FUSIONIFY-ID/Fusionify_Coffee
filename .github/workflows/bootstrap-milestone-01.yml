@@ -2,6 +2,7 @@ name: Bootstrap Milestone 0.1
 
 # Re-runnable bootstrap also normalizes generated Dart formatting.
 # Used for the API-backed Material 3 foundation validation pass.
+# Rerun after strict analyzer cleanup.
 
 on:
   push:
