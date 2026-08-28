@@ -6,19 +6,74 @@ import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
 import '../../cart/application/cart_controller.dart';
 import '../../cart/domain/cart_item.dart';
+import '../../catalog/application/catalog_provider.dart';
 import '../../catalog/domain/catalog_models.dart';
+import '../../shared/presentation/catalog_states.dart';
 
-class ProductDetailScreen extends ConsumerStatefulWidget {
-  const ProductDetailScreen({super.key, required this.product});
+class ProductDetailScreen extends ConsumerWidget {
+  const ProductDetailScreen({
+    super.key,
+    required this.productId,
+  });
+
+  final String productId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final catalog = ref.watch(catalogProvider);
+
+    return catalog.when(
+      data: (snapshot) {
+        Product? product;
+        for (final item in snapshot.products) {
+          if (item.id == productId) {
+            product = item;
+            break;
+          }
+        }
+
+        if (product == null) {
+          return const Scaffold(
+            body: SafeArea(
+              child: Center(child: Text('Produk tidak ditemukan.')),
+            ),
+          );
+        }
+
+        return _ProductDetailContent(product: product);
+      },
+      loading: () => const Scaffold(
+        body: SafeArea(
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+      error: (_, _) => Scaffold(
+        appBar: AppBar(),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(CoffeeSpacing.md),
+            child: CatalogErrorState(
+              onRetry: () => ref.invalidate(catalogProvider),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProductDetailContent extends ConsumerStatefulWidget {
+  const _ProductDetailContent({required this.product});
 
   final Product product;
 
   @override
-  ConsumerState<ProductDetailScreen> createState() =>
-      _ProductDetailScreenState();
+  ConsumerState<_ProductDetailContent> createState() =>
+      _ProductDetailContentState();
 }
 
-class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
+class _ProductDetailContentState
+    extends ConsumerState<_ProductDetailContent> {
   late final Map<String, Set<String>> _selection;
   int _quantity = 1;
 
@@ -84,9 +139,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   void _addToCart() {
-    ref
-        .read(cartProvider.notifier)
-        .add(
+    ref.read(cartProvider.notifier).add(
           CartItem.fromProduct(
             product: widget.product,
             selectedOptions: _selectedOptions,
@@ -110,11 +163,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final product = widget.product;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(product.name),
-        backgroundColor: CoffeeColors.background,
-        surfaceTintColor: Colors.transparent,
-      ),
+      appBar: AppBar(title: Text(product.name)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           CoffeeSpacing.md,

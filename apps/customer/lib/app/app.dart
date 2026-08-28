@@ -12,6 +12,7 @@ class FusionifyCoffeeApp extends StatelessWidget {
       title: 'Fusionify Coffee',
       debugShowCheckedModeBanner: false,
       theme: buildFusionifyCoffeeTheme(),
+      themeMode: ThemeMode.light,
       routerConfig: appRouter,
     );
   }

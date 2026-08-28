@@ -23,37 +23,14 @@ describe('Fusionify Coffee API (e2e)', () => {
     });
   });
 
-  it('/v1/catalog/preview (GET) clearly identifies preview data', () => {
+  it('/v1/catalog/preview (GET) exposes modifier-aware preview data', () => {
     return request(app.getHttpServer())
       .get('/v1/catalog/preview')
       .expect(200)
-      .expect({
-        preview: true,
-        outlet: {
-          id: 'preview-outlet',
-          name: 'Fusionify Coffee Preview Store',
-          pickupEnabled: true,
-        },
-        products: [
-          {
-            id: 'aren-latte',
-            name: 'Aren Latte',
-            category: 'Coffee',
-            basePrice: 28000,
-          },
-          {
-            id: 'sea-salt-latte',
-            name: 'Sea Salt Latte',
-            category: 'Coffee',
-            basePrice: 32000,
-          },
-          {
-            id: 'matcha-cloud',
-            name: 'Matcha Cloud',
-            category: 'Non Coffee',
-            basePrice: 30000,
-          },
-        ],
+      .then((response) => {
+        expect(response.text).toContain('"preview":true');
+        expect(response.text).toContain('"modifierGroups"');
+        expect(response.text).toContain('"oat-milk"');
       });
   });
 

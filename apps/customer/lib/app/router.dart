@@ -3,8 +3,6 @@ import 'package:go_router/go_router.dart';
 
 import '../features/account/presentation/account_screen.dart';
 import '../features/cart/presentation/cart_screen.dart';
-import '../features/catalog/data/demo_catalog.dart';
-import '../features/catalog/domain/catalog_models.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/menu/presentation/menu_screen.dart';
 import '../features/orders/presentation/orders_screen.dart';
@@ -28,26 +26,9 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/product/:productId',
-      builder: (context, state) {
-        final productId = state.pathParameters['productId'];
-        Product? product;
-        for (final item in demoProducts) {
-          if (item.id == productId) {
-            product = item;
-            break;
-          }
-        }
-
-        if (product == null) {
-          return const Scaffold(
-            body: SafeArea(
-              child: Center(child: Text('Produk tidak ditemukan.')),
-            ),
-          );
-        }
-
-        return ProductDetailScreen(product: product);
-      },
+      builder: (context, state) => ProductDetailScreen(
+        productId: state.pathParameters['productId'] ?? '',
+      ),
     ),
     GoRoute(path: '/cart', builder: (_, _) => const CartScreen()),
   ],
