@@ -4,8 +4,12 @@ import '../features/account/presentation/account_screen.dart';
 import '../features/account/presentation/language_screen.dart';
 import '../features/account/presentation/personal_information_screen.dart';
 import '../features/account/presentation/security_screen.dart';
+import '../features/account/presentation/change_phone_screen.dart';
+import '../features/account/presentation/active_sessions_screen.dart';
+import '../features/account/presentation/delete_account_screen.dart';
 import '../features/auth/presentation/complete_profile_screen.dart';
 import '../features/auth/presentation/login_screen.dart';
+import '../features/auth/presentation/forgot_password_screen.dart';
 import '../features/auth/presentation/otp_verification_screen.dart';
 import '../features/auth/presentation/register_phone_screen.dart';
 import '../features/cart/presentation/cart_screen.dart';
@@ -59,6 +63,10 @@ final appRouter = GoRouter(
     ),
     GoRoute(path: '/auth/login', builder: (_, _) => const LoginScreen()),
     GoRoute(
+      path: '/auth/forgot-password',
+      builder: (_, _) => const ForgotPasswordScreen(),
+    ),
+    GoRoute(
       path: '/account/language',
       builder: (_, _) => const LanguageScreen(),
     ),
@@ -69,6 +77,18 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/account/security',
       builder: (_, _) => const SecurityScreen(),
+    ),
+    GoRoute(
+      path: '/account/change-phone',
+      builder: (_, _) => const ChangePhoneScreen(),
+    ),
+    GoRoute(
+      path: '/account/sessions',
+      builder: (_, _) => const ActiveSessionsScreen(),
+    ),
+    GoRoute(
+      path: '/account/delete',
+      builder: (_, _) => const DeleteAccountScreen(),
     ),
   ],
 );

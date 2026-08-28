@@ -402,6 +402,88 @@ class AppStrings {
     'Menunggu pembayaran',
     'Waiting for payment',
   );
+
+  String get forgotPassword =>
+      _pick('Lupa password?', 'Lupa kata laluan?', 'Forgot password?');
+  String get resetPassword =>
+      _pick('Reset password', 'Tetapkan semula kata laluan', 'Reset password');
+  String get newPassword =>
+      _pick('Password baru', 'Kata laluan baharu', 'New password');
+  String get passwordResetComplete => _pick(
+    'Password sudah diubah. Silakan masuk lagi.',
+    'Kata laluan telah diubah. Sila log masuk semula.',
+    'Password updated. Please log in again.',
+  );
+  String get requestCode =>
+      _pick('Kirim kode', 'Hantar kod', 'Send code');
+  String get changePhone =>
+      _pick('Ganti nomor HP', 'Tukar nombor telefon', 'Change phone number');
+  String get newPhoneNumber =>
+      _pick('Nomor HP baru', 'Nombor telefon baharu', 'New phone number');
+  String get phoneChanged => _pick(
+    'Nomor HP berhasil diperbarui.',
+    'Nombor telefon berjaya dikemas kini.',
+    'Phone number updated.',
+  );
+  String get activeDevices =>
+      _pick('Perangkat aktif', 'Peranti aktif', 'Active devices');
+  String get currentDevice =>
+      _pick('Perangkat ini', 'Peranti ini', 'This device');
+  String get revokeSession =>
+      _pick('Keluar dari perangkat', 'Log keluar peranti', 'Sign out device');
+  String get noActiveSessions => _pick(
+    'Tidak ada sesi aktif lainnya.',
+    'Tiada sesi aktif lain.',
+    'No other active sessions.',
+  );
+  String get deleteAccount =>
+      _pick('Hapus akun', 'Padam akaun', 'Delete account');
+  String get deleteAccountWarning => _pick(
+    'Akun akan dinonaktifkan dan data identitas utama dianonimkan. Riwayat transaksi yang wajib disimpan tetap dipertahankan secara terpisah.',
+    'Akaun akan dinyahaktifkan dan data identiti utama dianonimkan. Rekod transaksi yang perlu disimpan kekal dipertahankan secara berasingan.',
+    'Your account will be deactivated and primary identity data anonymized. Required transaction records remain separately retained.',
+  );
+  String get verifyDeletion =>
+      _pick('Verifikasi penghapusan', 'Sahkan pemadaman', 'Verify deletion');
+  String get deletePermanently =>
+      _pick('Hapus akun saya', 'Padam akaun saya', 'Delete my account');
+  String get accountDeleted => _pick(
+    'Akun berhasil dihapus.',
+    'Akaun berjaya dipadam.',
+    'Account deleted.',
+  );
+  String get sessionLoadFailed => _pick(
+    'Perangkat aktif belum bisa dimuat.',
+    'Peranti aktif belum dapat dimuatkan.',
+    'Active devices could not be loaded.',
+  );
+  String get orderHistoryLoadFailed => _pick(
+    'Riwayat pesanan belum bisa dimuat.',
+    'Sejarah pesanan belum dapat dimuatkan.',
+    'Order history could not be loaded.',
+  );
+  String get signInToSeeOrders => _pick(
+    'Masuk untuk melihat riwayat pesanan.',
+    'Log masuk untuk melihat sejarah pesanan.',
+    'Log in to see your order history.',
+  );
+  String itemsCount(int count) =>
+      _pick('$count item', '$count item', '$count items');
+  String get orderStatusAwaitingPayment =>
+      _pick('Menunggu pembayaran', 'Menunggu pembayaran', 'Awaiting payment');
+  String get orderStatusConfirmed =>
+      _pick('Dikonfirmasi', 'Disahkan', 'Confirmed');
+  String get orderStatusPreparing =>
+      _pick('Sedang disiapkan', 'Sedang disediakan', 'Preparing');
+  String get orderStatusReady =>
+      _pick('Siap diambil', 'Sedia diambil', 'Ready for pickup');
+  String get orderStatusPickedUp =>
+      _pick('Sudah diambil', 'Sudah diambil', 'Picked up');
+  String get orderStatusCompleted =>
+      _pick('Selesai', 'Selesai', 'Completed');
+  String get orderStatusCancelled =>
+      _pick('Dibatalkan', 'Dibatalkan', 'Cancelled');
+
 }
 
 extension AppStringsContext on BuildContext {

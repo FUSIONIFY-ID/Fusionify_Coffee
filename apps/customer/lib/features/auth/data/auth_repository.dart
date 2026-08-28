@@ -15,6 +15,7 @@ class AuthRepository {
     required String phone,
     required String channel,
     required AppLanguage language,
+    String purpose = 'REGISTER',
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       '/v1/auth/otp/request',
@@ -23,7 +24,7 @@ class AuthRepository {
         'phone': phone,
         'channel': channel,
         'language': language.apiValue,
-        'purpose': 'REGISTER',
+        'purpose': purpose,
       },
     );
 
@@ -99,6 +100,110 @@ class AuthRepository {
       }
       rethrow;
     }
+  }
+
+  Future<void> resetPassword({
+    required String challengeId,
+    required String verificationToken,
+    required String newPassword,
+  }) async {
+    await _dio.post<void>(
+      '/v1/auth/reset-password',
+      data: {
+        'challengeId': challengeId,
+        'verificationToken': verificationToken,
+        'newPassword': newPassword,
+      },
+    );
+    await _store.clearSession();
+  }
+
+  Future<OtpChallengeView> requestChangePhoneOtp({
+    required String country,
+    required String phone,
+    required String channel,
+    required AppLanguage language,
+  }) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/v1/account/change-phone/request-otp',
+      data: {
+        'country': country,
+        'phone': phone,
+        'channel': channel,
+        'language': language.apiValue,
+      },
+    );
+    return OtpChallengeView.fromJson(_requireData(response));
+  }
+
+  Future<CustomerProfile> confirmChangePhone({
+    required String challengeId,
+    required String verificationToken,
+  }) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/v1/account/change-phone/confirm',
+      data: {
+        'challengeId': challengeId,
+        'verificationToken': verificationToken,
+      },
+    );
+    return CustomerProfile.fromJson(_requireData(response));
+  }
+
+  Future<OtpChallengeView> requestDeleteAccountOtp({
+    required String channel,
+    required AppLanguage language,
+  }) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/v1/account/delete/request-otp',
+      data: {
+        'channel': channel,
+        'language': language.apiValue,
+      },
+    );
+    return OtpChallengeView.fromJson(_requireData(response));
+  }
+
+  Future<void> confirmDeleteAccount({
+    required String challengeId,
+    required String verificationToken,
+  }) async {
+    try {
+      await _dio.post<void>(
+        '/v1/account/delete/confirm',
+        data: {
+          'challengeId': challengeId,
+          'verificationToken': verificationToken,
+        },
+      );
+    } finally {
+      await _store.clearSession();
+    }
+  }
+
+  Future<List<AccountSessionView>> listSessions() async {
+    final response = await _dio.get<List<dynamic>>('/v1/account/sessions');
+    final data = response.data ?? const <dynamic>[];
+    return data
+        .whereType<Map>()
+        .map(
+          (entry) => AccountSessionView.fromJson(
+            Map<String, dynamic>.from(entry),
+          ),
+        )
+        .toList();
+  }
+
+  Future<bool> revokeSession(String sessionId) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/v1/account/sessions/' + sessionId + '/revoke',
+    );
+    final revokedCurrent =
+        response.data?['currentSessionRevoked'] as bool? ?? false;
+    if (revokedCurrent) {
+      await _store.clearSession();
+    }
+    return revokedCurrent;
   }
 
   Future<CustomerProfile> updateLanguage(AppLanguage language) async {

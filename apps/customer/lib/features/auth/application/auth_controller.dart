@@ -23,6 +23,10 @@ class AuthController extends AsyncNotifier<CustomerProfile?> {
     state = AsyncData(profile);
   }
 
+  Future<void> setUnauthenticated() async {
+    state = const AsyncData(null);
+  }
+
   Future<void> syncLanguage(AppLanguage language) async {
     final current = state.value;
     if (current == null) {

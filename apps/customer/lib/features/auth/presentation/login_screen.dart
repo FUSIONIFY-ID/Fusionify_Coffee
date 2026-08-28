@@ -127,7 +127,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             onPressed: _submitting ? null : _submit,
             child: Text(strings.login),
           ),
-          const SizedBox(height: CoffeeSpacing.sm),
+          const SizedBox(height: CoffeeSpacing.xs),
+          TextButton(
+            onPressed: () => context.push('/auth/forgot-password'),
+            child: Text(strings.forgotPassword),
+          ),
+          const SizedBox(height: CoffeeSpacing.xs),
           TextButton(
             onPressed: () => context.push('/auth/register'),
             child: Text(strings.createAccount),

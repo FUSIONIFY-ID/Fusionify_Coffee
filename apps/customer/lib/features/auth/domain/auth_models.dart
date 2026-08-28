@@ -118,3 +118,40 @@ class AuthSessionView {
   final String accessToken;
   final String refreshToken;
 }
+
+
+class AccountSessionView {
+  const AccountSessionView({
+    required this.id,
+    required this.isCurrent,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.refreshExpiresAt,
+    this.deviceName,
+    this.platform,
+  });
+
+  factory AccountSessionView.fromJson(Map<String, dynamic> json) {
+    return AccountSessionView(
+      id: json['id'] as String? ?? '',
+      isCurrent: json['isCurrent'] as bool? ?? false,
+      createdAt:
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime(2026),
+      updatedAt:
+          DateTime.tryParse(json['updatedAt'] as String? ?? '') ?? DateTime(2026),
+      refreshExpiresAt:
+          DateTime.tryParse(json['refreshExpiresAt'] as String? ?? '') ??
+          DateTime(2026),
+      deviceName: json['deviceName'] as String?,
+      platform: json['platform'] as String?,
+    );
+  }
+
+  final String id;
+  final bool isCurrent;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime refreshExpiresAt;
+  final String? deviceName;
+  final String? platform;
+}
