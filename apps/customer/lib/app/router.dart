@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../features/account/presentation/account_screen.dart';
 import '../features/cart/presentation/cart_screen.dart';
 import '../features/catalog/data/demo_catalog.dart';
+import '../features/catalog/domain/catalog_models.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/menu/presentation/menu_screen.dart';
 import '../features/orders/presentation/orders_screen.dart';
