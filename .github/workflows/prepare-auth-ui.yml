@@ -5,6 +5,7 @@ name: Prepare Auth UI
 # Includes authenticated checkout ownership tests.
 # Includes constant-time auth hash checks.
 # Final rerun after Dart syntax correction.
+# Final rerun after analyzer deprecation cleanup.
 
 on:
   push:
