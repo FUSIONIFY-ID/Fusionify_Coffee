@@ -3,6 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
+import { hashOtp } from './../src/auth/crypto.util';
+import { PrismaService } from './../src/database/prisma.service';
 
 type OrderResponse = {
   id: string;
@@ -14,12 +16,14 @@ type OrderResponse = {
 
 describe('Fusionify Coffee API (e2e)', () => {
   let app: INestApplication<App>;
+  let prisma: PrismaService;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
+    prisma = moduleFixture.get<PrismaService>(PrismaService);
     app = moduleFixture.createNestApplication({ rawBody: true });
     await app.init();
   });
@@ -43,6 +47,64 @@ describe('Fusionify Coffee API (e2e)', () => {
         );
         expect(response.text).toContain('"Oat Milk"');
       });
+  });
+
+  it('registers a verified Indonesian customer and restores profile', async () => {
+    const phone = `0812${Date.now().toString().slice(-7)}`;
+
+    const requested = await request(app.getHttpServer())
+      .post('/v1/auth/otp/request')
+      .send({
+        country: 'ID',
+        phone,
+        channel: 'WHATSAPP',
+        language: 'ID_ID',
+        purpose: 'REGISTER',
+      })
+      .expect(201);
+
+    const challengeId = requested.body.challengeId as string;
+    const challenge = await prisma.otpChallenge.findUniqueOrThrow({
+      where: { id: challengeId },
+    });
+
+    await prisma.otpChallenge.update({
+      where: { id: challengeId },
+      data: {
+        codeHash: hashOtp(challenge.phoneE164, 'REGISTER', '123456'),
+      },
+    });
+
+    const verified = await request(app.getHttpServer())
+      .post('/v1/auth/otp/verify')
+      .send({
+        challengeId,
+        code: '123456',
+      })
+      .expect(201);
+
+    const registered = await request(app.getHttpServer())
+      .post('/v1/auth/register')
+      .send({
+        challengeId,
+        verificationToken: verified.body.verificationToken as string,
+        fullName: 'Fusionify Test User',
+        password: 'Fusionify-2026',
+        preferredLanguage: 'ID_ID',
+      })
+      .expect(201);
+
+    const accessToken = registered.body.accessToken as string;
+
+    const profile = await request(app.getHttpServer())
+      .get('/v1/account/me')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+
+    expect(profile.body.fullName).toBe('Fusionify Test User');
+    expect(profile.body.phoneCountry).toBe('ID');
+    expect(profile.body.phoneVerified).toBe(true);
+    expect(profile.body.preferredLanguage).toBe('ID_ID');
   });
 
   it('/v1/orders (POST) prices the cart on the server idempotently', async () => {
