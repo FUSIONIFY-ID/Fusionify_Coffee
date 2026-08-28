@@ -1,0 +1,37 @@
+name: Add QR Flutter Dependency
+
+on:
+  push:
+    paths:
+      - ".github/workflows/add-qr-flutter.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  dependency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.0"
+          channel: stable
+          cache: true
+
+      - name: Add qr_flutter
+        working-directory: apps/customer
+        run: flutter pub add qr_flutter:^4.1.0
+
+      - name: Commit dependency lock
+        run: |
+          if git status --porcelain apps/customer/pubspec.yaml apps/customer/pubspec.lock | grep . >/dev/null; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add apps/customer/pubspec.yaml apps/customer/pubspec.lock
+            git commit -m "chore: add qr_flutter dependency"
+            git push
+          else
+            echo "qr_flutter already present."
+          fi
