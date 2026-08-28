@@ -1,0 +1,124 @@
+name: Bootstrap Milestone 0.1
+
+on:
+  push:
+    paths:
+      - ".github/workflows/bootstrap-milestone-01.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.0"
+          channel: stable
+          cache: true
+
+      - name: Scaffold customer app
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f apps/customer/pubspec.yaml ]; then
+            mkdir -p apps
+            flutter create               --platforms=android,ios               --org id.fusionify               --project-name coffee               apps/customer
+
+            sed -i 's/^name: coffee$/name: fusionify_coffee/' apps/customer/pubspec.yaml
+            grep -RIl 'package:coffee/' apps/customer/lib apps/customer/test 2>/dev/null               | xargs -r sed -i 's/package:coffee\//package:fusionify_coffee\//g'
+
+            sed -i 's/android:label="coffee"/android:label="Fusionify Coffee"/'               apps/customer/android/app/src/main/AndroidManifest.xml
+
+            python3 - <<'PY'
+          from pathlib import Path
+          plist = Path("apps/customer/ios/Runner/Info.plist")
+          text = plist.read_text()
+          text = text.replace(
+              "<key>CFBundleDisplayName</key>\n\t<string>coffee</string>",
+              "<key>CFBundleDisplayName</key>\n\t<string>Fusionify Coffee</string>",
+          )
+          plist.write_text(text)
+          PY
+          fi
+
+          cd apps/customer
+          flutter pub add flutter_riverpod:^3.4.2
+          flutter pub add go_router:^18.0.0
+          flutter pub add dio:^5.11.0
+
+      - name: Apply Android API baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          file="apps/customer/android/app/build.gradle.kts"
+
+          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' "$file"
+          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 28/' "$file"
+          sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 36/' "$file"
+
+      - name: Set up Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: services/api/package-lock.json
+
+      - name: Scaffold NestJS API
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f services/api/package.json ]; then
+            mkdir -p services
+            cd services
+            npx --yes @nestjs/cli@11.0.24 new api               --package-manager npm               --skip-git               --strict
+
+            cd api
+            npm install @prisma/client@7.10.0
+            npm install --save-dev prisma@7.10.0
+            npx prisma init --datasource-provider postgresql
+          fi
+
+      - name: Record toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '24\n' > .nvmrc
+          cat > .tool-versions <<'EOF'
+          nodejs 24
+          flutter 3.47.0
+          EOF
+
+      - name: Validate generated foundations
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd apps/customer
+          dart format --output=none --set-exit-if-changed lib test
+          flutter analyze
+          flutter test
+
+          cd ../../services/api
+          npm run lint
+          npm test -- --runInBand
+          npm run build
+
+      - name: Commit scaffold
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git status --porcelain | grep . >/dev/null; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .
+            git commit -m "feat: scaffold Flutter customer app and NestJS API"
+            git push
+          else
+            echo "No scaffold changes to commit."
+          fi
