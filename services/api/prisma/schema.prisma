@@ -1,6 +1,6 @@
 generator client {
-  provider     = "prisma-client"
-  output       = "../src/generated/prisma"
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
   moduleFormat        = "cjs"
   importFileExtension = ""
 }
@@ -9,12 +9,42 @@ datasource db {
   provider = "postgresql"
 }
 
+enum OrderStatus {
+  AWAITING_PAYMENT
+  CONFIRMED
+  PREPARING
+  READY
+  PICKED_UP
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  EXPIRED
+  CANCELLED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  AUTOGOPAY
+}
+
+enum PaymentChannel {
+  GOPAY_QRIS
+  SHOPEEPAY_QRIS
+  INTERACTIVE_QRIS
+}
+
 model Outlet {
   id              String   @id
   name            String
   note            String   @default("")
   pickupEnabled   Boolean  @default(true)
   deliveryEnabled Boolean  @default(false)
+  orders          Order[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -38,6 +68,7 @@ model Product {
   categoryId     String
   category       Category        @relation(fields: [categoryId], references: [id])
   modifierGroups ModifierGroup[]
+  orderItems     OrderItem[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 }
@@ -66,4 +97,66 @@ model ModifierOption {
   sortOrder       Int           @default(0)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  checkoutKey    String      @unique
+  outletId       String
+  outlet         Outlet      @relation(fields: [outletId], references: [id])
+  status         OrderStatus @default(AWAITING_PAYMENT)
+  currency       String      @default("IDR")
+  subtotal       Int
+  totalAmount    Int
+  items          OrderItem[]
+  payments       Payment[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([outletId, status])
+}
+
+model OrderItem {
+  id                String   @id @default(cuid())
+  orderId           String
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId         String
+  product           Product  @relation(fields: [productId], references: [id])
+  productName       String
+  basePrice         Int
+  unitPrice         Int
+  quantity          Int
+  lineTotal         Int
+  selectedModifiers Json
+  createdAt         DateTime @default(now())
+
+  @@index([orderId])
+}
+
+model Payment {
+  id                    String          @id @default(cuid())
+  idempotencyKey        String          @unique
+  orderId               String
+  order                 Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider              PaymentProvider
+  channel               PaymentChannel
+  status                PaymentStatus   @default(PENDING)
+  amount                Int
+  currency              String          @default("IDR")
+  providerTransactionId String?         @unique
+  providerOrderId       String?
+  providerOrderSn       String?
+  providerInvoiceId     String?
+  providerRefNo         String?
+  providerRawStatus     String?
+  providerQrString      String?
+  providerQrUrl         String?
+  providerCheckoutUrl   String?
+  providerExpiryTime    String?
+  paidAt                DateTime?
+  cancelledAt           DateTime?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  @@index([orderId, status])
 }

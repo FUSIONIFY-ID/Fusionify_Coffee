@@ -12,7 +12,7 @@ describe('Fusionify Coffee API (e2e)', () => {
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication({ rawBody: true });
     await app.init();
   });
 
@@ -35,6 +35,63 @@ describe('Fusionify Coffee API (e2e)', () => {
         );
         expect(response.text).toContain('"Oat Milk"');
       });
+  });
+
+  it('/v1/orders (POST) prices the cart on the server idempotently', async () => {
+    const checkoutKey = `checkout-e2e-${Date.now()}`;
+    const body = {
+      outletId: 'preview-outlet',
+      items: [
+        {
+          productId: 'aren-latte',
+          quantity: 2,
+          modifierOptionIds: [
+            'aren-latte-size-regular',
+            'aren-latte-temperature-iced',
+            'aren-latte-sugar-sugar-50',
+            'aren-latte-ice-normal-ice',
+            'aren-latte-milk-fresh-milk',
+          ],
+        },
+      ],
+    };
+
+    const created = await request(app.getHttpServer())
+      .post('/v1/orders')
+      .set('Idempotency-Key', checkoutKey)
+      .send(body)
+      .expect(201);
+
+    expect(created.body.status).toBe('AWAITING_PAYMENT');
+    expect(created.body.subtotal).toBe(56000);
+    expect(created.body.totalAmount).toBe(56000);
+    expect(created.body.items).toHaveLength(1);
+    expect(created.body.items[0].unitPrice).toBe(28000);
+
+    const repeated = await request(app.getHttpServer())
+      .post('/v1/orders')
+      .set('Idempotency-Key', checkoutKey)
+      .send(body)
+      .expect(201);
+
+    expect(repeated.body.id).toBe(created.body.id);
+  });
+
+  it('/v1/orders (POST) rejects missing required modifiers', async () => {
+    await request(app.getHttpServer())
+      .post('/v1/orders')
+      .set('Idempotency-Key', `invalid-e2e-${Date.now()}`)
+      .send({
+        outletId: 'preview-outlet',
+        items: [
+          {
+            productId: 'aren-latte',
+            quantity: 1,
+            modifierOptionIds: [],
+          },
+        ],
+      })
+      .expect(400);
   });
 
   afterEach(async () => {
