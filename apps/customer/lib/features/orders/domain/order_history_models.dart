@@ -81,8 +81,9 @@ class CustomerOrderDetail {
       statusEvents: rawEvents
           .whereType<Map>()
           .map(
-            (event) =>
-                CustomerOrderStatusEvent.fromJson(Map<String, dynamic>.from(event)),
+            (event) => CustomerOrderStatusEvent.fromJson(
+              Map<String, dynamic>.from(event),
+            ),
           )
           .toList(),
       paymentStatus: rawPayments.isEmpty

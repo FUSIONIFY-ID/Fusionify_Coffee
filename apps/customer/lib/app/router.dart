@@ -47,9 +47,8 @@ final appRouter = GoRouter(
     GoRoute(path: '/checkout', builder: (_, _) => const CheckoutScreen()),
     GoRoute(
       path: '/orders/:orderId',
-      builder: (context, state) => OrderDetailScreen(
-        orderId: state.pathParameters['orderId'] ?? '',
-      ),
+      builder: (context, state) =>
+          OrderDetailScreen(orderId: state.pathParameters['orderId'] ?? ''),
     ),
     GoRoute(
       path: '/payment/:paymentId',

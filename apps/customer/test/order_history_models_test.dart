@@ -16,11 +16,7 @@ void main() {
           'quantity': 1,
           'lineTotal': 33000,
           'selectedModifiers': [
-            {
-              'groupName': 'Size',
-              'optionName': 'Large',
-              'priceDelta': 5000,
-            },
+            {'groupName': 'Size', 'optionName': 'Large', 'priceDelta': 5000},
           ],
         },
       ],

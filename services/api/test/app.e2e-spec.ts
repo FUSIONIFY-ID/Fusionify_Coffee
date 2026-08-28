@@ -398,8 +398,7 @@ describe('Fusionify Coffee API (e2e)', () => {
       .set('Authorization', `Bearer ${barista.accessToken}`)
       .send({ toStatus: 'PREPARING', note: 'Started by barista.' })
       .expect(201);
-    const preparing =
-      preparingResponse.body as unknown as StaffOrderResponse;
+    const preparing = preparingResponse.body as unknown as StaffOrderResponse;
 
     expect(preparing.status).toBe('PREPARING');
 

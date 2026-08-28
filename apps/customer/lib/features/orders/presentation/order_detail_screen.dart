@@ -41,9 +41,11 @@ class OrderDetailScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(CoffeeSpacing.md),
                   child: Column(
                     children: [
-                      for (var index = 0;
-                          index < value.items.length;
-                          index++) ...[
+                      for (
+                        var index = 0;
+                        index < value.items.length;
+                        index++
+                      ) ...[
                         _OrderItemRow(item: value.items[index]),
                         if (index < value.items.length - 1) const Divider(),
                       ],
@@ -58,9 +60,7 @@ class OrderDetailScreen extends ConsumerWidget {
                           ),
                           Text(
                             formatRupiah(value.totalAmount),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
+                            style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(fontWeight: FontWeight.w800),
                           ),
                         ],
@@ -100,8 +100,9 @@ class _OrderHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
-    final shortId =
-        order.id.length > 8 ? order.id.substring(order.id.length - 8) : order.id;
+    final shortId = order.id.length > 8
+        ? order.id.substring(order.id.length - 8)
+        : order.id;
 
     return Card(
       child: Padding(
@@ -197,10 +198,7 @@ class _OrderTimeline extends StatelessWidget {
           padding: const EdgeInsets.all(CoffeeSpacing.md),
           child: Row(
             children: [
-              const Icon(
-                Icons.schedule_outlined,
-                color: CoffeeColors.primary,
-              ),
+              const Icon(Icons.schedule_outlined, color: CoffeeColors.primary),
               const SizedBox(width: CoffeeSpacing.sm),
               Expanded(
                 child: Text(
@@ -273,9 +271,7 @@ class _TimelineRow extends StatelessWidget {
           const SizedBox(width: CoffeeSpacing.sm),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(
-                bottom: isLast ? 0 : CoffeeSpacing.md,
-              ),
+              padding: EdgeInsets.only(bottom: isLast ? 0 : CoffeeSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

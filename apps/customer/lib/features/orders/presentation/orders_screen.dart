@@ -121,49 +121,49 @@ class _OrderCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-        padding: const EdgeInsets.all(CoffeeSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    order.outletName,
-                    style: Theme.of(context).textTheme.titleMedium,
+          padding: const EdgeInsets.all(CoffeeSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      order.outletName,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                   ),
-                ),
-                _StatusChip(
-                  label: localizedOrderStatus(strings, order.status),
-                  status: order.status,
-                ),
-              ],
-            ),
-            const SizedBox(height: CoffeeSpacing.xs),
-            Text(
-              firstItems.isEmpty
-                  ? strings.itemsCount(order.items.length)
-                  : firstItems,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: CoffeeSpacing.sm),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _formatDate(order.createdAt),
-                    style: Theme.of(context).textTheme.bodySmall,
+                  _StatusChip(
+                    label: localizedOrderStatus(strings, order.status),
+                    status: order.status,
                   ),
-                ),
-                Text(
-                  formatRupiah(order.totalAmount),
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: CoffeeSpacing.xs),
+              Text(
+                firstItems.isEmpty
+                    ? strings.itemsCount(order.items.length)
+                    : firstItems,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: CoffeeSpacing.sm),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _formatDate(order.createdAt),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                  Text(
+                    formatRupiah(order.totalAmount),
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
