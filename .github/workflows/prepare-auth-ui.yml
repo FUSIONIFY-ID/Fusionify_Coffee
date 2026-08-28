@@ -3,6 +3,7 @@ name: Prepare Auth UI
 # Latest auth/e2e checkpoint.
 # Includes localized navigation + OTP input fix.
 # Includes authenticated checkout ownership tests.
+# Includes constant-time auth hash checks.
 
 on:
   push:
