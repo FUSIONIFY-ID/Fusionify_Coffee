@@ -2,9 +2,11 @@ import 'package:go_router/go_router.dart';
 
 import '../features/account/presentation/account_screen.dart';
 import '../features/cart/presentation/cart_screen.dart';
+import '../features/checkout/presentation/checkout_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/menu/presentation/menu_screen.dart';
 import '../features/orders/presentation/orders_screen.dart';
+import '../features/payment/presentation/payment_screen.dart';
 import '../features/product/presentation/product_detail_screen.dart';
 import '../features/rewards/presentation/rewards_screen.dart';
 import '../features/shell/presentation/app_shell.dart';
@@ -30,5 +32,12 @@ final appRouter = GoRouter(
       ),
     ),
     GoRoute(path: '/cart', builder: (_, _) => const CartScreen()),
+    GoRoute(path: '/checkout', builder: (_, _) => const CheckoutScreen()),
+    GoRoute(
+      path: '/payment/:paymentId',
+      builder: (context, state) => PaymentScreen(
+        paymentId: state.pathParameters['paymentId'] ?? '',
+      ),
+    ),
   ],
 );

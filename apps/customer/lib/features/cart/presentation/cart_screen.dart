@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
@@ -14,11 +15,7 @@ class CartScreen extends ConsumerWidget {
     final subtotal = ref.watch(cartSubtotalProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cart'),
-        backgroundColor: CoffeeColors.background,
-        surfaceTintColor: Colors.transparent,
-      ),
+      appBar: AppBar(title: const Text('Cart')),
       body: items.isEmpty
           ? const _EmptyCart()
           : ListView.separated(
@@ -62,6 +59,7 @@ class CartScreen extends ConsumerWidget {
                           ),
                         ),
                         IconButton(
+                          tooltip: 'Remove',
                           onPressed: () => ref
                               .read(cartProvider.notifier)
                               .remove(item.signature),
@@ -114,7 +112,7 @@ class CartScreen extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        const Expanded(child: Text('Subtotal')),
+                        const Expanded(child: Text('Estimated subtotal')),
                         Text(
                           formatRupiah(subtotal),
                           style: const TextStyle(fontWeight: FontWeight.w700),
@@ -122,9 +120,9 @@ class CartScreen extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: CoffeeSpacing.sm),
-                    const FilledButton(
-                      onPressed: null,
-                      child: Text('Checkout · Milestone 0.2'),
+                    FilledButton(
+                      onPressed: () => context.push('/checkout'),
+                      child: const Text('Checkout'),
                     ),
                   ],
                 ),
