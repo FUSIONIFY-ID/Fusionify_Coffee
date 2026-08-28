@@ -39,6 +39,20 @@ Home
 - no gradients
 - no dynamic recoloring that overrides Fusionify brand
 
+## Account Lifecycle
+
+Implemented customer account features:
+- Indonesia (+62) and Malaysia (+60) phone identity
+- WhatsApp/SMS OTP abstraction
+- password login
+- automatic access-token refresh with refresh-token rotation
+- forgot/reset password by OTP code
+- change verified phone number by OTP
+- active device/session list
+- revoke session / log out all devices
+- account deletion with OTP verification and identity anonymization
+- authenticated order history
+
 ## Checkout
 
 Cart subtotal is an estimate for display.
