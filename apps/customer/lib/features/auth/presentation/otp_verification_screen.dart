@@ -156,6 +156,7 @@ class _OtpVerificationScreenState
               labelText: strings.otpCode,
               counterText: '',
             ),
+            onChanged: (_) => setState(() {}),
             onSubmitted: (_) {
               if (_codeController.text.length == 6) {
                 _verify();
