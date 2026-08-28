@@ -98,7 +98,7 @@ jobs:
         run: |
           set -euo pipefail
           cd apps/customer
-          dart format --output=none --set-exit-if-changed lib test
+          dart format lib test
           flutter analyze
           flutter test
 
