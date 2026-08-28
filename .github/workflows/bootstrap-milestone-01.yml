@@ -1,5 +1,7 @@
 name: Bootstrap Milestone 0.1
 
+# Re-runnable bootstrap also normalizes generated Dart formatting.
+
 on:
   push:
     paths:
