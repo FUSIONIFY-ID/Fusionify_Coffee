@@ -262,7 +262,7 @@ class _TimelineRow extends StatelessWidget {
                       margin: const EdgeInsets.symmetric(
                         vertical: CoffeeSpacing.xxs,
                       ),
-                      color: CoffeeColors.outline,
+                      color: CoffeeColors.border,
                     ),
                   ),
               ],
