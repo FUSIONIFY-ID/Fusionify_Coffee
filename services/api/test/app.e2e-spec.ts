@@ -118,10 +118,7 @@ describe('Fusionify Coffee API (e2e)', () => {
     await app.init();
   });
 
-  async function createAndLoginStaff(
-    role: StaffRole,
-    outletId?: string,
-  ) {
+  async function createAndLoginStaff(role: StaffRole, outletId?: string) {
     userSequence += 1;
     const email = `staff-${Date.now()}-${userSequence}@example.com`;
     const password = 'Fusionify-Staff-2026';
@@ -325,8 +322,7 @@ describe('Fusionify Coffee API (e2e)', () => {
       })
       .expect(201);
 
-    const created =
-      createdResponse.body as unknown as StaffUserViewResponse;
+    const created = createdResponse.body as unknown as StaffUserViewResponse;
     expect(created.role).toBe('CASHIER');
     expect(created.status).toBe('ACTIVE');
     expect(created.outletId).toBe('preview-outlet');
@@ -337,8 +333,7 @@ describe('Fusionify Coffee API (e2e)', () => {
       .set('Authorization', `Bearer ${admin.accessToken}`)
       .expect(200);
 
-    const staffList =
-      listResponse.body as unknown as StaffUserViewResponse[];
+    const staffList = listResponse.body as unknown as StaffUserViewResponse[];
     expect(staffList.some((staff) => staff.id === created.id)).toBe(true);
 
     const cashier = await createAndLoginStaff(

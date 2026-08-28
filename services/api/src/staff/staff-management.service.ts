@@ -119,8 +119,7 @@ export class StaffManagementService {
     if (
       target.role === StaffRole.SUPER_ADMIN &&
       target.status === StaffStatus.ACTIVE &&
-      (nextRole !== StaffRole.SUPER_ADMIN ||
-        nextStatus !== StaffStatus.ACTIVE)
+      (nextRole !== StaffRole.SUPER_ADMIN || nextStatus !== StaffStatus.ACTIVE)
     ) {
       await this.assertAnotherActiveSuperAdmin(target.id);
     }
