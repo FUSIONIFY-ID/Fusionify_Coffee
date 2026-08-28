@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
+import '../../../l10n/app_strings.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.location, required this.child});
@@ -29,6 +30,8 @@ class AppShell extends StatelessWidget {
       builder: (context, constraints) {
         final useRail = constraints.maxWidth >= 700;
 
+        final strings = context.strings;
+
         if (!useRail) {
           return Scaffold(
             body: child,
@@ -39,27 +42,27 @@ class AppShell extends StatelessWidget {
                 NavigationDestination(
                   icon: Icon(Icons.home_outlined),
                   selectedIcon: Icon(Icons.home),
-                  label: 'Home',
+                  label: strings.home,
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.local_cafe_outlined),
                   selectedIcon: Icon(Icons.local_cafe),
-                  label: 'Order',
+                  label: strings.order,
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.receipt_long_outlined),
                   selectedIcon: Icon(Icons.receipt_long),
-                  label: 'Orders',
+                  label: strings.orders,
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.loyalty_outlined),
                   selectedIcon: Icon(Icons.loyalty),
-                  label: 'Rewards',
+                  label: strings.rewards,
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.person_outline),
                   selectedIcon: Icon(Icons.person),
-                  label: 'Account',
+                  label: strings.account,
                 ),
               ],
             ),
@@ -85,27 +88,27 @@ class AppShell extends StatelessWidget {
                   NavigationRailDestination(
                     icon: Icon(Icons.home_outlined),
                     selectedIcon: Icon(Icons.home),
-                    label: Text('Home'),
+                    label: Text(strings.home),
                   ),
                   NavigationRailDestination(
                     icon: Icon(Icons.local_cafe_outlined),
                     selectedIcon: Icon(Icons.local_cafe),
-                    label: Text('Order'),
+                    label: Text(strings.order),
                   ),
                   NavigationRailDestination(
                     icon: Icon(Icons.receipt_long_outlined),
                     selectedIcon: Icon(Icons.receipt_long),
-                    label: Text('Orders'),
+                    label: Text(strings.orders),
                   ),
                   NavigationRailDestination(
                     icon: Icon(Icons.loyalty_outlined),
                     selectedIcon: Icon(Icons.loyalty),
-                    label: Text('Rewards'),
+                    label: Text(strings.rewards),
                   ),
                   NavigationRailDestination(
                     icon: Icon(Icons.person_outline),
                     selectedIcon: Icon(Icons.person),
-                    label: Text('Account'),
+                    label: Text(strings.account),
                   ),
                 ],
               ),
