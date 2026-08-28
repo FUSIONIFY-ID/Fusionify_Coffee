@@ -1,0 +1,18 @@
+---
+description: NestJS backend engineering rules
+globs: ["services/api/**/*.ts", "services/api/**/prisma/**", "services/api/**/package.json"]
+alwaysApply: false
+---
+
+Follow `docs/ARCHITECTURE.md` and `docs/ENGINEERING_STANDARDS.md`.
+
+Rules:
+- NestJS + TypeScript + PostgreSQL + Prisma.
+- Controllers handle transport concerns; domain/business logic belongs in appropriate services/modules.
+- Validate inputs at trust boundaries.
+- Keep payment-provider APIs behind a provider adapter.
+- Design webhook handlers for authenticated, idempotent processing.
+- Persist auditable ledgers for money-adjacent rewards and inventory movement.
+- Do not silently swallow errors.
+- Avoid generic repositories/services unless they solve a real repeated problem.
+- Business state transitions must be explicit and testable.
