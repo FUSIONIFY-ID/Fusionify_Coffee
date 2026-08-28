@@ -222,7 +222,8 @@ export class PaymentsService {
           providerRefNo: result.refNo ?? payment.providerRefNo,
           providerQrString: result.qrString ?? payment.providerQrString,
           providerQrUrl: result.qrUrl ?? payment.providerQrUrl,
-          providerCheckoutUrl: result.checkoutUrl ?? payment.providerCheckoutUrl,
+          providerCheckoutUrl:
+            result.checkoutUrl ?? payment.providerCheckoutUrl,
           providerExpiryTime: result.expiryTime ?? payment.providerExpiryTime,
           paidAt,
           cancelledAt,
