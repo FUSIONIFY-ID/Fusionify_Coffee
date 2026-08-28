@@ -21,8 +21,9 @@ export class StaffAuthGuard implements CanActivate {
   constructor(private readonly authService: StaffAuthService) {}
 
   async canActivate(context: ExecutionContext) {
-    const request =
-      context.switchToHttp().getRequest<AuthenticatedStaffRequest>();
+    const request = context
+      .switchToHttp()
+      .getRequest<AuthenticatedStaffRequest>();
     const authorization = request.headers.authorization;
 
     if (!authorization?.startsWith('Bearer ')) {
