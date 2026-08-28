@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
+import '../../../l10n/app_strings.dart';
 import '../../catalog/domain/catalog_models.dart';
 
 class ProductCard extends StatelessWidget {
@@ -12,6 +13,8 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
+
     return Material(
       color: CoffeeColors.surface,
       borderRadius: BorderRadius.circular(CoffeeRadius.card),
@@ -45,9 +48,9 @@ class ProductCard extends StatelessWidget {
               ),
               const SizedBox(height: CoffeeSpacing.sm),
               if (product.isBestseller) ...[
-                const Text(
-                  'Bestseller',
-                  style: TextStyle(
+                Text(
+                  strings.bestseller,
+                  style: const TextStyle(
                     color: CoffeeColors.deep,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme.dart';
+import '../../../l10n/app_strings.dart';
 
 class CatalogLoading extends StatelessWidget {
   const CatalogLoading({super.key, this.cardCount = 3});
@@ -51,17 +52,9 @@ class CatalogLoading extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: CoffeeSpacing.sm),
-                    Container(
-                      height: 14,
-                      width: 120,
-                      color: CoffeeColors.border,
-                    ),
+                    Container(height: 14, width: 120, color: CoffeeColors.border),
                     const SizedBox(height: CoffeeSpacing.xs),
-                    Container(
-                      height: 14,
-                      width: 84,
-                      color: CoffeeColors.border,
-                    ),
+                    Container(height: 14, width: 84, color: CoffeeColors.border),
                   ],
                 ),
               );
@@ -80,6 +73,8 @@ class CatalogErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(CoffeeSpacing.lg),
@@ -92,12 +87,12 @@ class CatalogErrorState extends StatelessWidget {
             ),
             const SizedBox(height: CoffeeSpacing.sm),
             Text(
-              'Menu belum bisa dimuat.',
+              strings.menuLoadFailed,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: CoffeeSpacing.xs),
             Text(
-              'Periksa koneksi ke Fusionify Coffee API lalu coba lagi.',
+              strings.menuLoadFailedBody,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
@@ -105,7 +100,7 @@ class CatalogErrorState extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              label: const Text('Coba lagi'),
+              label: Text(strings.retry),
             ),
           ],
         ),

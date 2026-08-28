@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
+import '../../../l10n/app_strings.dart';
 import '../../cart/application/cart_controller.dart';
 import '../../catalog/application/catalog_provider.dart';
 import '../../catalog/domain/catalog_models.dart';
@@ -17,10 +18,11 @@ class MenuScreen extends ConsumerStatefulWidget {
 }
 
 class _MenuScreenState extends ConsumerState<MenuScreen> {
-  String _category = 'All';
+  String _categoryId = 'all';
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
     final cartCount = ref.watch(cartItemCountProvider);
     final catalog = ref.watch(catalogProvider);
 
@@ -38,12 +40,12 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    'Order Coffee',
+                    strings.orderCoffee,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Cart',
+                  tooltip: strings.cart,
                   onPressed: () => context.push('/cart'),
                   icon: Badge(
                     isLabelVisible: cartCount > 0,
@@ -58,9 +60,9 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
             child: catalog.when(
               data: (data) => _MenuContent(
                 snapshot: data,
-                selectedCategory: _category,
-                onCategoryChanged: (category) {
-                  setState(() => _category = category);
+                selectedCategoryId: _categoryId,
+                onCategoryChanged: (categoryId) {
+                  setState(() => _categoryId = categoryId);
                 },
               ),
               loading: () => const Padding(
@@ -86,36 +88,43 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
 class _MenuContent extends StatelessWidget {
   const _MenuContent({
     required this.snapshot,
-    required this.selectedCategory,
+    required this.selectedCategoryId,
     required this.onCategoryChanged,
   });
 
   final CatalogSnapshot snapshot;
-  final String selectedCategory;
+  final String selectedCategoryId;
   final ValueChanged<String> onCategoryChanged;
 
   @override
   Widget build(BuildContext context) {
-    final categories = <String>{
-      'All',
-      ...snapshot.products.map((product) => product.category),
-    }.toList();
+    final strings = context.strings;
+    final categoryNames = <String, String>{
+      for (final product in snapshot.products)
+        product.categoryId: product.category,
+    };
+    final categories = [
+      (id: 'all', name: strings.all),
+      for (final entry in categoryNames.entries)
+        (id: entry.key, name: entry.value),
+    ];
 
-    final activeCategory = categories.contains(selectedCategory)
-        ? selectedCategory
-        : 'All';
+    final activeCategoryId =
+        categories.any((category) => category.id == selectedCategoryId)
+        ? selectedCategoryId
+        : 'all';
 
-    final visibleProducts = activeCategory == 'All'
+    final visibleProducts = activeCategoryId == 'all'
         ? snapshot.products
         : snapshot.products
-              .where((product) => product.category == activeCategory)
+              .where((product) => product.categoryId == activeCategoryId)
               .toList(growable: false);
 
     return CustomScrollView(
       slivers: [
         if (snapshot.preview)
-          const SliverPadding(
-            padding: EdgeInsets.fromLTRB(
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
               CoffeeSpacing.md,
               CoffeeSpacing.xs,
               CoffeeSpacing.md,
@@ -123,8 +132,8 @@ class _MenuContent extends StatelessWidget {
             ),
             sliver: SliverToBoxAdapter(
               child: Text(
-                'Development preview catalog',
-                style: TextStyle(
+                strings.developmentPreviewCatalog,
+                style: const TextStyle(
                   color: CoffeeColors.deep,
                   fontWeight: FontWeight.w700,
                 ),
@@ -143,9 +152,9 @@ class _MenuContent extends StatelessWidget {
               itemBuilder: (context, index) {
                 final category = categories[index];
                 return ChoiceChip(
-                  label: Text(category),
-                  selected: category == activeCategory,
-                  onSelected: (_) => onCategoryChanged(category),
+                  label: Text(category.name),
+                  selected: category.id == activeCategoryId,
+                  onSelected: (_) => onCategoryChanged(category.id),
                 );
               },
             ),

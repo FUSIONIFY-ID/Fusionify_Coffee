@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme.dart';
+import '../../../l10n/app_strings.dart';
 
 class RewardsScreen extends StatelessWidget {
   const RewardsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SafeArea(
+    return SafeArea(
       child: Center(
         child: Padding(
-          padding: EdgeInsets.all(CoffeeSpacing.xl),
+          padding: const EdgeInsets.all(CoffeeSpacing.xl),
           child: Text(
-            'Fusion Points belum aktif. Rewards mulai setelah order flow stabil.',
+            context.strings.rewardsComingSoon,
             textAlign: TextAlign.center,
           ),
         ),

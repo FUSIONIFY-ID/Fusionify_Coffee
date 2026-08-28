@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
+import '../../../l10n/app_strings.dart';
 import '../../cart/application/cart_controller.dart';
 import '../../cart/domain/cart_item.dart';
 import '../../catalog/application/catalog_provider.dart';
@@ -30,9 +31,9 @@ class ProductDetailScreen extends ConsumerWidget {
         }
 
         if (product == null) {
-          return const Scaffold(
+          return Scaffold(
             body: SafeArea(
-              child: Center(child: Text('Produk tidak ditemukan.')),
+              child: Center(child: Text(context.strings.productNotFound)),
             ),
           );
         }
@@ -143,11 +144,12 @@ class _ProductDetailContentState extends ConsumerState<_ProductDetailContent> {
           ),
         );
 
+    final strings = context.strings;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${widget.product.name} ditambahkan ke cart.'),
+        content: Text(strings.productAddedToCart(widget.product.name)),
         action: SnackBarAction(
-          label: 'Lihat',
+          label: strings.view,
           onPressed: () => context.push('/cart'),
         ),
       ),
@@ -156,6 +158,7 @@ class _ProductDetailContentState extends ConsumerState<_ProductDetailContent> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
     final product = widget.product;
 
     return Scaffold(
@@ -226,7 +229,7 @@ class _ProductDetailContentState extends ConsumerState<_ProductDetailContent> {
                 child: FilledButton(
                   onPressed: _addToCart,
                   child: Text(
-                    'Add to Cart · ${formatRupiah(_unitPrice * _quantity)}',
+                    '${strings.addToCart} · ${formatRupiah(_unitPrice * _quantity)}',
                   ),
                 ),
               ),

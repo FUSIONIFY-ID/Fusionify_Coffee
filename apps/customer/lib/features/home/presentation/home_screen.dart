@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
+import '../../../l10n/app_strings.dart';
 import '../../cart/application/cart_controller.dart';
 import '../../catalog/application/catalog_provider.dart';
 import '../../catalog/domain/catalog_models.dart';
@@ -14,6 +15,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final strings = context.strings;
     final cartCount = ref.watch(cartItemCountProvider);
     final catalog = ref.watch(catalogProvider);
 
@@ -38,7 +40,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 IconButton(
                   onPressed: () => context.push('/cart'),
-                  tooltip: 'Cart',
+                  tooltip: strings.cart,
                   icon: Badge(
                     isLabelVisible: cartCount > 0,
                     label: Text('$cartCount'),
@@ -49,12 +51,12 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: CoffeeSpacing.lg),
             Text(
-              'Mau ngopi apa hari ini?',
+              strings.coffeePrompt,
               style: Theme.of(context).textTheme.headlineLarge,
             ),
             const SizedBox(height: CoffeeSpacing.xs),
             Text(
-              'Pilih pickup dulu. Delivery menyusul setelah flow pickup stabil.',
+              strings.pickupIntro,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: CoffeeSpacing.lg),
@@ -79,6 +81,8 @@ class _CatalogHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -92,20 +96,20 @@ class _CatalogHome extends StatelessWidget {
           children: [
             Expanded(
               child: _FulfillmentCard(
-                title: 'Pickup',
+                title: strings.pickup,
                 subtitle: data.outlet.pickupEnabled
-                    ? 'Pesan dari outlet ini'
-                    : 'Sedang tidak tersedia',
+                    ? strings.orderFromThisOutlet
+                    : strings.temporarilyUnavailable,
                 icon: Icons.storefront_outlined,
                 enabled: data.outlet.pickupEnabled,
                 onTap: () => context.go('/menu'),
               ),
             ),
             const SizedBox(width: CoffeeSpacing.sm),
-            const Expanded(
+            Expanded(
               child: _FulfillmentCard(
-                title: 'Delivery',
-                subtitle: 'Belum diimplementasikan',
+                title: strings.delivery,
+                subtitle: strings.notImplementedYet,
                 icon: Icons.delivery_dining_outlined,
                 enabled: false,
               ),
@@ -117,19 +121,19 @@ class _CatalogHome extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                'Recommended',
+                strings.recommended,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
             TextButton(
               onPressed: () => context.go('/menu'),
-              child: const Text('Lihat menu'),
+              child: Text(strings.seeMenu),
             ),
           ],
         ),
         const SizedBox(height: CoffeeSpacing.sm),
         if (data.products.isEmpty)
-          const Text('Belum ada menu yang tersedia.')
+          Text(strings.noMenuAvailable)
         else
           SizedBox(
             height: 286,
@@ -166,14 +170,14 @@ class _PreviewNotice extends StatelessWidget {
         color: CoffeeColors.surfaceBlue,
         borderRadius: BorderRadius.circular(CoffeeRadius.control),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.science_outlined, size: 20, color: CoffeeColors.deep),
-          SizedBox(width: CoffeeSpacing.xs),
+          const Icon(Icons.science_outlined, size: 20, color: CoffeeColors.deep),
+          const SizedBox(width: CoffeeSpacing.xs),
           Expanded(
             child: Text(
-              'Preview catalog dari API development. Bukan data production.',
-              style: TextStyle(
+              context.strings.previewCatalogNotice,
+              style: const TextStyle(
                 color: CoffeeColors.deep,
                 fontWeight: FontWeight.w600,
               ),

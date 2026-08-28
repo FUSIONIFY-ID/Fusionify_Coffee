@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
+import '../../../l10n/app_strings.dart';
+import '../../catalog/application/catalog_provider.dart';
 import '../application/cart_controller.dart';
 
 class CartScreen extends ConsumerWidget {
@@ -11,11 +13,13 @@ class CartScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final strings = context.strings;
     final items = ref.watch(cartProvider);
     final subtotal = ref.watch(cartSubtotalProvider);
+    final catalog = ref.watch(catalogProvider).value;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Cart')),
+      appBar: AppBar(title: Text(strings.cart)),
       body: items.isEmpty
           ? const _EmptyCart()
           : ListView.separated(
@@ -37,14 +41,12 @@ class CartScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                item.productName,
+                                item.displayProductName(catalog),
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               const SizedBox(height: CoffeeSpacing.xxs),
                               Text(
-                                item.selectedOptions
-                                    .map((option) => option.label)
-                                    .join(' · '),
+                                item.displayOptionLabels(catalog).join(' · '),
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                               const SizedBox(height: CoffeeSpacing.xs),
@@ -59,7 +61,7 @@ class CartScreen extends ConsumerWidget {
                           ),
                         ),
                         IconButton(
-                          tooltip: 'Remove',
+                          tooltip: strings.remove,
                           onPressed: () => ref
                               .read(cartProvider.notifier)
                               .remove(item.signature),
@@ -112,7 +114,7 @@ class CartScreen extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        const Expanded(child: Text('Estimated subtotal')),
+                        Expanded(child: Text(strings.estimatedSubtotal)),
                         Text(
                           formatRupiah(subtotal),
                           style: const TextStyle(fontWeight: FontWeight.w700),
@@ -122,7 +124,7 @@ class CartScreen extends ConsumerWidget {
                     const SizedBox(height: CoffeeSpacing.sm),
                     FilledButton(
                       onPressed: () => context.push('/checkout'),
-                      child: const Text('Checkout'),
+                      child: Text(strings.checkout),
                     ),
                   ],
                 ),
@@ -137,31 +139,33 @@ class _EmptyCart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final strings = context.strings;
+
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(CoffeeSpacing.xl),
+        padding: const EdgeInsets.all(CoffeeSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.shopping_bag_outlined,
               size: 56,
               color: CoffeeColors.textSecondary,
             ),
-            SizedBox(height: CoffeeSpacing.md),
+            const SizedBox(height: CoffeeSpacing.md),
             Text(
-              'Cart masih kosong.',
-              style: TextStyle(
+              strings.emptyCartTitle,
+              style: const TextStyle(
                 color: CoffeeColors.textPrimary,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            SizedBox(height: CoffeeSpacing.xs),
+            const SizedBox(height: CoffeeSpacing.xs),
             Text(
-              'Pilih kopi dan custom sesuai selera kamu.',
+              strings.emptyCartBody,
               textAlign: TextAlign.center,
-              style: TextStyle(color: CoffeeColors.textSecondary),
+              style: const TextStyle(color: CoffeeColors.textSecondary),
             ),
           ],
         ),

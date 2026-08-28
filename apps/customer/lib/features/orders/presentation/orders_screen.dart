@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme.dart';
+import '../../../l10n/app_strings.dart';
 
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SafeArea(
+    return SafeArea(
       child: Center(
         child: Padding(
-          padding: EdgeInsets.all(CoffeeSpacing.xl),
+          padding: const EdgeInsets.all(CoffeeSpacing.xl),
           child: Text(
-            'Belum ada order. Order tracking mulai di Milestone 0.3.',
+            context.strings.ordersEmpty,
             textAlign: TextAlign.center,
           ),
         ),

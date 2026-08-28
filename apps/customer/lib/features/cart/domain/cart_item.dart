@@ -37,9 +37,36 @@ class CartItem {
   int get lineTotal => unitPrice * quantity;
 
   String get signature {
-    final optionIds = selectedOptions.map((option) => option.id).toList()
-      ..sort();
+    final optionIds = selectedOptions.map((option) => option.id).toList()..sort();
     return '$productId|${optionIds.join(',')}';
+  }
+
+  String displayProductName(CatalogSnapshot? catalog) {
+    return _localizedProduct(catalog)?.name ?? productName;
+  }
+
+  List<String> displayOptionLabels(CatalogSnapshot? catalog) {
+    final product = _localizedProduct(catalog);
+    if (product == null) {
+      return selectedOptions.map((option) => option.label).toList(growable: false);
+    }
+
+    final localizedById = <String, String>{
+      for (final group in product.modifierGroups)
+        for (final option in group.options) option.id: option.label,
+    };
+
+    return selectedOptions
+        .map((option) => localizedById[option.id] ?? option.label)
+        .toList(growable: false);
+  }
+
+  Product? _localizedProduct(CatalogSnapshot? catalog) {
+    if (catalog == null) return null;
+    for (final product in catalog.products) {
+      if (product.id == productId) return product;
+    }
+    return null;
   }
 
   CartItem copyWith({int? quantity}) {
