@@ -42,19 +42,16 @@ jobs:
           done < <(git ls-files)
           exit "$bad"
 
-      - name: Enforce no-gradient policy in application source
+      - name: Enforce no-gradient policy in product UI source
         shell: bash
         run: |
           set -euo pipefail
-          paths=()
-          [ -d apps ] && paths+=("apps")
-          [ -d services ] && paths+=("services")
-          if [ "${#paths[@]}" -eq 0 ]; then
+          if [ ! -d apps ]; then
             echo "No application source yet."
             exit 0
           fi
 
-          if grep -RInE             --exclude-dir=build             --exclude-dir=node_modules             --exclude='*.md'             --exclude='*.mdc'             'LinearGradient|RadialGradient|SweepGradient|linear-gradient\(|radial-gradient\('             "${paths[@]}"; then
+          if grep -RInE --exclude-dir=build --exclude-dir=node_modules --exclude='*.md' --exclude='*.mdc' 'LinearGradient|RadialGradient|SweepGradient|linear-gradient\(|radial-gradient\(' apps; then
             echo "Gradient usage violates ADR 0005 and the design system."
             exit 1
           fi
