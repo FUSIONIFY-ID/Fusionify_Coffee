@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Headers,
-  Post,
-  RawBodyRequest,
-  Req,
-} from '@nestjs/common';
+import { Controller, Headers, Post, RawBodyRequest, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { PaymentsService } from './payments.service';
 
