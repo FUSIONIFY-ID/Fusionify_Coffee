@@ -12,3 +12,10 @@ final orderHistoryProvider =
     FutureProvider.autoDispose<List<CustomerOrderSummary>>((ref) {
       return ref.watch(ordersRepositoryProvider).listOrders();
     });
+
+final orderDetailProvider =
+    FutureProvider.autoDispose.family<CustomerOrderDetail, String>(
+      (ref, orderId) {
+        return ref.watch(ordersRepositoryProvider).getOrder(orderId);
+      },
+    );

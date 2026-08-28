@@ -481,6 +481,27 @@ class AppStrings {
   String get orderStatusCompleted => _pick('Selesai', 'Selesai', 'Completed');
   String get orderStatusCancelled =>
       _pick('Dibatalkan', 'Dibatalkan', 'Cancelled');
+  String get orderDetail =>
+      _pick('Detail Pesanan', 'Butiran Pesanan', 'Order Detail');
+  String get orderItems =>
+      _pick('Item Pesanan', 'Item Pesanan', 'Order Items');
+  String get orderTimeline =>
+      _pick('Perjalanan Pesanan', 'Perjalanan Pesanan', 'Order Timeline');
+  String get total => _pick('Total', 'Jumlah', 'Total');
+  String get orderNumber =>
+      _pick('Nomor pesanan', 'Nombor pesanan', 'Order number');
+  String get placedAt =>
+      _pick('Dibuat', 'Dibuat', 'Placed');
+  String get orderDetailLoadFailed => _pick(
+    'Detail pesanan belum bisa dimuat.',
+    'Butiran pesanan belum dapat dimuatkan.',
+    'Order details could not be loaded.',
+  );
+  String get statusHistoryEmpty => _pick(
+    'Timeline akan muncul setelah status pesanan berubah.',
+    'Garis masa akan muncul selepas status pesanan berubah.',
+    'The timeline will appear after the order status changes.',
+  );
 }
 
 extension AppStringsContext on BuildContext {

@@ -8,6 +8,7 @@ import '../../../l10n/app_strings.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/orders_provider.dart';
 import '../domain/order_history_models.dart';
+import 'order_status_labels.dart';
 
 class OrdersScreen extends ConsumerWidget {
   const OrdersScreen({super.key});
@@ -100,9 +101,10 @@ class OrdersScreen extends ConsumerWidget {
 }
 
 class _OrderCard extends StatelessWidget {
-  const _OrderCard({required this.order});
+  const _OrderCard({required this.order, required this.onTap});
 
   final CustomerOrderSummary order;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +117,10 @@ class _OrderCard extends StatelessWidget {
         .join(' • ');
 
     return Card(
-      child: Padding(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
         padding: const EdgeInsets.all(CoffeeSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,7 +134,7 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ),
                 _StatusChip(
-                  label: _statusLabel(order.status, strings),
+                  label: localizedOrderStatus(strings, order.status),
                   status: order.status,
                 ),
               ],
@@ -159,20 +164,8 @@ class _OrderCard extends StatelessWidget {
           ],
         ),
       ),
+      ),
     );
-  }
-
-  String _statusLabel(String status, AppStrings strings) {
-    return switch (status) {
-      'AWAITING_PAYMENT' => strings.orderStatusAwaitingPayment,
-      'CONFIRMED' => strings.orderStatusConfirmed,
-      'PREPARING' => strings.orderStatusPreparing,
-      'READY' => strings.orderStatusReady,
-      'PICKED_UP' => strings.orderStatusPickedUp,
-      'COMPLETED' => strings.orderStatusCompleted,
-      'CANCELLED' => strings.orderStatusCancelled,
-      _ => status,
-    };
   }
 
   String _formatDate(DateTime date) {

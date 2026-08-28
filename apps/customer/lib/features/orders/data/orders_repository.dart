@@ -18,4 +18,13 @@ class OrdersRepository {
         )
         .toList();
   }
+
+  Future<CustomerOrderDetail> getOrder(String orderId) async {
+    final response = await _dio.get<Map<String, dynamic>>('/v1/orders/$orderId');
+    final data = response.data;
+    if (data == null) {
+      throw StateError('Order response is empty.');
+    }
+    return CustomerOrderDetail.fromJson(data);
+  }
 }

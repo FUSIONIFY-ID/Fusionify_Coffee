@@ -201,6 +201,12 @@ export class OrdersService {
     const order = await this.prisma.order.findFirst({
       where: { id: orderId, userId },
       include: {
+        outlet: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         items: true,
         payments: {
           orderBy: { createdAt: 'desc' },
