@@ -62,7 +62,7 @@ class _RegisterPhoneScreenState extends ConsumerState<RegisterPhoneScreen> {
       }
     } catch (error) {
       if (mounted) {
-        setState(() => _error = authErrorMessage(error));
+        setState(() => _error = authErrorMessage(error, context.strings));
       }
     } finally {
       if (mounted) {

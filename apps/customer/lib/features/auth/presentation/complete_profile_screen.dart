@@ -67,7 +67,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
       }
     } catch (error) {
       if (mounted) {
-        setState(() => _error = authErrorMessage(error));
+        setState(() => _error = authErrorMessage(error, context.strings));
       }
     } finally {
       if (mounted) {
@@ -110,7 +110,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
             autofillHints: const [AutofillHints.newPassword],
             decoration: InputDecoration(
               labelText: strings.password,
-              helperText: 'Minimum 8 characters',
+              helperText: strings.minimumPassword,
               suffixIcon: IconButton(
                 onPressed: () {
                   setState(() => _hidePassword = !_hidePassword);

@@ -56,7 +56,7 @@ class _OtpVerificationScreenState
       }
     } catch (error) {
       if (mounted) {
-        setState(() => _error = authErrorMessage(error));
+        setState(() => _error = authErrorMessage(error, context.strings));
       }
     } finally {
       if (mounted) {
@@ -94,7 +94,7 @@ class _OtpVerificationScreenState
       _codeController.clear();
     } catch (error) {
       if (mounted) {
-        setState(() => _error = authErrorMessage(error));
+        setState(() => _error = authErrorMessage(error, context.strings));
       }
     } finally {
       if (mounted) {

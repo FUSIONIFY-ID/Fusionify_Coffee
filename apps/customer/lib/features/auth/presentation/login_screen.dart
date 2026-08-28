@@ -54,7 +54,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } catch (error) {
       if (mounted) {
-        setState(() => _error = authErrorMessage(error));
+        setState(() => _error = authErrorMessage(error, context.strings));
       }
     } finally {
       if (mounted) {
@@ -90,7 +90,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             keyboardType: TextInputType.emailAddress,
             autofillHints: const [AutofillHints.username],
             decoration: InputDecoration(
-              labelText: '${strings.phoneNumber} / Email',
+              labelText: strings.phoneOrEmail,
             ),
           ),
           const SizedBox(height: CoffeeSpacing.md),

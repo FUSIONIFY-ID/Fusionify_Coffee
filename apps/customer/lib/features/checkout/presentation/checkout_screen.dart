@@ -6,10 +6,12 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
 import '../../../core/utils/idempotency_key.dart';
-import '../../cart/application/cart_controller.dart';
+import '../../../l10n/app_strings.dart';
 import '../../auth/application/auth_controller.dart';
+import '../../cart/application/cart_controller.dart';
 import '../../cart/domain/cart_item.dart';
 import '../../catalog/application/catalog_provider.dart';
+import '../../catalog/domain/catalog_models.dart';
 import '../application/checkout_provider.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -33,16 +35,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Future<void> _placeOrder() async {
-    if (_submitting) {
-      return;
-    }
+    if (_submitting) return;
 
     final items = ref.read(cartProvider);
     final catalog = ref.read(catalogProvider).value;
 
-    if (items.isEmpty || catalog == null) {
-      return;
-    }
+    if (items.isEmpty || catalog == null) return;
 
     setState(() {
       _submitting = true;
@@ -62,52 +60,39 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         idempotencyKey: _paymentKey,
       );
 
-      if (!mounted) {
-        return;
+      if (mounted) {
+        context.go('/payment/${payment.id}');
       }
-
-      context.go('/payment/${payment.id}');
     } on DioException catch (error) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _error = _messageFromDio(error);
-      });
-    } catch (_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _error = 'Checkout belum bisa diproses. Coba lagi.';
-      });
-    } finally {
       if (mounted) {
         setState(() {
-          _submitting = false;
+          _error = _messageFromDio(error, context.strings);
         });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _error = context.strings.checkoutProcessingFailed;
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _submitting = false);
       }
     }
   }
 
-  String _messageFromDio(DioException error) {
-    final data = error.response?.data;
-    if (data is Map<String, dynamic>) {
-      final message = data['message'];
-      if (message is String && message.isNotEmpty) {
-        return message;
-      }
-    }
-
+  String _messageFromDio(DioException error, AppStrings strings) {
     if (error.response?.statusCode == 503) {
-      return 'Payment provider belum dikonfigurasi pada server ini.';
+      return strings.paymentProviderNotConfigured;
     }
 
-    return 'Tidak bisa terhubung ke server checkout.';
+    return strings.checkoutServerUnavailable;
   }
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
     final items = ref.watch(cartProvider);
     final localSubtotal = ref.watch(cartSubtotalProvider);
     final catalog = ref.watch(catalogProvider);
@@ -115,7 +100,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     if (profile == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Checkout')),
+        appBar: AppBar(title: Text(strings.checkout)),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(CoffeeSpacing.lg),
@@ -129,24 +114,24 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 ),
                 const SizedBox(height: CoffeeSpacing.md),
                 Text(
-                  'Sign in before checkout',
+                  strings.signInBeforeCheckout,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: CoffeeSpacing.xs),
                 Text(
-                  'Your order, payment, and history need to belong to a verified Fusionify account.',
+                  strings.checkoutAccountReason,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: CoffeeSpacing.lg),
                 FilledButton(
                   onPressed: () => context.push('/auth/login'),
-                  child: const Text('Log in'),
+                  child: Text(strings.login),
                 ),
                 const SizedBox(height: CoffeeSpacing.sm),
                 OutlinedButton(
                   onPressed: () => context.push('/auth/register'),
-                  child: const Text('Create account'),
+                  child: Text(strings.createAccount),
                 ),
               ],
             ),
@@ -156,12 +141,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Checkout')),
+      appBar: AppBar(title: Text(strings.checkout)),
       body: catalog.when(
         data: (snapshot) => ListView(
           padding: const EdgeInsets.all(CoffeeSpacing.md),
           children: [
-            Text('Pickup', style: Theme.of(context).textTheme.headlineSmall),
+            Text(strings.pickup, style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: CoffeeSpacing.sm),
             Card(
               child: Padding(
@@ -183,7 +168,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           ),
                           const SizedBox(height: CoffeeSpacing.xxs),
                           Text(
-                            'Ambil pesanan di outlet ini setelah status Ready.',
+                            strings.pickupReadyInstruction,
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ],
@@ -195,18 +180,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
             const SizedBox(height: CoffeeSpacing.lg),
             Text(
-              'Order Summary',
+              strings.orderSummary,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: CoffeeSpacing.sm),
             for (final item in items) ...[
-              _OrderLine(item: item),
+              _OrderLine(item: item, catalog: snapshot),
               const Divider(height: CoffeeSpacing.lg),
             ],
             const SizedBox(height: CoffeeSpacing.sm),
             Row(
               children: [
-                const Expanded(child: Text('Estimated subtotal')),
+                Expanded(child: Text(strings.estimatedSubtotal)),
                 Text(
                   formatRupiah(localSubtotal),
                   style: const TextStyle(fontWeight: FontWeight.w700),
@@ -220,19 +205,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 color: CoffeeColors.surfaceBlue,
                 borderRadius: BorderRadius.circular(CoffeeRadius.control),
               ),
-              child: const Row(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.verified_user_outlined,
                     size: 20,
                     color: CoffeeColors.deep,
                   ),
-                  SizedBox(width: CoffeeSpacing.xs),
+                  const SizedBox(width: CoffeeSpacing.xs),
                   Expanded(
                     child: Text(
-                      'Harga final dihitung ulang oleh server dari menu dan modifier aktif sebelum QRIS dibuat.',
-                      style: TextStyle(
+                      strings.serverPriceNotice,
+                      style: const TextStyle(
                         color: CoffeeColors.deep,
                         fontWeight: FontWeight.w600,
                       ),
@@ -254,10 +239,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => const Center(
+        error: (_, _) => Center(
           child: Padding(
-            padding: EdgeInsets.all(CoffeeSpacing.lg),
-            child: Text('Outlet checkout belum bisa dimuat.'),
+            padding: const EdgeInsets.all(CoffeeSpacing.lg),
+            child: Text(strings.checkoutLoadFailed),
           ),
         ),
       ),
@@ -280,7 +265,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         )
                       : const Icon(Icons.qr_code_2),
                   label: Text(
-                    _submitting ? 'Preparing payment…' : 'Continue to QRIS',
+                    _submitting
+                        ? strings.preparingPayment
+                        : strings.continueToQris,
                   ),
                 ),
               ),
@@ -290,9 +277,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 }
 
 class _OrderLine extends StatelessWidget {
-  const _OrderLine({required this.item});
+  const _OrderLine({required this.item, required this.catalog});
 
   final CartItem item;
+  final CatalogSnapshot catalog;
 
   @override
   Widget build(BuildContext context) {
@@ -304,12 +292,12 @@ class _OrderLine extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${item.quantity}× ${item.productName}',
+                '${item.quantity}× ${item.displayProductName(catalog)}',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: CoffeeSpacing.xxs),
               Text(
-                item.selectedOptions.map((option) => option.label).join(' · '),
+                item.displayOptionLabels(catalog).join(' · '),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],

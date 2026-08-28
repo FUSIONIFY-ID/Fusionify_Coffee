@@ -8,6 +8,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
+import '../../../l10n/app_strings.dart';
 import '../../cart/application/cart_controller.dart';
 import '../../checkout/application/checkout_provider.dart';
 import '../../checkout/domain/checkout_models.dart';
@@ -78,29 +79,23 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
     } on DioException {
       if (!silent && mounted) {
         setState(() {
-          _error = 'Status pembayaran belum bisa dimuat.';
+          _error = context.strings.paymentStatusLoadFailed;
         });
       }
     } finally {
       if (!silent && mounted) {
-        setState(() {
-          _loading = false;
-        });
+        setState(() => _loading = false);
       }
     }
   }
 
   Future<void> _checkProvider({bool silent = false}) async {
-    if (_checking || _payment?.isPending != true) {
-      return;
-    }
+    if (_checking || _payment?.isPending != true) return;
 
     if (mounted) {
       setState(() {
         _checking = true;
-        if (!silent) {
-          _error = null;
-        }
+        if (!silent) _error = null;
       });
     }
 
@@ -112,22 +107,18 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
     } on DioException {
       if (!silent && mounted) {
         setState(() {
-          _error = 'Belum bisa mengecek provider. Coba lagi.';
+          _error = context.strings.paymentProviderCheckFailed;
         });
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _checking = false;
-        });
+        setState(() => _checking = false);
       }
     }
   }
 
   Future<void> _cancel() async {
-    if (_cancelling || _payment?.isPending != true) {
-      return;
-    }
+    if (_cancelling || _payment?.isPending != true) return;
 
     setState(() {
       _cancelling = true;
@@ -142,22 +133,18 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
     } on DioException {
       if (mounted) {
         setState(() {
-          _error = 'Pembayaran belum bisa dibatalkan.';
+          _error = context.strings.paymentCancelFailed;
         });
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _cancelling = false;
-        });
+        setState(() => _cancelling = false);
       }
     }
   }
 
   void _applyPayment(PaymentView payment) {
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
 
     final becamePaid = _payment?.isPaid != true && payment.isPaid;
 
@@ -179,10 +166,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
 
   void _updateRemaining() {
     final expiresAt = _payment?.expiresAt;
-
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
 
     if (expiresAt == null) {
       if (_remaining != null) {
@@ -201,15 +185,16 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
     final payment = _payment;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('QRIS Payment')),
+      appBar: AppBar(title: Text(strings.qrisPayment)),
       body: _loading && payment == null
           ? const Center(child: CircularProgressIndicator())
           : payment == null
           ? _ErrorBody(
-              message: _error ?? 'Payment tidak ditemukan.',
+              message: _error ?? strings.paymentNotFound,
               onRetry: _refreshLocal,
             )
           : ListView(
@@ -239,13 +224,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
                   ),
                   const SizedBox(height: CoffeeSpacing.xs),
                   Text(
-                    _expiryLabel(payment),
+                    _expiryLabel(payment, strings),
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: CoffeeSpacing.lg),
-                  const Text(
-                    'Scan QR ini dari aplikasi pembayaran yang mendukung QRIS. Status akan diperbarui otomatis saat webhook diterima.',
+                  Text(
+                    strings.scanQrisInstruction,
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -270,25 +255,27 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.refresh),
-                    label: const Text('Check Status'),
+                    label: Text(strings.checkStatus),
                   ),
                   const SizedBox(height: CoffeeSpacing.sm),
                   TextButton(
                     onPressed: _cancelling ? null : _cancel,
                     child: Text(
-                      _cancelling ? 'Cancelling…' : 'Cancel Pending Payment',
+                      _cancelling
+                          ? strings.cancelling
+                          : strings.cancelPendingPayment,
                     ),
                   ),
                 ] else if (payment.isPaid) ...[
                   FilledButton.icon(
                     onPressed: () => context.go('/orders'),
                     icon: const Icon(Icons.receipt_long_outlined),
-                    label: const Text('View Order'),
+                    label: Text(strings.viewOrder),
                   ),
                 ] else ...[
                   OutlinedButton(
                     onPressed: () => context.go('/cart'),
-                    child: const Text('Back to Cart'),
+                    child: Text(strings.backToCart),
                   ),
                 ],
               ],
@@ -296,19 +283,21 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
     );
   }
 
-  String _expiryLabel(PaymentView payment) {
+  String _expiryLabel(PaymentView payment, AppStrings strings) {
     final remaining = _remaining;
     if (remaining != null) {
       final minutes = remaining.inMinutes;
       final seconds = remaining.inSeconds.remainder(60);
-      return 'Expires in ${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+      final time =
+          '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+      return strings.expiresIn(time);
     }
 
     if (payment.expiryTime != null) {
-      return 'Provider expiry: ${payment.expiryTime}';
+      return strings.providerExpiry(payment.expiryTime!);
     }
 
-    return 'Follow the payment status shown in this app.';
+    return strings.followPaymentStatus;
   }
 }
 
@@ -319,26 +308,31 @@ class _StatusHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
     final config = switch (payment.status) {
       'PAID' => (
         Icons.check_circle_outline,
-        'Payment received',
+        strings.paymentReceived,
         CoffeeColors.success,
       ),
       'EXPIRED' => (
         Icons.timer_off_outlined,
-        'Payment expired',
+        strings.paymentExpired,
         CoffeeColors.warning,
       ),
       'CANCELLED' => (
         Icons.cancel_outlined,
-        'Payment cancelled',
+        strings.paymentCancelled,
         CoffeeColors.textSecondary,
       ),
-      'FAILED' => (Icons.error_outline, 'Payment failed', CoffeeColors.error),
+      'FAILED' => (
+        Icons.error_outline,
+        strings.paymentFailed,
+        CoffeeColors.error,
+      ),
       _ => (
         Icons.hourglass_top_outlined,
-        'Waiting for payment',
+        strings.waitingForPayment,
         CoffeeColors.primary,
       ),
     };
@@ -360,7 +354,7 @@ class _StatusHeader extends StatelessWidget {
                   ),
                   const SizedBox(height: CoffeeSpacing.xxs),
                   Text(
-                    'GoPay QRIS · ${payment.status}',
+                    'GoPay QRIS',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -398,7 +392,7 @@ class _ErrorBody extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(context.strings.retry),
             ),
           ],
         ),
