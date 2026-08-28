@@ -60,6 +60,8 @@ jobs:
 
       - name: Generate Prisma client
         working-directory: services/api
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fusionify_coffee_preview
         run: npm run prisma:generate
 
       - name: Format auth backend
