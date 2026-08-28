@@ -1,0 +1,60 @@
+name: Repository Policy
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  repository-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Reject tracked Android signing files
+        shell: bash
+        run: |
+          set -euo pipefail
+          tracked="$(git ls-files)"
+          if echo "$tracked" | grep -E '(^|/).*\.(jks|keystore)$|(^|/)android/key\.properties$' >/dev/null; then
+            echo "Signing material must not be tracked."
+            echo "$tracked" | grep -E '(^|/).*\.(jks|keystore)$|(^|/)android/key\.properties$' || true
+            exit 1
+          fi
+
+      - name: Reject tracked secret environment files
+        shell: bash
+        run: |
+          set -euo pipefail
+          bad=0
+          while IFS= read -r file; do
+            case "$file" in
+              *.env.example|*.env.sample|.env.example|.env.sample)
+                ;;
+              .env|.env.*|*/.env|*/.env.*)
+                echo "Tracked secret-like environment file: $file"
+                bad=1
+                ;;
+            esac
+          done < <(git ls-files)
+          exit "$bad"
+
+      - name: Enforce no-gradient policy in application source
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=()
+          [ -d apps ] && paths+=("apps")
+          [ -d services ] && paths+=("services")
+          if [ "${#paths[@]}" -eq 0 ]; then
+            echo "No application source yet."
+            exit 0
+          fi
+
+          if grep -RInE             --exclude-dir=build             --exclude-dir=node_modules             --exclude='*.md'             --exclude='*.mdc'             'LinearGradient|RadialGradient|SweepGradient|linear-gradient\(|radial-gradient\('             "${paths[@]}"; then
+            echo "Gradient usage violates ADR 0005 and the design system."
+            exit 1
+          fi
