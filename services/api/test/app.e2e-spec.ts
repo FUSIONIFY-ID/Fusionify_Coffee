@@ -14,6 +14,32 @@ type OrderResponse = {
   items: Array<{ unitPrice: number }>;
 };
 
+type OtpRequestResponse = {
+  challengeId: string;
+};
+
+type OtpVerifyResponse = {
+  verificationToken: string;
+};
+
+type RegisteredUserResponse = {
+  accessToken: string;
+  user: {
+    id: string;
+    fullName: string;
+    phoneCountry: string;
+    phoneVerified: boolean;
+    preferredLanguage: string;
+  };
+};
+
+type ProfileResponse = {
+  fullName: string;
+  phoneCountry: string;
+  phoneVerified: boolean;
+  preferredLanguage: string;
+};
+
 describe('Fusionify Coffee API (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
@@ -45,7 +71,8 @@ describe('Fusionify Coffee API (e2e)', () => {
       })
       .expect(201);
 
-    const challengeId = requested.body.challengeId as string;
+    const requestedBody = requested.body as unknown as OtpRequestResponse;
+    const challengeId = requestedBody.challengeId;
     const challenge = await prisma.otpChallenge.findUniqueOrThrow({
       where: { id: challengeId },
     });
@@ -65,26 +92,25 @@ describe('Fusionify Coffee API (e2e)', () => {
       })
       .expect(201);
 
+    const verifiedBody = verified.body as unknown as OtpVerifyResponse;
+
     const registered = await request(app.getHttpServer())
       .post('/v1/auth/register')
       .send({
         challengeId,
-        verificationToken: verified.body.verificationToken as string,
+        verificationToken: verifiedBody.verificationToken,
         fullName: 'Fusionify Test User',
         password: 'Fusionify-2026',
         preferredLanguage: 'ID_ID',
       })
       .expect(201);
 
+    const registeredBody =
+      registered.body as unknown as RegisteredUserResponse;
+
     return {
-      accessToken: registered.body.accessToken as string,
-      user: registered.body.user as {
-        id: string;
-        fullName: string;
-        phoneCountry: string;
-        phoneVerified: boolean;
-        preferredLanguage: string;
-      },
+      accessToken: registeredBody.accessToken,
+      user: registeredBody.user,
     };
   }
 
@@ -117,10 +143,12 @@ describe('Fusionify Coffee API (e2e)', () => {
       .set('Authorization', `Bearer ${registered.accessToken}`)
       .expect(200);
 
-    expect(profile.body.fullName).toBe('Fusionify Test User');
-    expect(profile.body.phoneCountry).toBe('ID');
-    expect(profile.body.phoneVerified).toBe(true);
-    expect(profile.body.preferredLanguage).toBe('ID_ID');
+    const profileBody = profile.body as unknown as ProfileResponse;
+
+    expect(profileBody.fullName).toBe('Fusionify Test User');
+    expect(profileBody.phoneCountry).toBe('ID');
+    expect(profileBody.phoneVerified).toBe(true);
+    expect(profileBody.preferredLanguage).toBe('ID_ID');
   });
 
   it('/v1/orders (POST) requires authentication', async () => {
