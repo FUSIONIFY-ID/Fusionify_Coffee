@@ -17,6 +17,7 @@ type OrderResponse = {
 describe('Fusionify Coffee API (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
+  let userSequence = 0;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -28,29 +29,10 @@ describe('Fusionify Coffee API (e2e)', () => {
     await app.init();
   });
 
-  it('/v1/health (GET)', () => {
-    return request(app.getHttpServer()).get('/v1/health').expect(200).expect({
-      status: 'ok',
-      service: 'fusionify-coffee-api',
-    });
-  });
-
-  it('/v1/catalog/preview (GET) reads seeded PostgreSQL data', () => {
-    return request(app.getHttpServer())
-      .get('/v1/catalog/preview')
-      .expect(200)
-      .then((response) => {
-        expect(response.text).toContain('"preview":true');
-        expect(response.text).toContain('"aren-latte"');
-        expect(response.text).toContain(
-          '"Database-backed development fixture."',
-        );
-        expect(response.text).toContain('"Oat Milk"');
-      });
-  });
-
-  it('registers a verified Indonesian customer and restores profile', async () => {
-    const phone = `0812${Date.now().toString().slice(-7)}`;
+  async function registerCustomer() {
+    userSequence += 1;
+    const suffix = (Date.now() + userSequence).toString().slice(-7);
+    const phone = `0812${suffix}`;
 
     const requested = await request(app.getHttpServer())
       .post('/v1/auth/otp/request')
@@ -94,11 +76,45 @@ describe('Fusionify Coffee API (e2e)', () => {
       })
       .expect(201);
 
-    const accessToken = registered.body.accessToken as string;
+    return {
+      accessToken: registered.body.accessToken as string,
+      user: registered.body.user as {
+        id: string;
+        fullName: string;
+        phoneCountry: string;
+        phoneVerified: boolean;
+        preferredLanguage: string;
+      },
+    };
+  }
+
+  it('/v1/health (GET)', () => {
+    return request(app.getHttpServer()).get('/v1/health').expect(200).expect({
+      status: 'ok',
+      service: 'fusionify-coffee-api',
+    });
+  });
+
+  it('/v1/catalog/preview (GET) reads seeded PostgreSQL data', () => {
+    return request(app.getHttpServer())
+      .get('/v1/catalog/preview')
+      .expect(200)
+      .then((response) => {
+        expect(response.text).toContain('"preview":true');
+        expect(response.text).toContain('"aren-latte"');
+        expect(response.text).toContain(
+          '"Database-backed development fixture."',
+        );
+        expect(response.text).toContain('"Oat Milk"');
+      });
+  });
+
+  it('registers a verified Indonesian customer and restores profile', async () => {
+    const registered = await registerCustomer();
 
     const profile = await request(app.getHttpServer())
       .get('/v1/account/me')
-      .set('Authorization', `Bearer ${accessToken}`)
+      .set('Authorization', `Bearer ${registered.accessToken}`)
       .expect(200);
 
     expect(profile.body.fullName).toBe('Fusionify Test User');
@@ -107,7 +123,19 @@ describe('Fusionify Coffee API (e2e)', () => {
     expect(profile.body.preferredLanguage).toBe('ID_ID');
   });
 
+  it('/v1/orders (POST) requires authentication', async () => {
+    await request(app.getHttpServer())
+      .post('/v1/orders')
+      .set('Idempotency-Key', `unauthenticated-${Date.now()}`)
+      .send({
+        outletId: 'preview-outlet',
+        items: [],
+      })
+      .expect(401);
+  });
+
   it('/v1/orders (POST) prices the cart on the server idempotently', async () => {
+    const registered = await registerCustomer();
     const checkoutKey = `checkout-e2e-${Date.now()}`;
     const body = {
       outletId: 'preview-outlet',
@@ -128,6 +156,7 @@ describe('Fusionify Coffee API (e2e)', () => {
 
     const created = await request(app.getHttpServer())
       .post('/v1/orders')
+      .set('Authorization', `Bearer ${registered.accessToken}`)
       .set('Idempotency-Key', checkoutKey)
       .send(body)
       .expect(201);
@@ -141,6 +170,7 @@ describe('Fusionify Coffee API (e2e)', () => {
 
     const repeated = await request(app.getHttpServer())
       .post('/v1/orders')
+      .set('Authorization', `Bearer ${registered.accessToken}`)
       .set('Idempotency-Key', checkoutKey)
       .send(body)
       .expect(201);
@@ -150,9 +180,11 @@ describe('Fusionify Coffee API (e2e)', () => {
   });
 
   it('fails payment creation safely when AutoGoPay is not configured', async () => {
+    const registered = await registerCustomer();
     const checkoutKey = `payment-order-e2e-${Date.now()}`;
     const created = await request(app.getHttpServer())
       .post('/v1/orders')
+      .set('Authorization', `Bearer ${registered.accessToken}`)
       .set('Idempotency-Key', checkoutKey)
       .send({
         outletId: 'preview-outlet',
@@ -175,12 +207,14 @@ describe('Fusionify Coffee API (e2e)', () => {
 
     await request(app.getHttpServer())
       .post(`/v1/orders/${order.id}/payments`)
+      .set('Authorization', `Bearer ${registered.accessToken}`)
       .set('Idempotency-Key', `payment-e2e-${Date.now()}`)
       .send({ channel: 'GOPAY_QRIS' })
       .expect(503);
 
     const refreshed = await request(app.getHttpServer())
       .get(`/v1/orders/${order.id}`)
+      .set('Authorization', `Bearer ${registered.accessToken}`)
       .expect(200);
     const refreshedBody = refreshed.body as {
       payments: Array<{ status: string }>;
@@ -191,8 +225,11 @@ describe('Fusionify Coffee API (e2e)', () => {
   });
 
   it('/v1/orders (POST) rejects missing required modifiers', async () => {
+    const registered = await registerCustomer();
+
     await request(app.getHttpServer())
       .post('/v1/orders')
+      .set('Authorization', `Bearer ${registered.accessToken}`)
       .set('Idempotency-Key', `invalid-e2e-${Date.now()}`)
       .send({
         outletId: 'preview-outlet',
