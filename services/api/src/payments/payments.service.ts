@@ -201,11 +201,11 @@ export class PaymentsService {
     const status = prismaStatus[result.state];
     const paidAt =
       status === PaymentStatus.PAID
-        ? result.paidAt ?? payment.paidAt ?? new Date()
+        ? (result.paidAt ?? payment.paidAt ?? new Date())
         : payment.paidAt;
     const cancelledAt =
       status === PaymentStatus.CANCELLED
-        ? payment.cancelledAt ?? new Date()
+        ? (payment.cancelledAt ?? new Date())
         : payment.cancelledAt;
 
     const updated = await this.prisma.$transaction(async (tx) => {
@@ -222,10 +222,8 @@ export class PaymentsService {
           providerRefNo: result.refNo ?? payment.providerRefNo,
           providerQrString: result.qrString ?? payment.providerQrString,
           providerQrUrl: result.qrUrl ?? payment.providerQrUrl,
-          providerCheckoutUrl:
-            result.checkoutUrl ?? payment.providerCheckoutUrl,
-          providerExpiryTime:
-            result.expiryTime ?? payment.providerExpiryTime,
+          providerCheckoutUrl: result.checkoutUrl ?? payment.providerCheckoutUrl,
+          providerExpiryTime: result.expiryTime ?? payment.providerExpiryTime,
           paidAt,
           cancelledAt,
         },

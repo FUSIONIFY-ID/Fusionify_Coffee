@@ -54,7 +54,9 @@ export class OrdersService {
       },
     });
 
-    const productMap = new Map(products.map((product) => [product.id, product]));
+    const productMap = new Map(
+      products.map((product) => [product.id, product]),
+    );
 
     const pricedItems = input.items.map((item) => {
       const product = productMap.get(item.productId);

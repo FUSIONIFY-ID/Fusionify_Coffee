@@ -4,6 +4,14 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 
+type OrderResponse = {
+  id: string;
+  status: string;
+  subtotal: number;
+  totalAmount: number;
+  items: Array<{ unitPrice: number }>;
+};
+
 describe('Fusionify Coffee API (e2e)', () => {
   let app: INestApplication<App>;
 
@@ -61,20 +69,22 @@ describe('Fusionify Coffee API (e2e)', () => {
       .set('Idempotency-Key', checkoutKey)
       .send(body)
       .expect(201);
+    const createdBody = created.body as OrderResponse;
 
-    expect(created.body.status).toBe('AWAITING_PAYMENT');
-    expect(created.body.subtotal).toBe(56000);
-    expect(created.body.totalAmount).toBe(56000);
-    expect(created.body.items).toHaveLength(1);
-    expect(created.body.items[0].unitPrice).toBe(28000);
+    expect(createdBody.status).toBe('AWAITING_PAYMENT');
+    expect(createdBody.subtotal).toBe(56000);
+    expect(createdBody.totalAmount).toBe(56000);
+    expect(createdBody.items).toHaveLength(1);
+    expect(createdBody.items[0].unitPrice).toBe(28000);
 
     const repeated = await request(app.getHttpServer())
       .post('/v1/orders')
       .set('Idempotency-Key', checkoutKey)
       .send(body)
       .expect(201);
+    const repeatedBody = repeated.body as OrderResponse;
 
-    expect(repeated.body.id).toBe(created.body.id);
+    expect(repeatedBody.id).toBe(createdBody.id);
   });
 
   it('/v1/orders (POST) rejects missing required modifiers', async () => {

@@ -17,19 +17,20 @@ describe('AutoGoPayGoPayProvider', () => {
   it('normalizes a generated QRIS response', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue({
       ok: true,
-      json: async () => ({
-        success: true,
-        data: {
-          transaction_id: 'trx-1',
-          order_id: 'provider-order-1',
-          amount: 28000,
-          transaction_status: 'pending',
-          qr_string: '000201-test',
-          qr_url: 'https://example.invalid/qr.png',
-          checkout_url: 'https://example.invalid/pay',
-          expiry_time: '2026-08-28 15:00:00',
-        },
-      }),
+      json: () =>
+        Promise.resolve({
+          success: true,
+          data: {
+            transaction_id: 'trx-1',
+            order_id: 'provider-order-1',
+            amount: 28000,
+            transaction_status: 'pending',
+            qr_string: '000201-test',
+            qr_url: 'https://example.invalid/qr.png',
+            checkout_url: 'https://example.invalid/pay',
+            expiry_time: '2026-08-28 15:00:00',
+          },
+        }),
     } as Response);
 
     const provider = new AutoGoPayGoPayProvider();

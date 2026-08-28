@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Headers,
-  Param,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderInput } from './orders.types';
 
