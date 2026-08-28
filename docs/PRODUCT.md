@@ -72,6 +72,17 @@ Delivery will include:
 
 Maps and courier/logistics providers are separate concerns.
 
+## Localization
+
+The customer application currently supports:
+- Bahasa Indonesia
+- Bahasa Melayu
+- English
+
+Changing language updates customer UI copy and requests localized catalog content from the backend. Dynamic catalog data such as outlet notes, categories, product descriptions, modifier groups, and modifier options must be translated at the data layer rather than hardcoded in Flutter.
+
+Fallback behavior must remain safe: missing translations fall back to the stored default text rather than hiding the product or inventing copy.
+
 ## Loyalty
 
 Fusion Points and membership are separate systems.
