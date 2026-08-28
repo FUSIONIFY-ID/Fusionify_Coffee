@@ -42,7 +42,7 @@ class LanguageScreen extends ConsumerWidget {
                   await ref
                       .read(authControllerProvider.notifier)
                       .syncLanguage(value);
-                } catch {
+                } catch (_) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
