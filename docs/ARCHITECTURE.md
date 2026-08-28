@@ -9,7 +9,7 @@ Flutter Customer App
   v
 NestJS API
   |
-  +-- Auth / Accounts / Catalog / Orders / Payments
+  +-- Customer Auth / Staff Auth / Accounts / Catalog / Orders / Payments
   |
   v
 Prisma 7 + @prisma/adapter-pg
@@ -202,6 +202,24 @@ Order:
 
 Payment and fulfillment state remain separate.
 
+## Staff Operations Boundary
+
+```text
+Staff Interface
+ -> staff password challenge
+ -> TOTP
+ -> staff access session
+ -> RBAC permission guard
+ -> outlet scope
+ -> staff order queue/detail
+ -> sequential status transition
+ -> OrderStatusEvent + StaffAuditLog
+```
+
+Customer and staff identities are separate silos. Outlet-scoped roles cannot read or mutate another outlet's orders.
+
+Fulfillment status is persisted as an event history rather than inferred from `Order.updatedAt`.
+
 ## Realtime
 
 Current payment UI polls local Fusionify state.
@@ -211,7 +229,6 @@ Future realtime/socket/push updates are an optimization and must not replace aut
 ## Operations / Future Modules
 
 Create modules only when implementation begins:
-- POS/KDS
 - rewards
 - vouchers
 - inventory/procurement/assets

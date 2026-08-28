@@ -70,24 +70,26 @@ Status: **Partially in progress**
 Implemented:
 - authenticated customer order history API
 - Flutter order history
+- Flutter order detail + persisted status timeline
 - separate staff/admin identity model
 - staff password + TOTP authenticator login
 - staff access/refresh sessions
 - staff RBAC permission foundation
 - staff audit log foundation
 - server-side initial SUPER_ADMIN bootstrap
-- e2e staff TOTP/RBAC validation
+- staff management lifecycle APIs
+- outlet-scoped staff order queue/detail APIs
+- strict fulfillment transitions
+- PREPARING
+- READY
+- PICKED_UP
+- COMPLETED
+- e2e staff management, outlet scope, fulfillment, TOTP, and RBAC validation
 
 Remaining:
-- order detail
-- order tracking
-- staff-managed order state transitions
-- POS/KDS minimum flow
-- preparing
-- ready
-- picked up
-- completed
-- staff management lifecycle
+- POS/KDS staff interface
+- staff/admin management UI
+- realtime/push order status delivery
 - rewards ledger
 - Fusion Points earning
 

@@ -7,7 +7,7 @@ Last updated: 2026-08-28
 - Repository: `FUSIONIFY-ID/Fusionify_Coffee`
 - Default branch: `main`
 - Visibility: public
-- Latest fully validated implementation head: `a139346b5dab4d5cb53bfa8b6eb5c02356cefd56`
+- Latest fully validated implementation head: `383ebd276d3a6f9ca0bbcc169e5767dbbc721c86`
 
 ## Current Milestone
 
@@ -94,6 +94,51 @@ Initial staff bootstrap:
 - `npm run staff:bootstrap`
 - requires server-side bootstrap environment values
 - first login requires TOTP enrollment
+
+### Staff Management
+- privileged staff can create/list/update staff accounts
+- outlet-scoped roles require a valid outlet assignment
+- role/status/outlet security changes revoke active target sessions
+- privileged password reset revokes sessions/challenges
+- privileged TOTP reset revokes sessions/challenges and requires re-enrollment
+- last active SUPER_ADMIN cannot be removed/suspended/demoted
+- ordinary staff cannot access staff-management endpoints
+- management actions are written to staff audit log
+
+Implemented management APIs:
+- `GET /v1/staff/users`
+- `POST /v1/staff/users`
+- `PATCH /v1/staff/users/:staffUserId`
+- `POST /v1/staff/users/:staffUserId/reset-password`
+- `POST /v1/staff/users/:staffUserId/reset-totp`
+
+### Fulfillment + Order Tracking
+- persisted `OrderStatusEvent` timeline
+- payment confirmation records AWAITING_PAYMENT -> CONFIRMED
+- staff fulfillment flow is strictly sequential:
+  - CONFIRMED -> PREPARING
+  - PREPARING -> READY
+  - READY -> PICKED_UP
+  - PICKED_UP -> COMPLETED
+- invalid status jumps return conflict
+- concurrent transitions are guarded
+- outlet-scoped staff cannot read or mutate orders from other outlets
+- every staff status transition is audited
+- customer Order Detail shows real persisted timeline rather than synthesized progress
+
+Implemented staff order APIs:
+- `GET /v1/staff/orders`
+- `GET /v1/staff/orders/:orderId`
+- `POST /v1/staff/orders/:orderId/status`
+
+Implemented customer UI:
+- tappable order-history cards
+- order detail
+- item/modifier breakdown
+- current status
+- persisted fulfillment timeline
+- pull-to-refresh
+- ID/MS/EN status/detail copy
 
 ### Localization
 - Bahasa Indonesia (`id-ID` / `ID_ID`)
@@ -223,7 +268,7 @@ See:
 
 ## Validation Evidence
 
-GitHub Actions run `33166925122` for implementation head `a139346b5dab4d5cb53bfa8b6eb5c02356cefd56`: **PASS**
+GitHub Actions run `33175076828` for implementation head `383ebd276d3a6f9ca0bbcc169e5767dbbc721c86`: **PASS**
 
 Customer:
 - Dart format: PASS
@@ -260,6 +305,11 @@ Automated validation covers:
 - staff session creation
 - staff RBAC denial for insufficient permission
 - staff audit-log access for authorized role
+- staff-management RBAC
+- outlet-scoped staff order access
+- rejection of invalid fulfillment status jumps
+- sequential PREPARING -> READY -> PICKED_UP -> COMPLETED transitions
+- persisted customer-visible order status timeline
 - provider QR response normalization with mocked fetch
 - raw-body HMAC webhook verification
 - Flutter payment model parsing
@@ -313,11 +363,9 @@ Current rule:
 - production catalog/media
 - scheduled pickup
 - realtime socket/push delivery of payment changes
-- order detail/tracking UI
+- realtime/push order tracking updates
 - staff/admin management UI
-- staff invitation/creation lifecycle beyond initial bootstrap
-- staff TOTP recovery/reset operator procedure
-- POS/KDS
+- POS/KDS staff interface
 - Fusion Points
 - membership
 - vouchers
@@ -345,14 +393,16 @@ Current rule:
 Implemented:
 - authenticated customer order history API
 - Flutter Orders history tab
+- customer Order Detail + persisted fulfillment timeline
 - staff/admin identity silo
 - staff password + TOTP authentication
 - staff RBAC + audit foundation
+- staff management lifecycle APIs
+- outlet-scoped staff order APIs
+- sequential fulfillment transitions through COMPLETED
 
 Next:
-- order detail
-- staff-managed order transition API
-- CONFIRMED -> PREPARING -> READY -> PICKED_UP -> COMPLETED
-- POS/KDS minimum workflow
-- staff management lifecycle
+- POS/KDS staff interface
+- staff/admin management UI
+- realtime/push order updates
 - Fusion Points ledger/earning
