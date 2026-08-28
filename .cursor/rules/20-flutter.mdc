@@ -1,0 +1,26 @@
+---
+description: Flutter customer application engineering rules
+globs: ["apps/customer/**/*.dart", "apps/customer/**/pubspec.yaml", "apps/customer/android/**", "apps/customer/ios/**"]
+alwaysApply: false
+---
+
+Follow `AGENTS.md`, `docs/ARCHITECTURE.md`, and Android/iOS platform docs.
+
+Flutter baseline:
+- Flutter + Dart
+- Riverpod
+- GoRouter
+- Dio
+- Feature-based modules
+- Android minSdk 28, compileSdk 36, targetSdk 36
+
+Rules:
+- Keep widgets small and composable for actual reasons, not arbitrary line counts.
+- Keep business logic outside presentation widgets.
+- Never hardcode provider secrets.
+- Do not add Android permissions without product justification.
+- Use secure platform storage for sensitive session material.
+- Preserve iOS compatibility unless the task explicitly changes platform support.
+- Prefer native/system pickers where they reduce permissions.
+- Add semantics/accessibility where meaningful.
+- Use loading, empty, error, and retry states where network operations exist.
