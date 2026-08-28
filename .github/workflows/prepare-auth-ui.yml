@@ -25,11 +25,11 @@ jobs:
         working-directory: apps/customer
         run: flutter pub get
 
-      - name: Format source
+      - name: Format customer source
         working-directory: apps/customer
         run: dart format lib test
 
-      - name: Analyze
+      - name: Analyze customer
         working-directory: apps/customer
         run: flutter analyze
 
@@ -41,13 +41,31 @@ jobs:
         working-directory: apps/customer
         run: flutter test
 
-      - name: Commit lockfile, formatting, and golden
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: services/api/package-lock.json
+
+      - name: Resolve API dependencies
+        working-directory: services/api
+        run: npm ci
+
+      - name: Format auth backend
+        working-directory: services/api
+        run: npx prettier --write "src/auth/**/*.ts" "src/app.module.ts"
+
+      - name: Lint auth backend
+        working-directory: services/api
+        run: npm run lint
+
+      - name: Commit generated changes
         run: |
-          if git status --porcelain apps/customer | grep . >/dev/null; then
+          if git status --porcelain apps/customer services/api/src/auth services/api/src/app.module.ts | grep . >/dev/null; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add apps/customer
-            git commit -m "chore: resolve auth UI dependencies and golden"
+            git add apps/customer services/api/src/auth services/api/src/app.module.ts
+            git commit -m "style: normalize auth UI and backend"
             git push
           else
             echo "No generated changes."
