@@ -13,37 +13,56 @@ Roadmap items describe planned sequencing, not completed work.
 
 ## Milestone 0.1: Ordering Foundation
 
+Status: **Complete**
+
 - Flutter Android/iOS scaffold
 - Backend scaffold
-- App theme/tokens
-- Navigation
+- Material 3 theme/tokens
+- Adaptive navigation
 - Outlet model
 - Categories
 - Products
 - Dynamic modifier groups/options
 - Product detail/customization
 - Cart
+- Dio/Riverpod API boundary
+- Prisma 7 PostgreSQL adapter
+- Initial migration
+- Development seed
+- Database-backed catalog
+- CI against PostgreSQL
 
 Success condition:
-A product can be configured and added to cart as a distinct configuration.
+A product can be configured and added to cart as a distinct configuration using a database-backed development catalog.
 
 ## Milestone 0.2: Pickup Checkout + Payment
 
+Status: **Next**
+
 - Pickup outlet context
-- Order creation
-- Checkout
-- AutoGoPay provider adapter
+- Server-authoritative cart/checkout validation
+- Order + OrderItem persistence
+- Payment persistence
+- Order state machine
+- Payment state machine
+- Payment provider abstraction
+- Payment channel capabilities
+- AutoGoPay GoPay QRIS adapter as first channel
 - QRIS generation
 - Native QR payment presentation
 - Payment status endpoint
-- Webhook verification
-- Idempotency
+- Raw-body webhook HMAC verification
+- Webhook/status idempotency
 - Realtime/fallback reconciliation
-- Pending payment cancel
+- Pending payment cancel when supported
 - Expiry
+- App background/resume reconciliation
+- Channel-specific external references
+- Preparation for ShopeePay/QRIS Interactive
+- Backend polling strategy for QRIS Interactive if enabled
 
 Success condition:
-A customer can place and pay for a pickup order, with server-authoritative automatic payment detection.
+A customer can place and pay for a pickup order, with server-authoritative automatic payment detection and safe recovery after missed realtime/webhook events.
 
 ## Milestone 0.3: Fulfillment + Fusion Points
 
@@ -106,6 +125,7 @@ A customer can place and pay for a pickup order, with server-authoritative autom
 ## Release Readiness
 
 Before production:
+- Re-validate payment provider operational/legal terms
 - Android Play policy re-check
 - iOS App Store policy re-check
 - Privacy policy
