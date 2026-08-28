@@ -1,5 +1,7 @@
 name: CI
 
+# Validates the formatted API-backed Material 3 customer foundation.
+
 on:
   push:
     paths:
