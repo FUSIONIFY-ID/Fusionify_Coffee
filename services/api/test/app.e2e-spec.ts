@@ -73,6 +73,36 @@ type StaffMeResponse = {
   permissions: string[];
 };
 
+type StaffUserViewResponse = {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
+  outletId: string | null;
+  totpEnabled: boolean;
+};
+
+type StaffOrderResponse = {
+  id: string;
+  status: string;
+  outletId: string;
+  statusEvents: Array<{
+    fromStatus: string | null;
+    toStatus: string;
+    note: string | null;
+  }>;
+};
+
+type CustomerOrderDetailResponse = {
+  id: string;
+  status: string;
+  statusEvents: Array<{
+    fromStatus: string | null;
+    toStatus: string;
+    note: string | null;
+  }>;
+};
+
 describe('Fusionify Coffee API (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
@@ -88,7 +118,10 @@ describe('Fusionify Coffee API (e2e)', () => {
     await app.init();
   });
 
-  async function createAndLoginStaff(role: StaffRole) {
+  async function createAndLoginStaff(
+    role: StaffRole,
+    outletId?: string,
+  ) {
     userSequence += 1;
     const email = `staff-${Date.now()}-${userSequence}@example.com`;
     const password = 'Fusionify-Staff-2026';
@@ -99,6 +132,7 @@ describe('Fusionify Coffee API (e2e)', () => {
         fullName: 'Fusionify Staff Test',
         passwordHash: await hashPassword(password),
         role,
+        outletId,
       },
     });
 
@@ -274,6 +308,161 @@ describe('Fusionify Coffee API (e2e)', () => {
       .get('/v1/staff/audit-logs')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .expect(403);
+  });
+
+  it('lets privileged staff manage accounts and blocks ordinary staff', async () => {
+    const admin = await createAndLoginStaff(StaffRole.SUPER_ADMIN);
+
+    const createdResponse = await request(app.getHttpServer())
+      .post('/v1/staff/users')
+      .set('Authorization', `Bearer ${admin.accessToken}`)
+      .send({
+        fullName: 'Preview Cashier',
+        email: `cashier-${Date.now()}-${userSequence}@example.com`,
+        role: 'CASHIER',
+        outletId: 'preview-outlet',
+        initialPassword: 'Fusionify-Cashier-2026',
+      })
+      .expect(201);
+
+    const created =
+      createdResponse.body as unknown as StaffUserViewResponse;
+    expect(created.role).toBe('CASHIER');
+    expect(created.status).toBe('ACTIVE');
+    expect(created.outletId).toBe('preview-outlet');
+    expect(created.totpEnabled).toBe(false);
+
+    const listResponse = await request(app.getHttpServer())
+      .get('/v1/staff/users')
+      .set('Authorization', `Bearer ${admin.accessToken}`)
+      .expect(200);
+
+    const staffList =
+      listResponse.body as unknown as StaffUserViewResponse[];
+    expect(staffList.some((staff) => staff.id === created.id)).toBe(true);
+
+    const cashier = await createAndLoginStaff(
+      StaffRole.CASHIER,
+      'preview-outlet',
+    );
+
+    await request(app.getHttpServer())
+      .get('/v1/staff/users')
+      .set('Authorization', `Bearer ${cashier.accessToken}`)
+      .expect(403);
+  });
+
+  it('enforces sequential outlet-scoped fulfillment transitions', async () => {
+    const registered = await registerCustomer();
+    const created = await request(app.getHttpServer())
+      .post('/v1/orders')
+      .set('Authorization', `Bearer ${registered.accessToken}`)
+      .set('Idempotency-Key', `fulfillment-e2e-${Date.now()}`)
+      .send({
+        outletId: 'preview-outlet',
+        items: [
+          {
+            productId: 'aren-latte',
+            quantity: 1,
+            modifierOptionIds: [
+              'aren-latte-size-regular',
+              'aren-latte-temperature-iced',
+              'aren-latte-sugar-sugar-50',
+              'aren-latte-ice-normal-ice',
+              'aren-latte-milk-fresh-milk',
+            ],
+          },
+        ],
+      })
+      .expect(201);
+
+    const order = created.body as unknown as OrderResponse;
+
+    await prisma.$transaction([
+      prisma.order.update({
+        where: { id: order.id },
+        data: { status: 'CONFIRMED' },
+      }),
+      prisma.orderStatusEvent.create({
+        data: {
+          orderId: order.id,
+          fromStatus: 'AWAITING_PAYMENT',
+          toStatus: 'CONFIRMED',
+          note: 'E2E simulated paid order.',
+        },
+      }),
+    ]);
+
+    const barista = await createAndLoginStaff(
+      StaffRole.BARISTA,
+      'preview-outlet',
+    );
+
+    const preparingResponse = await request(app.getHttpServer())
+      .post(`/v1/staff/orders/${order.id}/status`)
+      .set('Authorization', `Bearer ${barista.accessToken}`)
+      .send({ toStatus: 'PREPARING', note: 'Started by barista.' })
+      .expect(201);
+    const preparing =
+      preparingResponse.body as unknown as StaffOrderResponse;
+
+    expect(preparing.status).toBe('PREPARING');
+
+    await request(app.getHttpServer())
+      .post(`/v1/staff/orders/${order.id}/status`)
+      .set('Authorization', `Bearer ${barista.accessToken}`)
+      .send({ toStatus: 'COMPLETED' })
+      .expect(409);
+
+    for (const status of ['READY', 'PICKED_UP', 'COMPLETED']) {
+      await request(app.getHttpServer())
+        .post(`/v1/staff/orders/${order.id}/status`)
+        .set('Authorization', `Bearer ${barista.accessToken}`)
+        .send({ toStatus: status })
+        .expect(201);
+    }
+
+    const customerOrderResponse = await request(app.getHttpServer())
+      .get(`/v1/orders/${order.id}`)
+      .set('Authorization', `Bearer ${registered.accessToken}`)
+      .expect(200);
+    const customerOrder =
+      customerOrderResponse.body as unknown as CustomerOrderDetailResponse;
+
+    expect(customerOrder.status).toBe('COMPLETED');
+    expect(customerOrder.statusEvents.map((event) => event.toStatus)).toEqual([
+      'CONFIRMED',
+      'PREPARING',
+      'READY',
+      'PICKED_UP',
+      'COMPLETED',
+    ]);
+
+    await prisma.outlet.upsert({
+      where: { id: 'other-e2e-outlet' },
+      update: {},
+      create: {
+        id: 'other-e2e-outlet',
+        name: 'Other E2E Outlet',
+        pickupEnabled: true,
+      },
+    });
+
+    const otherOrder = await prisma.order.create({
+      data: {
+        checkoutKey: `other-outlet-${Date.now()}-${userSequence}`,
+        userId: registered.user.id,
+        outletId: 'other-e2e-outlet',
+        status: 'CONFIRMED',
+        subtotal: 10000,
+        totalAmount: 10000,
+      },
+    });
+
+    await request(app.getHttpServer())
+      .get(`/v1/staff/orders/${otherOrder.id}`)
+      .set('Authorization', `Bearer ${barista.accessToken}`)
+      .expect(404);
   });
 
   it('/v1/orders (POST) requires authentication', async () => {
