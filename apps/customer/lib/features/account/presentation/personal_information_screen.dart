@@ -16,7 +16,7 @@ class PersonalInformationScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(strings.personalInformation)),
       body: profile == null
-          ? const Center(child: Text('Account session is not available.'))
+          ? Center(child: Text(strings.accountSessionUnavailable))
           : ListView(
               padding: const EdgeInsets.all(CoffeeSpacing.md),
               children: [
@@ -27,12 +27,12 @@ class PersonalInformationScreen extends ConsumerWidget {
                   verified: profile.phoneVerified,
                 ),
                 _InfoRow(
-                  label: 'Email',
+                  label: strings.email,
                   value: profile.email ?? '—',
                 ),
                 _InfoRow(
                   label: strings.country,
-                  value: profile.phoneCountry == 'MY' ? 'Malaysia' : 'Indonesia',
+                  value: profile.phoneCountry == 'MY' ? strings.malaysia : strings.indonesia,
                 ),
               ],
             ),

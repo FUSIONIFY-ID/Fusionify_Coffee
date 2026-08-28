@@ -259,7 +259,7 @@ class _MemberCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Fusion Member',
+                    strings.fusionMember,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: CoffeeSpacing.xxs),

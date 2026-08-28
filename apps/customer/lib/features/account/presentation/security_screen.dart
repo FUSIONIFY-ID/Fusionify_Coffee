@@ -34,7 +34,7 @@ class SecurityScreen extends ConsumerWidget {
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.password_outlined),
             title: Text(strings.password),
-            subtitle: const Text('Password authentication enabled'),
+            subtitle: Text(strings.passwordAuthenticationEnabled),
           ),
           const SizedBox(height: CoffeeSpacing.xl),
           OutlinedButton.icon(
