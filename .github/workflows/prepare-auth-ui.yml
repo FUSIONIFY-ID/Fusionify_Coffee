@@ -58,6 +58,10 @@ jobs:
         working-directory: services/api
         run: npm ci
 
+      - name: Generate Prisma client
+        working-directory: services/api
+        run: npm run prisma:generate
+
       - name: Format auth backend
         working-directory: services/api
         run: npx prettier --write "src/auth/**/*.ts" "src/app.module.ts"
