@@ -31,6 +31,11 @@ export class OrdersController {
     );
   }
 
+  @Get()
+  list(@Req() request: AuthenticatedRequest) {
+    return this.ordersService.listForUser(request.auth!.userId);
+  }
+
   @Get(':orderId')
   getById(
     @Req() request: AuthenticatedRequest,

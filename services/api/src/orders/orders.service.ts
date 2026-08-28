@@ -174,6 +174,29 @@ export class OrdersService {
     }
   }
 
+  async listForUser(userId: string) {
+    return this.prisma.order.findMany({
+      where: { userId },
+      include: {
+        outlet: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        items: {
+          orderBy: { createdAt: 'asc' },
+        },
+        payments: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+  }
+
   async getById(orderId: string, userId: string) {
     const order = await this.prisma.order.findFirst({
       where: { id: orderId, userId },
