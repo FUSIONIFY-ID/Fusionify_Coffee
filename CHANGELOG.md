@@ -1,8 +1,6 @@
 # Changelog
 
-All notable project changes will be documented here when implementation begins.
-
-The format is based on meaningful product and engineering milestones rather than generated commit noise.
+All notable project changes are documented by meaningful product and engineering milestones rather than generated commit noise.
 
 ## Unreleased
 
@@ -17,14 +15,26 @@ The format is based on meaningful product and engineering milestones rather than
 - Android API 28/36, permission, Play, and signing policy
 - iOS platform direction
 - AutoGoPay/payment and maps integration planning
-- Menu/modifier, pickup, delivery, loyalty, inventory, and digital-benefit docs
 - Initial architecture decision records
+- Flutter 3.47 Android/iOS customer application scaffold
+- Riverpod, GoRouter, and Dio customer stack
+- Fusionify Coffee app shell and solid-color design tokens
+- Preview outlet, menu, category, product customization, and cart flow
+- Size, temperature, sugar, ice, milk, and add-on modifiers
+- Modifier-aware cart identity and subtotal behavior
+- NestJS 11 + Node 24 API scaffold
+- Prisma/PostgreSQL catalog schema foundation
+- Health and preview catalog endpoints
+- Flutter and API tests
+- CI for Flutter format/analyze/test and API lint/unit/e2e/build
 - Repository policy CI including no-gradient enforcement and signing/secret-file checks
 
 ### Changed
 
-- None
+- Removed Flutter/Nest generic project README content
+- Android release no longer uses the debug signing key
 
 ### Fixed
 
-- None
+- Corrected Flutter router model import and dynamic preview outlet const usage discovered by CI
+- Bootstrap workflow now installs API dependencies before backend validation

@@ -10,33 +10,58 @@ Last updated: 2026-08-28
 
 ## Current Milestone
 
-Foundation complete. Next implementation milestone is 0.1.
+Milestone 0.1 ordering foundation is implemented as a development preview.
 
-The repository now contains product, engineering, design, platform, security, payment, project-memory, and AI-agent rules before application scaffolding begins.
+The app and API are scaffolded and validated. The customer app currently uses explicitly labeled local preview catalog data. Flutter is not yet wired to the backend preview endpoint or PostgreSQL.
 
 ## Completed
 
-- Repository created and write access verified
-- README initialized
-- Primary `AGENTS.md` policy
-- Claude, Gemini, Copilot, and Cursor repository guidance
-- Claude project skills for checkpointing, UI review, Android release, payment review, and docs sync
-- Contribution and security policies
-- Issue and pull-request templates
-- Secret and Android signing ignore policy
-- Repository policy CI for tracked signing files, secret-like env files, and no-gradient UI enforcement
-- Product vision and domain documentation
-- Architecture documentation
-- Design system and brand/asset direction
-- Engineering standards and testing policy
-- Privacy data-map planning
-- Android API/Play/permission/signing documentation
-- iOS platform direction
-- Payment abstraction and AutoGoPay integration planning
-- Maps/location planning
-- Menu/modifier, pickup, delivery, loyalty, inventory, and digital-benefit documentation
-- Initial accepted ADRs
-- Documentation index
+### Repository Foundation
+- Repository rules and `AGENTS.md`
+- Claude, Gemini, Copilot, and Cursor guidance
+- Project skills and project-memory workflow
+- Security/contribution templates
+- No-gradient and signing/secret repository policy
+
+### Customer App
+- Flutter 3.47 Android+iOS scaffold
+- Riverpod 3.4.2
+- GoRouter 18
+- Dio 5.11
+- Android minSdk 28, compileSdk 36, targetSdk 36
+- Material 3 app shell
+- Solid-color Fusionify design tokens
+- Bottom navigation
+- Preview outlet context
+- Menu/category browsing
+- Product detail
+- Dynamic development modifier groups for size, temperature, sugar, ice, milk, and add-ons
+- Modifier-aware price calculation
+- Cart item identity by product configuration
+- Quantity increment/decrement/remove
+- Cart subtotal
+- Honest disabled states for checkout/delivery/rewards/auth not implemented yet
+- Flutter widget test
+- Cart controller unit test
+
+### Backend
+- Node.js 24 toolchain
+- NestJS 11 scaffold
+- Prisma 7 + PostgreSQL schema foundation
+- `GET /v1/health`
+- `GET /v1/catalog/preview`
+- Preview catalog tests
+- Initial Outlet, Category, Product, ModifierGroup, ModifierOption schema
+
+### CI
+- Flutter format check
+- Flutter analyze
+- Flutter tests
+- API lint
+- API unit tests
+- API e2e tests
+- API build
+- Repository policy checks
 
 ## Accepted Decisions
 
@@ -59,9 +84,9 @@ The repository now contains product, engineering, design, platform, security, pa
 - No vibe coding
 - No AI-style overengineering
 
-## Explicitly Not Final Yet
+## Explicitly Provisional / Not Final
 
-- Android application/package ID
+- Android generated application ID: `id.fusionify.coffee`
 - Official Fusionify Coffee logo assets
 - Coffee-specific warm accent palette
 - iOS minimum deployment target
@@ -71,27 +96,28 @@ The repository now contains product, engineering, design, platform, security, pa
 - Fusion Points earning/redemption rates
 - Refund provider/process
 
-Do not invent these as final decisions.
+Do not turn these into final decisions without explicit project approval.
+
+## Development Preview Data
+
+Current local Flutter catalog and `/v1/catalog/preview` data are intentionally fictional development fixtures.
+
+They are not production outlet, menu, pricing, popularity, or operational data.
 
 ## Not Implemented Yet
 
-No production application code has been scaffolded yet.
-
-Not implemented:
-- Flutter customer application
-- Backend API
+- Flutter-to-API catalog wiring
+- PostgreSQL persistence/migrations for live catalog
 - Authentication
-- Outlet discovery
-- Menu
-- Product modifiers
-- Cart
-- Pickup
-- Delivery
+- Real outlet discovery
+- Real product photography/assets
+- Pickup checkout
 - AutoGoPay integration
-- Payment webhook
+- Payment webhook/reconciliation
 - Order tracking
-- Rewards
+- Fusion Points ledger
 - Membership
+- Delivery/maps
 - POS
 - KDS
 - Inventory
@@ -99,50 +125,41 @@ Not implemented:
 - Assets/maintenance
 - Wi-Fi benefit
 - AI benefit
+- Production release signing
 
-## Next Milestone: 0.1
+## Next Work
 
-Goal:
+Complete Milestone 0.1 as a real data boundary:
+1. Add app configuration for API base URL.
+2. Add Dio API client and catalog repository.
+3. Expand preview API to return modifier groups/options.
+4. Wire Flutter catalog state to the backend with explicit loading/error/retry states.
+5. Add database service and initial migration when a PostgreSQL environment is defined.
+6. Replace preview imagery only after official assets/product media are available.
+7. Lock Android production package ID before generating the upload keystore.
 
-A customer can open the app, select/view an outlet, browse structured menu data, customize a product, and add distinct configurations to cart.
-
-Planned sequence:
-1. Scaffold Flutter customer app for Android and iOS.
-2. Apply Android API 28/36 baseline.
-3. Lock application/package ID before release-signing configuration becomes final.
-4. Create design tokens and app shell.
-5. Add navigation.
-6. Scaffold backend API.
-7. Model outlets, categories, products, modifier groups/options.
-8. Implement menu and product detail.
-9. Implement cart.
-10. Add relevant validation and tests.
-
-## Milestone 0.2
-
-Pickup checkout and AutoGoPay QRIS:
-- Create order
-- Create QRIS payment server-side
-- Native in-app payment screen
-- Check payment status
-- Automatic webhook detection
+After that, begin Milestone 0.2:
+- Pickup checkout
+- Server-calculated order
+- AutoGoPay QRIS
+- Automatic payment detection
 - Pending payment cancellation
-- Expiry handling
-- Reconciliation
+- Expiry/reconciliation
 
-## Milestone 0.3
+## Validation Evidence
 
-Fulfillment and rewards:
-- Confirmed
-- Preparing
-- Ready
-- Picked up
-- Completed
-- Fusion Points ledger and crediting
+Bootstrap validation after implementation:
+- Dart format: PASS
+- Flutter analyze: PASS, no issues found
+- Flutter tests: PASS, 2 tests
+- API dependencies install: PASS
+- API lint: PASS
+- API unit tests: PASS
+- API build: PASS
 
-## Validation State
+Repository policy:
+- Signing file check: PASS
+- Secret-like environment file check: PASS
+- No-gradient UI check: PASS
 
-Application tests: NOT RUN, application code does not exist yet.
-Static analysis: NOT RUN, application code does not exist yet.
-Android release validation: NOT RUN, Android project does not exist yet.
-Repository structure sanity check: PASS.
+API e2e validation is added to regular CI in the cleanup commit and must pass before this state is treated as fully green.

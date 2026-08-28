@@ -5,6 +5,7 @@ plugins {
 }
 
 android {
+    // Provisional until the production package ID is explicitly locked.
     namespace = "id.fusionify.coffee"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
@@ -15,25 +16,18 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // Provisional development identity. Do not register as final without project approval.
         applicationId = "id.fusionify.coffee"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 28
         targetSdk = 36
-        // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
-        // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
-        // You can force using the value of versionCode by specifying the `-P force-version-code-ignoring-abi=true`
-        // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Intentionally not signed with the debug key.
+            // Production release signing will use an untracked Fusionify upload keystore.
         }
     }
 }

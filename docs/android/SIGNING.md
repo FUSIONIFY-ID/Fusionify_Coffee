@@ -7,6 +7,14 @@ Use Google Play App Signing.
 Fusionify controls an upload key.
 Google Play protects and uses the app signing key for Play-distributed artifacts.
 
+## Current Repository State
+
+The Flutter scaffold currently has no production release signing configuration.
+
+The generated debug-key release signing shortcut was removed intentionally so a release is not accidentally treated as production-ready.
+
+Current generated Android application ID is `id.fusionify.coffee`, but it remains provisional until explicitly locked as the production package ID.
+
 ## Upload Key
 
 Suggested naming convention:
@@ -41,7 +49,7 @@ Use protected, independent storage. Do not keep the only copy on a development l
 
 ## Flutter Configuration Direction
 
-Release signing should load values from a local untracked configuration such as `key.properties` or CI secret storage.
+When the production package ID and upload key are ready, release signing should load values from an untracked local configuration such as `key.properties` or protected CI secret storage.
 
 Never hardcode signing passwords in Gradle source.
 
@@ -61,11 +69,16 @@ Do not assume they are interchangeable.
 
 Application/package ID must be explicitly approved and stabilized before Play production registration/signing configuration is treated as final.
 
-Do not invent a package ID in generated code without confirming the project decision.
+Do not register the provisional scaffold identity as final by accident.
 
 ## CI
 
-If CI produces signed release artifacts:
+Repository policy rejects:
+- Tracked `.jks` / `.keystore`
+- Tracked `android/key.properties`
+- Release configuration that explicitly uses the debug signing key
+
+If CI produces signed release artifacts in the future:
 - Store signing material in protected CI secrets
 - Reconstruct temporary keystore only for the job
 - Prevent logs from printing secrets

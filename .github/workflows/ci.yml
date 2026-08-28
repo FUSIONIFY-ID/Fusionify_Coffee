@@ -48,4 +48,5 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test -- --runInBand
+      - run: npm run test:e2e
       - run: npm run build

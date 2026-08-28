@@ -25,6 +25,16 @@ jobs:
             exit 1
           fi
 
+      - name: Reject debug signing for Android release
+        shell: bash
+        run: |
+          set -euo pipefail
+          file="apps/customer/android/app/build.gradle.kts"
+          if [ -f "$file" ] && grep -F 'signingConfigs.getByName("debug")' "$file"; then
+            echo "Release builds must never use the debug signing key."
+            exit 1
+          fi
+
       - name: Reject tracked secret environment files
         shell: bash
         run: |
