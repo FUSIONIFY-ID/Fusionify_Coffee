@@ -9,7 +9,11 @@ import { WebhooksController } from './webhooks.controller';
 
 @Module({
   imports: [AuthModule, StaffModule],
-  controllers: [PaymentsController, StaffPaymentsController, WebhooksController],
+  controllers: [
+    PaymentsController,
+    StaffPaymentsController,
+    WebhooksController,
+  ],
   providers: [PaymentsService, AutoGoPayGoPayProvider],
   exports: [PaymentsService],
 })
