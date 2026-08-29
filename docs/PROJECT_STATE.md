@@ -7,7 +7,7 @@ Last updated: 2026-08-28
 - Repository: `FUSIONIFY-ID/Fusionify_Coffee`
 - Default branch: `main`
 - Visibility: public
-- Latest fully validated implementation head: `383ebd276d3a6f9ca0bbcc169e5767dbbc721c86`
+- Latest fully validated implementation head: `6f38d81d56985dd320c8f7109cc1fef42d0a28aa`
 
 ## Current Milestone
 
@@ -140,6 +140,40 @@ Implemented customer UI:
 - pull-to-refresh
 - ID/MS/EN status/detail copy
 
+### Staff Operations Web / KDS
+- separate Next.js 16 staff-facing application under `apps/staff`
+- server-side BFF pattern between browser and Fusionify Coffee API
+- staff access/refresh tokens stay in HTTP-only same-site cookies
+- browser code does not store staff bearer tokens in localStorage/sessionStorage
+- server-side access-token refresh through the BFF
+- password + TOTP login UI
+- first-login authenticator setup UI
+- responsive KDS queue for:
+  - CONFIRMED
+  - PREPARING
+  - READY
+  - PICKED_UP
+- sequential fulfillment actions from the KDS
+- staff order detail with item/modifier breakdown
+- persisted fulfillment timeline
+- Team UI for privileged staff
+- create staff
+- suspend/reactivate staff
+- reset staff TOTP
+- responsive desktop/tablet/mobile layout
+- Fusionify blue design system
+- no gradients
+- staff dependency lockfile committed
+- CI validates `npm ci`, TypeScript strict typecheck, and `next build`
+
+Staff app runtime environment:
+- `FUSIONIFY_API_BASE_URL` is server-only
+- no `NEXT_PUBLIC` API origin is required
+
+Current delivery mechanism:
+- KDS polls the Fusionify API through the BFF every 10 seconds
+- realtime WebSocket/SSE/push is not implemented yet
+
 ### Localization
 - Bahasa Indonesia (`id-ID` / `ID_ID`)
 - Bahasa Melayu (`ms-MY` / `MS_MY`)
@@ -268,13 +302,18 @@ See:
 
 ## Validation Evidence
 
-GitHub Actions run `33175076828` for implementation head `383ebd276d3a6f9ca0bbcc169e5767dbbc721c86`: **PASS**
+GitHub Actions run `33227030852` for implementation head `6f38d81d56985dd320c8f7109cc1fef42d0a28aa`: **PASS**
 
 Customer:
 - Dart format: PASS
 - Flutter analyze: PASS
 - Flutter tests: PASS
 - Android debug APK build: PASS
+
+Staff Web:
+- npm ci: PASS
+- TypeScript strict typecheck: PASS
+- Next.js 16 production build: PASS
 
 API:
 - PostgreSQL 17 startup: PASS
@@ -364,8 +403,8 @@ Current rule:
 - scheduled pickup
 - realtime socket/push delivery of payment changes
 - realtime/push order tracking updates
-- staff/admin management UI
-- POS/KDS staff interface
+- realtime staff queue transport (WebSocket/SSE)
+- cashier POS order-entry interface
 - Fusion Points
 - membership
 - vouchers

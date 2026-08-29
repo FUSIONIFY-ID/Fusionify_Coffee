@@ -226,6 +226,33 @@ Current payment UI polls local Fusionify state.
 
 Future realtime/socket/push updates are an optimization and must not replace authoritative GET/reconciliation APIs.
 
+## Staff Web BFF Boundary
+
+```text
+Staff Browser
+  |
+  | same-origin /api/*
+  v
+Next.js Staff BFF
+  |
+  | HTTP-only access/refresh cookies
+  | server-side token refresh
+  v
+Fusionify Coffee API
+  |
+  | StaffAuthGuard + RBAC + outlet scope
+  v
+Orders / Staff Management / Audit
+```
+
+Rules:
+- staff bearer tokens are never persisted in browser localStorage/sessionStorage
+- `FUSIONIFY_API_BASE_URL` is server-only
+- browser requests use same-origin BFF route handlers
+- backend RBAC and outlet scope remain authoritative
+- KDS polling currently runs every 10 seconds
+- realtime transport is a future optimization, not a replacement for authoritative APIs
+
 ## Operations / Future Modules
 
 Create modules only when implementation begins:

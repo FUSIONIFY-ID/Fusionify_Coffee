@@ -69,6 +69,12 @@ Status: **Partially in progress**
 
 Implemented:
 - authenticated customer order history API
+- Staff operations web (Next.js 16)
+- HTTP-only-cookie BFF staff session boundary
+- responsive KDS queue
+- staff order detail/timeline
+- Team/staff-management UI
+- staff web TypeScript + production build CI
 - Flutter order history
 - Flutter order detail + persisted status timeline
 - separate staff/admin identity model
@@ -77,7 +83,7 @@ Implemented:
 - staff RBAC permission foundation
 - staff audit log foundation
 - server-side initial SUPER_ADMIN bootstrap
-- staff management lifecycle APIs
+- staff management lifecycle ✅ backend + Team UI foundation APIs
 - outlet-scoped staff order queue/detail APIs
 - strict fulfillment transitions
 - PREPARING
