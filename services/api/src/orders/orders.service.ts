@@ -16,6 +16,18 @@ export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(input: CreateOrderInput, checkoutKey: string, userId: string) {
+    return this.createOwned(input, checkoutKey, userId);
+  }
+
+  async createForStaff(input: CreateOrderInput, checkoutKey: string) {
+    return this.createOwned(input, checkoutKey, null);
+  }
+
+  private async createOwned(
+    input: CreateOrderInput,
+    checkoutKey: string,
+    userId: string | null,
+  ) {
     this.validateCheckoutKey(checkoutKey);
     this.validateInput(input);
 

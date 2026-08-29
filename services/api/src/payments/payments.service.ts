@@ -40,6 +40,34 @@ export class PaymentsService {
     idempotencyKey: string,
     requestedChannel?: string,
   ) {
+    return this.createAuthorizedPayment(
+      orderId,
+      idempotencyKey,
+      requestedChannel,
+      (order) => order.userId === userId,
+    );
+  }
+
+  async createForStaffOrder(
+    orderId: string,
+    outletId: string | null,
+    idempotencyKey: string,
+    requestedChannel?: string,
+  ) {
+    return this.createAuthorizedPayment(
+      orderId,
+      idempotencyKey,
+      requestedChannel,
+      (order) => !outletId || order.outletId === outletId,
+    );
+  }
+
+  private async createAuthorizedPayment(
+    orderId: string,
+    idempotencyKey: string,
+    requestedChannel: string | undefined,
+    authorize: (order: { userId: string | null; outletId: string }) => boolean,
+  ) {
     this.validateIdempotencyKey(idempotencyKey);
     const channel = this.resolveChannel(requestedChannel);
 
@@ -70,7 +98,7 @@ export class PaymentsService {
       },
     });
 
-    if (!order || order.userId !== userId) {
+    if (!order || !authorize(order)) {
       throw new NotFoundException('Order not found.');
     }
 
@@ -141,6 +169,38 @@ export class PaymentsService {
       });
       throw error;
     }
+  }
+
+  async checkForStaff(paymentId: string, outletId: string | null) {
+    const payment = await this.getPaymentForStaff(paymentId, outletId);
+    if (payment.status !== PaymentStatus.PENDING) {
+      return this.toView(payment);
+    }
+
+    const result = await this.autoGoPay.getStatus(this.referenceFor(payment));
+    return this.applyProviderResult(payment.id, result);
+  }
+
+  async cancelForStaff(paymentId: string, outletId: string | null) {
+    const payment = await this.getPaymentForStaff(paymentId, outletId);
+
+    if (payment.status !== PaymentStatus.PENDING) {
+      throw new ConflictException('Only pending payments can be cancelled.');
+    }
+
+    if (
+      !this.autoGoPay.capabilities().supportsPendingCancel ||
+      !this.autoGoPay.cancelPendingPayment
+    ) {
+      throw new ConflictException(
+        'This payment channel does not support cancellation.',
+      );
+    }
+
+    const result = await this.autoGoPay.cancelPendingPayment(
+      this.referenceFor(payment),
+    );
+    return this.applyProviderResult(payment.id, result);
   }
 
   async getView(paymentId: string, userId: string) {
@@ -281,6 +341,24 @@ export class PaymentsService {
     });
 
     return this.toView(updated);
+  }
+
+  private async getPaymentForStaff(
+    paymentId: string,
+    outletId: string | null,
+  ) {
+    const payment = await this.prisma.payment.findFirst({
+      where: {
+        id: paymentId,
+        ...(outletId ? { order: { outletId } } : {}),
+      },
+    });
+
+    if (!payment) {
+      throw new NotFoundException('Payment not found.');
+    }
+
+    return payment;
   }
 
   private async getPayment(paymentId: string, userId?: string) {

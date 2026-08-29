@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   Param,
   Post,
   Query,
@@ -14,11 +15,29 @@ import { RequireStaffPermissions } from '../staff/staff.decorators';
 import { StaffPermissionsGuard } from '../staff/staff-permissions.guard';
 import { StaffPermission } from '../staff/staff.types';
 import { StaffOrdersService } from './staff-orders.service';
+import type { CreateOrderInput } from './orders.types';
 
 @Controller('v1/staff/orders')
 @UseGuards(StaffAuthGuard, StaffPermissionsGuard)
 export class StaffOrdersController {
   constructor(private readonly ordersService: StaffOrdersService) {}
+
+  @Post()
+  @RequireStaffPermissions(StaffPermission.OrdersManage)
+  createPosOrder(
+    @Req() request: AuthenticatedStaffRequest,
+    @Headers('idempotency-key') idempotencyKey = '',
+    @Body() body: CreateOrderInput,
+  ) {
+    return this.ordersService.createPosOrder(
+      {
+        staffUserId: request.staffAuth!.staffUserId,
+        outletId: request.staffAuth!.outletId,
+      },
+      body,
+      idempotencyKey,
+    );
+  }
 
   @Get()
   @RequireStaffPermissions(StaffPermission.OrdersRead)

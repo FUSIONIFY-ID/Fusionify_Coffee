@@ -7,6 +7,8 @@ import {
 import { OrderStatus } from '../generated/prisma/enums';
 import { PrismaService } from '../database/prisma.service';
 import { StaffAuthService } from '../staff/staff-auth.service';
+import { OrdersService } from './orders.service';
+import type { CreateOrderInput } from './orders.types';
 
 type StaffOrderActor = {
   staffUserId: string;
@@ -25,7 +27,35 @@ export class StaffOrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly staffAuthService: StaffAuthService,
+    private readonly ordersService: OrdersService,
   ) {}
+
+  async createPosOrder(
+    actor: StaffOrderActor,
+    input: CreateOrderInput,
+    idempotencyKey: string,
+  ) {
+    const outletId = this.resolveOutlet(actor, input.outletId);
+    if (!outletId) {
+      throw new BadRequestException('outletId is required for POS orders.');
+    }
+
+    const order = await this.ordersService.createForStaff(
+      { ...input, outletId },
+      idempotencyKey,
+    );
+
+    await this.staffAuthService.audit(actor.staffUserId, 'POS_ORDER_CREATED', {
+      targetType: 'Order',
+      targetId: order.id,
+      metadata: {
+        outletId,
+        totalAmount: order.totalAmount,
+      },
+    });
+
+    return order;
+  }
 
   async list(
     actor: StaffOrderActor,
