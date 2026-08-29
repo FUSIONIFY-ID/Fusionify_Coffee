@@ -17,6 +17,24 @@ permissions:
   contents: read
 
 jobs:
+  staff:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/staff
+    env:
+      FUSIONIFY_API_BASE_URL: http://127.0.0.1:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/staff/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+
   customer:
     runs-on: ubuntu-latest
     defaults:
