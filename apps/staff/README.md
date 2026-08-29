@@ -18,6 +18,15 @@ Do not convert the staff session to localStorage/sessionStorage tokens.
 
 ## Current interface
 
+- cashier POS counter order entry
+- database-backed menu + modifier configuration
+- server-authoritative POS order pricing
+- guest/walk-in order creation
+- GoPay QRIS initiation
+- QR rendering in the staff browser
+- local order-status polling until payment confirmation
+- manual payment status reconciliation
+- paid POS orders enter the same KDS fulfillment queue
 - staff login
 - first-login TOTP setup
 - 6-digit authenticator verification
@@ -29,8 +38,13 @@ Do not convert the staff session to localStorage/sessionStorage tokens.
 - suspend/reactivate staff
 - reset staff TOTP
 
-The interface polls the Fusionify API through the BFF every 10 seconds.
+The KDS polls the Fusionify API through the BFF every 10 seconds.
+The POS polls the local Fusionify order state while a QRIS payment is pending.
 Realtime push/socket delivery is not implemented yet.
+
+POS pricing displayed in the browser is only an estimate. The API reloads active
+products/modifiers and recalculates the authoritative order total before
+payment creation.
 
 ## Environment
 
