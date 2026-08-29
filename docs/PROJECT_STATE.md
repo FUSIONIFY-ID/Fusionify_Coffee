@@ -7,7 +7,7 @@ Last updated: 2026-08-28
 - Repository: `FUSIONIFY-ID/Fusionify_Coffee`
 - Default branch: `main`
 - Visibility: public
-- Latest fully validated implementation head: `6f38d81d56985dd320c8f7109cc1fef42d0a28aa`
+- Latest fully validated implementation head: `9b897acc592853c0e0f16bfe21bdeaa227d21f99`
 
 ## Current Milestone
 
@@ -174,6 +174,40 @@ Current delivery mechanism:
 - KDS polls the Fusionify API through the BFF every 10 seconds
 - realtime WebSocket/SSE/push is not implemented yet
 
+### Cashier POS
+- responsive counter POS inside the separate Next.js staff application
+- visible only to staff with `orders.manage`
+- database-backed catalog and modifiers
+- walk-in/guest orders use `userId = null`
+- POS order creation uses an Idempotency-Key
+- outlet-scoped staff cannot create orders for another outlet
+- browser subtotal is explicitly an estimate
+- backend reloads active products/modifiers and recalculates authoritative pricing
+- required/single-select modifier rules remain enforced server-side
+- POS order creation is audited
+- GoPay QRIS initiation uses the existing server-side AutoGoPay adapter
+- staff payment creation/check/cancel APIs are outlet scoped
+- QR payload is rendered in the staff browser
+- payment-provider failure leaves the order in `AWAITING_PAYMENT`
+- failed provider initialization records a FAILED payment attempt
+- order becomes `CONFIRMED` only from a verified PAID provider state
+- confirmed POS orders enter the same KDS fulfillment queue
+- POS polling reads authoritative Fusionify order state
+- staff BFF forwards Idempotency-Key without exposing staff bearer tokens to browser storage
+
+Implemented staff POS APIs:
+- `POST /v1/staff/orders`
+- `POST /v1/staff/orders/:orderId/payments`
+- `POST /v1/staff/payments/:paymentId/check`
+- `POST /v1/staff/payments/:paymentId/cancel`
+
+Automated POS e2e proves:
+- cashier can create an outlet-scoped guest order
+- server calculates two configured Aren Latte items as Rp56,000
+- repeated POS Idempotency-Key returns the same order
+- unconfigured AutoGoPay returns 503 safely
+- failed payment does not confirm the order
+
 ### Localization
 - Bahasa Indonesia (`id-ID` / `ID_ID`)
 - Bahasa Melayu (`ms-MY` / `MS_MY`)
@@ -302,7 +336,7 @@ See:
 
 ## Validation Evidence
 
-GitHub Actions run `33227030852` for implementation head `6f38d81d56985dd320c8f7109cc1fef42d0a28aa`: **PASS**
+GitHub Actions run `33227516934` for implementation head `9b897acc592853c0e0f16bfe21bdeaa227d21f99`: **PASS**
 
 Customer:
 - Dart format: PASS
@@ -349,6 +383,9 @@ Automated validation covers:
 - rejection of invalid fulfillment status jumps
 - sequential PREPARING -> READY -> PICKED_UP -> COMPLETED transitions
 - persisted customer-visible order status timeline
+- staff POS guest order pricing/idempotency
+- outlet-scoped POS order creation
+- safe POS payment failure when provider is unconfigured
 - provider QR response normalization with mocked fetch
 - raw-body HMAC webhook verification
 - Flutter payment model parsing
@@ -404,7 +441,7 @@ Current rule:
 - realtime socket/push delivery of payment changes
 - realtime/push order tracking updates
 - realtime staff queue transport (WebSocket/SSE)
-- cashier POS order-entry interface
+- live AutoGoPay validation for staff POS payment
 - Fusion Points
 - membership
 - vouchers

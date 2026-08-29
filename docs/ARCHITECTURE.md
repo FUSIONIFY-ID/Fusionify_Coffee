@@ -226,6 +226,33 @@ Current payment UI polls local Fusionify state.
 
 Future realtime/socket/push updates are an optimization and must not replace authoritative GET/reconciliation APIs.
 
+## Cashier POS Path
+
+```text
+Staff POS Browser
+  -> same-origin Next.js BFF
+  -> StaffAuthGuard + orders.manage
+  -> outlet-scoped guest Order
+  -> backend authoritative catalog/modifier pricing
+  -> staff payment endpoint
+  -> AutoGoPay GoPay QRIS adapter
+  -> Payment PENDING
+  -> provider webhook/manual reconciliation
+  -> Payment PAID
+  -> Order CONFIRMED
+  -> KDS queue
+```
+
+Rules:
+- POS browser totals are estimates only
+- staff cannot assert the final amount
+- staff cannot assert PAID/CONFIRMED
+- guest POS orders use `userId = null`
+- Idempotency-Key is required for both order and payment creation
+- outlet scope is enforced by the backend
+- failed provider initialization does not advance fulfillment
+- staff browser bearer tokens remain inside HTTP-only BFF cookies
+
 ## Staff Web BFF Boundary
 
 ```text
