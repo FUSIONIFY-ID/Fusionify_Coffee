@@ -347,6 +347,76 @@ describe('Fusionify Coffee API (e2e)', () => {
       .expect(403);
   });
 
+  it('creates server-priced guest POS orders and fails payment safely without provider config', async () => {
+    const cashier = await createAndLoginStaff(
+      StaffRole.CASHIER,
+      'preview-outlet',
+    );
+    const idempotencyKey = `pos-order-${Date.now()}-${userSequence}`;
+    const body = {
+      outletId: 'preview-outlet',
+      items: [
+        {
+          productId: 'aren-latte',
+          quantity: 2,
+          modifierOptionIds: [
+            'aren-latte-size-regular',
+            'aren-latte-temperature-iced',
+            'aren-latte-sugar-sugar-50',
+            'aren-latte-ice-normal-ice',
+            'aren-latte-milk-fresh-milk',
+          ],
+        },
+      ],
+    };
+
+    const createdResponse = await request(app.getHttpServer())
+      .post('/v1/staff/orders')
+      .set('Authorization', `Bearer ${cashier.accessToken}`)
+      .set('Idempotency-Key', idempotencyKey)
+      .send(body)
+      .expect(201);
+
+    const created = createdResponse.body as unknown as OrderResponse & {
+      userId: string | null;
+    };
+
+    expect(created.userId).toBeNull();
+    expect(created.status).toBe('AWAITING_PAYMENT');
+    expect(created.subtotal).toBe(56000);
+    expect(created.totalAmount).toBe(56000);
+
+    const repeatedResponse = await request(app.getHttpServer())
+      .post('/v1/staff/orders')
+      .set('Authorization', `Bearer ${cashier.accessToken}`)
+      .set('Idempotency-Key', idempotencyKey)
+      .send(body)
+      .expect(201);
+    const repeated = repeatedResponse.body as unknown as OrderResponse;
+
+    expect(repeated.id).toBe(created.id);
+
+    await request(app.getHttpServer())
+      .post(`/v1/staff/orders/${created.id}/payments`)
+      .set('Authorization', `Bearer ${cashier.accessToken}`)
+      .set('Idempotency-Key', `pos-payment-${Date.now()}-${userSequence}`)
+      .send({ channel: 'GOPAY_QRIS' })
+      .expect(503);
+
+    const refreshedResponse = await request(app.getHttpServer())
+      .get(`/v1/staff/orders/${created.id}`)
+      .set('Authorization', `Bearer ${cashier.accessToken}`)
+      .expect(200);
+    const refreshed = refreshedResponse.body as unknown as {
+      status: string;
+      payments: Array<{ status: string }>;
+    };
+
+    expect(refreshed.status).toBe('AWAITING_PAYMENT');
+    expect(refreshed.payments).toHaveLength(1);
+    expect(refreshed.payments[0].status).toBe('FAILED');
+  });
+
   it('enforces sequential outlet-scoped fulfillment transitions', async () => {
     const registered = await registerCustomer();
     const created = await request(app.getHttpServer())
