@@ -29,6 +29,12 @@ export type StaffOrder = {
   outletId: string;
   outlet: { id: string; name: string };
   items: StaffOrderItem[];
+  payments?: Array<{
+    id: string;
+    status: string;
+    amount: number;
+    channel: string;
+  }>;
   statusEvents?: Array<{
     id: string;
     fromStatus: string | null;
@@ -53,4 +59,58 @@ export type StaffUserView = {
   outlet?: { id: string; name: string } | null;
   totpEnabled: boolean;
   permissions: string[];
+};
+
+
+export type StaffCatalogModifierOption = {
+  id: string;
+  label: string;
+  priceDelta: number;
+  isDefault: boolean;
+};
+
+export type StaffCatalogModifierGroup = {
+  id: string;
+  label: string;
+  required: boolean;
+  allowMultiple: boolean;
+  options: StaffCatalogModifierOption[];
+};
+
+export type StaffCatalogProduct = {
+  id: string;
+  name: string;
+  description: string;
+  categoryId: string;
+  category: string;
+  basePrice: number;
+  isBestseller: boolean;
+  modifierGroups: StaffCatalogModifierGroup[];
+};
+
+export type StaffCatalog = {
+  preview: boolean;
+  language: string;
+  outlet: {
+    id: string;
+    name: string;
+    note: string;
+    pickupEnabled: boolean;
+  };
+  products: StaffCatalogProduct[];
+};
+
+export type StaffPaymentView = {
+  id: string;
+  orderId: string;
+  provider: string;
+  channel: string;
+  status: string;
+  amount: number;
+  currency: string;
+  qrString: string | null;
+  qrUrl: string | null;
+  checkoutUrl: string | null;
+  expiryTime: string | null;
+  providerRawStatus: string | null;
 };

@@ -13,9 +13,17 @@ async function proxy(
   const incoming = new URL(request.url);
   const suffix = path.map(encodeURIComponent).join('/');
   const body = method === 'GET' ? undefined : await request.text();
+  const idempotencyKey = request.headers.get('idempotency-key');
+
   const response = await backendStaffFetch(
     `/v1/staff/${suffix}${incoming.search}`,
-    { method, body },
+    {
+      method,
+      body,
+      headers: idempotencyKey
+        ? { 'Idempotency-Key': idempotencyKey }
+        : undefined,
+    },
   );
   return forwardResponse(response);
 }

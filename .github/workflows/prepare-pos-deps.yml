@@ -1,0 +1,41 @@
+name: Prepare POS Dependencies
+
+on:
+  push:
+    paths:
+      - ".github/workflows/prepare-pos-deps.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/staff
+    env:
+      FUSIONIFY_API_BASE_URL: http://127.0.0.1:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - run: npm install --package-lock-only
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+
+      - name: Commit updated staff lockfile
+        working-directory: .
+        run: |
+          if git status --porcelain apps/staff/package-lock.json | grep . >/dev/null; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add apps/staff/package-lock.json
+            git commit -m "chore: lock POS QR dependency"
+            git push
+          else
+            echo "Staff lockfile already current."
+          fi
