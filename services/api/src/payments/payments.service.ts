@@ -343,10 +343,7 @@ export class PaymentsService {
     return this.toView(updated);
   }
 
-  private async getPaymentForStaff(
-    paymentId: string,
-    outletId: string | null,
-  ) {
+  private async getPaymentForStaff(paymentId: string, outletId: string | null) {
     const payment = await this.prisma.payment.findFirst({
       where: {
         id: paymentId,
