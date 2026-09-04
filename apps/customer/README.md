@@ -13,6 +13,22 @@ Flutter customer application for Android and iOS.
 - Android minSdk 28
 - Android compileSdk/targetSdk 36
 
+## App Version
+
+Current initial app version:
+
+```text
+0.1.0 (01)
+```
+
+Flutter source value:
+
+```text
+0.1.0+1
+```
+
+The human-facing build label uses `01`; Flutter/Android/iOS store the build number as numeric `1`.
+
 ## Current Customer Flow
 
 Implemented development flow:
@@ -129,7 +145,7 @@ See `../../docs/android/SIGNING.md`.
 Pushing an explicit repository tag that starts with `v`, for example:
 
 ```text
-v0.3.0-preview.1
+v0.1.0-preview.1
 ```
 
 runs the `Preview Release` workflow. It validates formatting, analyzes/tests the customer app, builds a debug-signed Android APK, creates a GitHub prerelease, and attaches the APK.
