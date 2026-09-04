@@ -90,7 +90,6 @@ jobs:
             gh release create "$TAG" "$ASSET" \
               --verify-tag \
               --prerelease \
-              --generate-notes \
               --title "Fusionify Coffee $TAG (Preview)" \
               --notes "Preview/development release. The attached Android APK uses debug signing and is not a production Google Play build."
           fi
