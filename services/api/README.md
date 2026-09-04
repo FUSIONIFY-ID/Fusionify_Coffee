@@ -37,6 +37,14 @@ Payments:
 - `POST /v1/payments/:paymentId/check`
 - `POST /v1/payments/:paymentId/cancel`
 
+Rewards and membership:
+- `GET /v1/rewards/me`
+- staff-configurable Fusion Points earning programs
+- staff-configurable membership tiers per currency
+- membership qualification from completed customer spend
+- optional tier points multipliers
+- membership implementation is currently undergoing full CI validation
+
 Webhook:
 - `POST /v1/webhooks/autogopay`
 
@@ -66,6 +74,8 @@ Current database-backed development flow includes:
 - modifier group/option
 - order/order item
 - payment
+- Fusion Points ledger/account/program
+- membership tier/progress
 
 Run:
 
@@ -127,7 +137,8 @@ npm run build
 
 CI uses PostgreSQL 17.
 
-Latest validated implementation head: `a139346b5dab4d5cb53bfa8b6eb5c02356cefd56`.
+Latest previously validated implementation head: `a139346b5dab4d5cb53bfa8b6eb5c02356cefd56`.
+Membership head validation is in progress.
 
 ## Security
 
