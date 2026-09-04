@@ -146,6 +146,20 @@ Implemented customer behavior:
 
 Fulfillment status events are authoritative backend data. The customer app does not synthesize fake progress from timestamps.
 
+## Digital Receipt
+
+Authenticated customers can open a server-backed digital receipt from order detail.
+
+The receipt renders:
+- outlet and order identity
+- persisted item/modifier snapshots
+- subtotal, discount, delivery fee, and total
+- payment summary when available
+- voucher code when available
+- issued digital-benefit references when available
+
+Receipt data comes from the backend order record. The Flutter app does not reconstruct an authoritative receipt from local cart state.
+
 ## Rewards + Digital Benefits UI
 
 Rewards is a customer hub for:
