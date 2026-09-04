@@ -10,7 +10,6 @@ import '../../../l10n/app_strings.dart';
 import '../../../l10n/delivery_strings.dart';
 import '../../../l10n/reward_extras_strings.dart';
 import '../../addresses/application/addresses_provider.dart';
-import '../../addresses/domain/address_models.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../cart/application/cart_controller.dart';
 import '../../cart/domain/cart_item.dart';
@@ -552,9 +551,10 @@ class _DeliveryOptions extends ConsumerWidget {
               data: (items) {
                 if (items.isEmpty) return Text(strings.addressesEmpty);
                 if (selectedAddressId == null) {
-                  final preferred =
-                      items.where((item) => item.isDefault).firstOrNull ??
-                      items.first;
+                  final preferred = items.firstWhere(
+                    (item) => item.isDefault,
+                    orElse: () => items.first,
+                  );
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     onSelected(preferred.id);
                   });
@@ -562,13 +562,19 @@ class _DeliveryOptions extends ConsumerWidget {
                 return Column(
                   children: [
                     for (final address in items)
-                      RadioListTile<String>(
-                        value: address.id,
-                        groupValue: selectedAddressId,
+                      ListTile(
+                        onTap: () => onSelected(address.id),
                         contentPadding: EdgeInsets.zero,
+                        leading: Icon(
+                          selectedAddressId == address.id
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          color: selectedAddressId == address.id
+                              ? CoffeeColors.primary
+                              : CoffeeColors.textSecondary,
+                        ),
                         title: Text(address.label),
                         subtitle: Text(address.compactAddress),
-                        onChanged: onSelected,
                       ),
                     if (selectedAddressId != null)
                       _DeliveryQuoteView(
