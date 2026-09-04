@@ -8,6 +8,7 @@ import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { RewardsModule } from './rewards/rewards.module';
 import { StaffModule } from './staff/staff.module';
+import { VouchersModule } from './vouchers/vouchers.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { StaffModule } from './staff/staff.module';
     PaymentsModule,
     RewardsModule,
     StaffModule,
+    VouchersModule,
   ],
   controllers: [AppController],
 })
