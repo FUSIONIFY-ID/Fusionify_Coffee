@@ -28,6 +28,7 @@ class CustomerRealtimeRepository {
 
     await for (final line
         in body.stream
+            .map<List<int>>((chunk) => chunk)
             .transform(utf8.decoder)
             .transform(const LineSplitter())) {
       if (line.isEmpty) {
