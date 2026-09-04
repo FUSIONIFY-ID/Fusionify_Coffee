@@ -1,23 +1,277 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
 import '../../../l10n/app_strings.dart';
+import '../../../l10n/rewards_strings.dart';
+import '../../auth/application/auth_controller.dart';
+import '../application/rewards_provider.dart';
+import '../domain/rewards_models.dart';
 
-class RewardsScreen extends StatelessWidget {
+class RewardsScreen extends ConsumerWidget {
   const RewardsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final strings = context.strings;
+    final profile = ref.watch(authControllerProvider).value;
+
+    if (profile == null) {
+      return SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(CoffeeSpacing.xl),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.stars_outlined,
+                  size: 56,
+                  color: CoffeeColors.primary,
+                ),
+                const SizedBox(height: CoffeeSpacing.md),
+                Text(
+                  strings.signInToSeeRewards,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: CoffeeSpacing.md),
+                FilledButton(
+                  onPressed: () => context.push('/auth/login'),
+                  child: Text(strings.login),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final summary = ref.watch(rewardsSummaryProvider);
+
     return SafeArea(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(CoffeeSpacing.xl),
-          child: Text(
-            context.strings.rewardsComingSoon,
-            textAlign: TextAlign.center,
+      child: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(rewardsSummaryProvider);
+          await ref.read(rewardsSummaryProvider.future);
+        },
+        child: summary.when(
+          data: (value) => _RewardsContent(summary: value),
+          loading: () => const _RewardsLoading(),
+          error: (_, _) => _RewardsError(
+            onRetry: () => ref.invalidate(rewardsSummaryProvider),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _RewardsContent extends StatelessWidget {
+  const _RewardsContent({required this.summary});
+
+  final RewardsSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(CoffeeSpacing.md),
+      children: [
+        Text(
+          strings.fusionPoints,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: CoffeeSpacing.md),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(CoffeeSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  strings.pointsBalance,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                const SizedBox(height: CoffeeSpacing.xs),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      summary.balance.toString(),
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                            color: CoffeeColors.deep,
+                            fontWeight: FontWeight.w800,
+                          ),
+                    ),
+                    const SizedBox(width: CoffeeSpacing.xs),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: CoffeeSpacing.xs),
+                      child: Text(strings.fusionPoints),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: CoffeeSpacing.md),
+        Row(
+          children: [
+            Expanded(
+              child: _Metric(
+                label: strings.lifetimeEarned,
+                value: summary.lifetimeEarned,
+              ),
+            ),
+            const SizedBox(width: CoffeeSpacing.md),
+            Expanded(
+              child: _Metric(
+                label: strings.lifetimeRedeemed,
+                value: summary.lifetimeRedeemed,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: CoffeeSpacing.xl),
+        Text(
+          strings.recentPointsActivity,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: CoffeeSpacing.sm),
+        if (summary.recentActivity.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: CoffeeSpacing.xl),
+            child: Text(
+              strings.noPointsActivity,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          )
+        else
+          for (final entry in summary.recentActivity)
+            _LedgerTile(entry: entry),
+      ],
+    );
+  }
+}
+
+class _Metric extends StatelessWidget {
+  const _Metric({required this.label, required this.value});
+
+  final String label;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(CoffeeSpacing.md),
+      decoration: BoxDecoration(
+        border: Border.all(color: CoffeeColors.border),
+        borderRadius: BorderRadius.circular(CoffeeRadius.card),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: CoffeeSpacing.xs),
+          Text(
+            value.toString(),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LedgerTile extends StatelessWidget {
+  const _LedgerTile({required this.entry});
+
+  final RewardsLedgerEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+    final positive = entry.points >= 0;
+    final local = entry.createdAt.toLocal();
+    final date = '${local.day.toString().padLeft(2, '0')}/'
+        '${local.month.toString().padLeft(2, '0')}/${local.year}';
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(
+        positive ? Icons.add_circle_outline : Icons.remove_circle_outline,
+        color: positive ? CoffeeColors.success : CoffeeColors.error,
+      ),
+      title: Text(_entryLabel(strings)),
+      subtitle: Text(date),
+      trailing: Text(
+        '${positive ? '+' : ''}${strings.pointsAmount(entry.points)}',
+        style: TextStyle(
+          color: positive ? CoffeeColors.success : CoffeeColors.error,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+
+  String _entryLabel(AppStrings strings) {
+    return switch (entry.type) {
+      'ORDER_REWARD' => strings.orderReward,
+      'CAMPAIGN_BONUS' => strings.campaignBonus,
+      'REDEEM_REWARD' => strings.rewardRedemption,
+      'REFUND_REVERSAL' => strings.refundReversal,
+      'MANUAL_ADJUSTMENT' => strings.manualAdjustment,
+      _ => strings.fusionPoints,
+    };
+  }
+}
+
+class _RewardsLoading extends StatelessWidget {
+  const _RewardsLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const ListView(
+      physics: AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(height: 240),
+        Center(child: CircularProgressIndicator()),
+      ],
+    );
+  }
+}
+
+class _RewardsError extends StatelessWidget {
+  const _RewardsError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(CoffeeSpacing.xl),
+      children: [
+        const SizedBox(height: 180),
+        Text(
+          strings.pointsLoadFailed,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: CoffeeSpacing.md),
+        Center(
+          child: FilledButton(
+            onPressed: onRetry,
+            child: Text(strings.retry),
+          ),
+        ),
+      ],
     );
   }
 }
