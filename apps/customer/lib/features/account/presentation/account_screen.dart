@@ -30,6 +30,7 @@ class AccountScreen extends ConsumerWidget {
             membership: rewards.value?.membership,
             onRewards: () => context.go('/rewards'),
             onOrders: () => context.go('/orders'),
+            onFavorites: () => context.push('/favorites'),
             onPersonalInfo: () => context.push('/account/personal'),
             onLanguage: () => context.push('/account/language'),
             onSecurity: () => context.push('/account/security'),
@@ -52,6 +53,7 @@ class AccountHubView extends StatelessWidget {
     this.membership,
     this.onRewards,
     this.onOrders,
+    this.onFavorites,
     this.onPersonalInfo,
     this.onLanguage,
     this.onSecurity,
@@ -62,6 +64,7 @@ class AccountHubView extends StatelessWidget {
   final MembershipSummary? membership;
   final VoidCallback? onRewards;
   final VoidCallback? onOrders;
+  final VoidCallback? onFavorites;
   final VoidCallback? onPersonalInfo;
   final VoidCallback? onLanguage;
   final VoidCallback? onSecurity;
@@ -90,6 +93,11 @@ class AccountHubView extends StatelessWidget {
           icon: Icons.receipt_long_outlined,
           title: strings.orders,
           onTap: onOrders,
+        ),
+        _AccountTile(
+          icon: Icons.favorite_border,
+          title: strings.favorites,
+          onTap: onFavorites,
         ),
         const SizedBox(height: CoffeeSpacing.lg),
         _SectionTitle(strings.account),
