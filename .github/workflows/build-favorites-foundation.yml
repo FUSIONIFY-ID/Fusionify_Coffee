@@ -1,0 +1,252 @@
+name: Build Favorites Foundation Once
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build-favorites-foundation.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch schema and modules
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          schema = Path('services/api/prisma/schema.prisma')
+          text = schema.read_text()
+          text = text.replace('  orderItems     OrderItem[]\n', '  orderItems     OrderItem[]\n  favoritedBy    FavoriteProduct[]\n')
+          text = text.replace('  loyaltyAccount    LoyaltyAccount?\n', '  loyaltyAccount    LoyaltyAccount?\n  favoriteProducts  FavoriteProduct[]\n')
+          marker = 'model UserSession {'
+          favorite_model = '''model FavoriteProduct {
+  id        String       @id @default(cuid())
+  userId    String
+  user      CustomerUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId, createdAt])
+  @@index([productId])
+}
+
+'''
+          if 'model FavoriteProduct {' not in text:
+              text = text.replace(marker, favorite_model + marker)
+          schema.write_text(text)
+
+          app = Path('services/api/src/app.module.ts')
+          text = app.read_text()
+          text = text.replace("import { DatabaseModule } from './database/database.module';", "import { DatabaseModule } from './database/database.module';\nimport { FavoritesModule } from './favorites/favorites.module';")
+          text = text.replace('    CatalogModule,\n', '    CatalogModule,\n    FavoritesModule,\n')
+          app.write_text(text)
+          PY
+
+      - name: Add favorites migration
+        shell: bash
+        run: |
+          mkdir -p services/api/prisma/migrations/20260904094500_favorite_products
+          cat > services/api/prisma/migrations/20260904094500_favorite_products/migration.sql <<'SQL'
+          CREATE TABLE "FavoriteProduct" (
+            "id" TEXT NOT NULL,
+            "userId" TEXT NOT NULL,
+            "productId" TEXT NOT NULL,
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT "FavoriteProduct_pkey" PRIMARY KEY ("id")
+          );
+
+          CREATE UNIQUE INDEX "FavoriteProduct_userId_productId_key"
+          ON "FavoriteProduct"("userId", "productId");
+          CREATE INDEX "FavoriteProduct_userId_createdAt_idx"
+          ON "FavoriteProduct"("userId", "createdAt");
+          CREATE INDEX "FavoriteProduct_productId_idx"
+          ON "FavoriteProduct"("productId");
+
+          ALTER TABLE "FavoriteProduct"
+          ADD CONSTRAINT "FavoriteProduct_userId_fkey"
+          FOREIGN KEY ("userId") REFERENCES "CustomerUser"("id")
+          ON DELETE CASCADE ON UPDATE CASCADE;
+
+          ALTER TABLE "FavoriteProduct"
+          ADD CONSTRAINT "FavoriteProduct_productId_fkey"
+          FOREIGN KEY ("productId") REFERENCES "Product"("id")
+          ON DELETE CASCADE ON UPDATE CASCADE;
+          SQL
+
+      - name: Add favorites API
+        shell: bash
+        run: |
+          mkdir -p services/api/src/favorites
+          cat > services/api/src/favorites/favorites.service.ts <<'TS'
+          import {
+            Injectable,
+            NotFoundException,
+          } from '@nestjs/common';
+          import { PrismaService } from '../database/prisma.service';
+
+          @Injectable()
+          export class FavoritesService {
+            constructor(private readonly prisma: PrismaService) {}
+
+            async list(userId: string) {
+              const favorites = await this.prisma.favoriteProduct.findMany({
+                where: {
+                  userId,
+                  product: { active: true },
+                },
+                include: {
+                  product: {
+                    include: {
+                      category: true,
+                      modifierGroups: {
+                        orderBy: { sortOrder: 'asc' },
+                        include: {
+                          options: {
+                            where: { active: true },
+                            orderBy: { sortOrder: 'asc' },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                orderBy: { createdAt: 'desc' },
+              });
+
+              return favorites.map((favorite) => ({
+                id: favorite.id,
+                productId: favorite.productId,
+                createdAt: favorite.createdAt,
+                product: favorite.product,
+              }));
+            }
+
+            async add(userId: string, productId: string) {
+              const product = await this.prisma.product.findFirst({
+                where: { id: productId, active: true },
+                select: { id: true },
+              });
+              if (!product) {
+                throw new NotFoundException('Product not found.');
+              }
+
+              const favorite = await this.prisma.favoriteProduct.upsert({
+                where: {
+                  userId_productId: { userId, productId },
+                },
+                update: {},
+                create: { userId, productId },
+                include: { product: true },
+              });
+
+              return {
+                id: favorite.id,
+                productId: favorite.productId,
+                createdAt: favorite.createdAt,
+                product: favorite.product,
+              };
+            }
+
+            async remove(userId: string, productId: string) {
+              await this.prisma.favoriteProduct.deleteMany({
+                where: { userId, productId },
+              });
+              return { success: true };
+            }
+          }
+          TS
+
+          cat > services/api/src/favorites/favorites.controller.ts <<'TS'
+          import {
+            Controller,
+            Delete,
+            Get,
+            Param,
+            Post,
+            Req,
+            UseGuards,
+          } from '@nestjs/common';
+          import type { AuthenticatedRequest } from '../auth/auth.guard';
+          import { CustomerAuthGuard } from '../auth/auth.guard';
+          import { FavoritesService } from './favorites.service';
+
+          @Controller('v1/account/favorites')
+          @UseGuards(CustomerAuthGuard)
+          export class FavoritesController {
+            constructor(private readonly favoritesService: FavoritesService) {}
+
+            @Get()
+            list(@Req() request: AuthenticatedRequest) {
+              return this.favoritesService.list(request.auth!.userId);
+            }
+
+            @Post(':productId')
+            add(
+              @Req() request: AuthenticatedRequest,
+              @Param('productId') productId: string,
+            ) {
+              return this.favoritesService.add(request.auth!.userId, productId);
+            }
+
+            @Delete(':productId')
+            remove(
+              @Req() request: AuthenticatedRequest,
+              @Param('productId') productId: string,
+            ) {
+              return this.favoritesService.remove(
+                request.auth!.userId,
+                productId,
+              );
+            }
+          }
+          TS
+
+          cat > services/api/src/favorites/favorites.module.ts <<'TS'
+          import { Module } from '@nestjs/common';
+          import { AuthModule } from '../auth/auth.module';
+          import { FavoritesController } from './favorites.controller';
+          import { FavoritesService } from './favorites.service';
+
+          @Module({
+            imports: [AuthModule],
+            controllers: [FavoritesController],
+            providers: [FavoritesService],
+            exports: [FavoritesService],
+          })
+          export class FavoritesModule {}
+          TS
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: services/api/package-lock.json
+
+      - name: Validate generated API
+        working-directory: services/api
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fusionify_coffee_builder
+        run: |
+          npm ci
+          npm run prisma:generate
+          npx prettier --write 'src/favorites/**/*.ts' src/app.module.ts prisma/schema.prisma
+
+      - name: Commit favorites foundation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add services/api
+          if git diff --cached --quiet; then
+            echo 'No favorites changes.'
+          else
+            git commit -m 'feat: add customer favorites API foundation'
+            git push
+          fi
