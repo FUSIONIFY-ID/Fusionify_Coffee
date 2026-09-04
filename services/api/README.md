@@ -97,6 +97,27 @@ AUTOGOPAY_BASE_URL=https://v1-gateway.autogopay.site
 
 Never commit real credentials.
 
+## Container Image / GitHub Packages
+
+The API has a production-oriented multi-stage Dockerfile at `services/api/Dockerfile`.
+
+After the `CI` workflow succeeds on `main`, GitHub Actions automatically builds and publishes:
+
+```text
+ghcr.io/FUSIONIFY-ID/fusionify-coffee-api:latest
+ghcr.io/FUSIONIFY-ID/fusionify-coffee-api:sha-<commit>
+```
+
+This publication uses the repository `GITHUB_TOKEN`; no registry password is committed.
+
+The runtime image:
+- uses Node.js 24 Bookworm Slim
+- runs as the non-root `node` user
+- contains production dependencies plus compiled NestJS output
+- does not run database migrations automatically on container startup
+
+Database migration deployment remains an explicit deployment step.
+
 ## Checkout Authority
 
 Mobile prices are presentation only.
