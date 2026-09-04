@@ -8,6 +8,7 @@ import '../../../l10n/app_strings.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../cart/application/cart_controller.dart';
 import '../../catalog/application/catalog_provider.dart';
+import '../../catalog/domain/catalog_models.dart';
 import '../application/orders_provider.dart';
 import '../application/reorder_builder.dart';
 import '../domain/order_history_models.dart';
@@ -133,7 +134,7 @@ class OrdersScreen extends ConsumerWidget {
     required BuildContext context,
     required WidgetRef ref,
     required CustomerOrderSummary order,
-    required dynamic catalog,
+    required CatalogSnapshot catalog,
   }) {
     final result = buildReorderCart(
       orderItems: order.items,
