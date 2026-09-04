@@ -21,7 +21,7 @@ import '../features/orders/presentation/order_detail_screen.dart';
 import '../features/orders/presentation/orders_screen.dart';
 import '../features/payment/presentation/payment_screen.dart';
 import '../features/product/presentation/product_detail_screen.dart';
-import '../features/rewards/presentation/rewards_screen.dart';
+import '../features/rewards/presentation/rewards_hub_screen.dart';
 import '../features/shell/presentation/app_shell.dart';
 
 final appRouter = GoRouter(
@@ -34,7 +34,7 @@ final appRouter = GoRouter(
         GoRoute(path: '/', builder: (_, _) => const HomeScreen()),
         GoRoute(path: '/menu', builder: (_, _) => const MenuScreen()),
         GoRoute(path: '/orders', builder: (_, _) => const OrdersScreen()),
-        GoRoute(path: '/rewards', builder: (_, _) => const RewardsScreen()),
+        GoRoute(path: '/rewards', builder: (_, _) => const RewardsHubScreen()),
         GoRoute(path: '/account', builder: (_, _) => const AccountScreen()),
       ],
     ),
