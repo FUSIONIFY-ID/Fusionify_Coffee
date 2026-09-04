@@ -99,3 +99,16 @@ export async function forwardResponse(response: Response) {
     },
   });
 }
+
+export function forwardStreamingResponse(response: Response) {
+  const contentType = response.headers.get('content-type') ?? 'text/event-stream';
+  return new Response(response.body, {
+    status: response.status,
+    headers: {
+      'Content-Type': contentType,
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    },
+  });
+}

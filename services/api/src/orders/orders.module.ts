@@ -6,6 +6,7 @@ import { RewardsModule } from '../rewards/rewards.module';
 import { StaffModule } from '../staff/staff.module';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
+import { StaffOrderStreamService } from './staff-order-stream.service';
 import { StaffOrdersController } from './staff-orders.controller';
 import { StaffOrdersService } from './staff-orders.service';
 
@@ -18,7 +19,7 @@ import { StaffOrdersService } from './staff-orders.service';
     StaffModule,
   ],
   controllers: [OrdersController, StaffOrdersController],
-  providers: [OrdersService, StaffOrdersService],
+  providers: [OrdersService, StaffOrdersService, StaffOrderStreamService],
   exports: [OrdersService, StaffOrdersService],
 })
 export class OrdersModule {}

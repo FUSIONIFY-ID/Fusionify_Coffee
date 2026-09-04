@@ -29,35 +29,68 @@ const lanes = [
   },
 ] as const;
 
+type QueueEvent = {
+  orders: StaffOrder[];
+  generatedAt: string;
+};
+
+type LiveState = 'connecting' | 'live' | 'fallback';
+
 export default function KdsPage() {
   const { staff, loading: staffLoading } = useStaff();
   const [orders, setOrders] = useState<StaffOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actingId, setActingId] = useState('');
+  const [liveState, setLiveState] = useState<LiveState>('connecting');
+
+  const applyQueue = useCallback((data: StaffOrder[]) => {
+    setOrders(
+      data.filter((order) =>
+        lanes.some((lane) => lane.status === order.status),
+      ),
+    );
+    setError('');
+    setLoading(false);
+  }, []);
 
   const loadOrders = useCallback(async () => {
     try {
       const data = await apiJson<StaffOrder[]>('/api/staff/orders');
-      setOrders(
-        data.filter((order) =>
-          lanes.some((lane) => lane.status === order.status),
-        ),
-      );
-      setError('');
+      applyQueue(data);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Queue could not load.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [applyQueue]);
 
   useEffect(() => {
     if (!staff) return;
+
     void loadOrders();
-    const timer = window.setInterval(() => void loadOrders(), 10_000);
-    return () => window.clearInterval(timer);
-  }, [staff, loadOrders]);
+    const source = new EventSource('/api/events/orders');
+
+    source.onopen = () => setLiveState('live');
+    source.addEventListener('orders', (event) => {
+      try {
+        const payload = JSON.parse(event.data) as QueueEvent;
+        applyQueue(payload.orders);
+        setLiveState('live');
+      } catch {
+        setLiveState('fallback');
+      }
+    });
+    source.onerror = () => {
+      setLiveState('fallback');
+    };
+
+    const fallbackTimer = window.setInterval(() => void loadOrders(), 30_000);
+    return () => {
+      source.close();
+      window.clearInterval(fallbackTimer);
+    };
+  }, [staff, loadOrders, applyQueue]);
 
   const grouped = useMemo(
     () =>
@@ -99,6 +132,13 @@ export default function KdsPage() {
             {staff.outletId
               ? 'Showing orders assigned to your outlet.'
               : 'Showing operational orders across permitted outlets.'}
+          </p>
+          <p aria-live="polite">
+            {liveState === 'live'
+              ? 'Live updates connected. New and updated orders arrive automatically.'
+              : liveState === 'fallback'
+                ? 'Realtime connection is recovering. A 30-second fallback refresh remains active.'
+                : 'Connecting realtime order updates…'}
           </p>
         </div>
         <button
