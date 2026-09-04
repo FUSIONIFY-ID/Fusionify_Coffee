@@ -28,9 +28,8 @@ class CustomerOrderSummary {
       items: rawItems
           .whereType<Map>()
           .map(
-            (item) => CustomerOrderItem.fromJson(
-              Map<String, dynamic>.from(item),
-            ),
+            (item) =>
+                CustomerOrderItem.fromJson(Map<String, dynamic>.from(item)),
           )
           .toList(),
       paymentStatus: rawPayments.isEmpty
@@ -92,9 +91,8 @@ class CustomerOrderDetail {
       items: rawItems
           .whereType<Map>()
           .map(
-            (item) => CustomerOrderItem.fromJson(
-              Map<String, dynamic>.from(item),
-            ),
+            (item) =>
+                CustomerOrderItem.fromJson(Map<String, dynamic>.from(item)),
           )
           .toList(),
       statusEvents: rawEvents
@@ -179,10 +177,13 @@ class CustomerDeliveryAddressSnapshot {
   final String? deliveryNotes;
 
   String get compactAddress {
-    return [line1, line2, city, region, postalCode]
-        .whereType<String>()
-        .where((value) => value.trim().isNotEmpty)
-        .join(', ');
+    return [
+      line1,
+      line2,
+      city,
+      region,
+      postalCode,
+    ].whereType<String>().where((value) => value.trim().isNotEmpty).join(', ');
   }
 }
 
