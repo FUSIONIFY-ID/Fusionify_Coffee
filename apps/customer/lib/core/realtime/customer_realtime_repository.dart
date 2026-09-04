@@ -26,9 +26,10 @@ class CustomerRealtimeRepository {
     var eventType = 'message';
     final dataLines = <String>[];
 
-    await for (final line in body.stream
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())) {
+    await for (final line
+        in body.stream
+            .transform(utf8.decoder)
+            .transform(const LineSplitter())) {
       if (line.isEmpty) {
         if (eventType == 'account' && dataLines.isNotEmpty) {
           final decoded = jsonDecode(dataLines.join('\n'));

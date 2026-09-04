@@ -6,7 +6,9 @@ class CustomerRealtimeSnapshot {
   });
 
   factory CustomerRealtimeSnapshot.fromJson(Map<String, dynamic> json) {
-    final rawOrders = json['orders'] is List ? json['orders'] as List : const [];
+    final rawOrders = json['orders'] is List
+        ? json['orders'] as List
+        : const [];
     return CustomerRealtimeSnapshot(
       signature: json['signature'] as String? ?? '',
       orders: rawOrders
@@ -57,8 +59,9 @@ class CustomerRealtimeOrder {
   });
 
   factory CustomerRealtimeOrder.fromJson(Map<String, dynamic> json) {
-    final rawPayments =
-        json['payments'] is List ? json['payments'] as List : const [];
+    final rawPayments = json['payments'] is List
+        ? json['payments'] as List
+        : const [];
     return CustomerRealtimeOrder(
       id: json['id'] as String? ?? '',
       status: json['status'] as String? ?? '',
