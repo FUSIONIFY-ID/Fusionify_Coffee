@@ -62,8 +62,11 @@ Checkout sends:
 - product IDs
 - modifier IDs
 - quantities
+- optional customer voucher wallet ID
 
-The backend calculates the final amount.
+The backend calculates the final amount and validates voucher eligibility again. The customer app does not calculate an authoritative discount.
+
+If an eligible voucher reduces the server-authoritative total to zero and the backend confirms the order, Flutter skips payment creation and opens the persisted order instead.
 
 ## QRIS Payment
 
@@ -145,4 +148,9 @@ Fulfillment status events are authoritative backend data. The customer app does 
 
 ## Rewards + Digital Benefits UI
 
-Customer rewards, voucher, and digital-benefit presentation code is kept `dart format` clean and validated by the standard customer CI before changes are considered complete.
+Rewards is a customer hub for:
+- Fusion Points / membership
+- customer voucher wallet
+- digital benefits from eligible completed orders
+
+Voucher wallet and digital-benefit data come from authenticated backend APIs. Wi-Fi passwords are masked by default in the customer UI, and AI benefits display backend quota state.
