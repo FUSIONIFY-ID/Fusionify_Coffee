@@ -105,6 +105,7 @@ class CustomerOrderDetail {
 
 class CustomerOrderItem {
   const CustomerOrderItem({
+    required this.productId,
     required this.productName,
     required this.quantity,
     required this.lineTotal,
@@ -115,6 +116,7 @@ class CustomerOrderItem {
     final rawModifiers = _list(json['selectedModifiers']);
 
     return CustomerOrderItem(
+      productId: json['productId'] as String? ?? '',
       productName: json['productName'] as String? ?? '',
       quantity: json['quantity'] as int? ?? 0,
       lineTotal: json['lineTotal'] as int? ?? 0,
@@ -129,6 +131,7 @@ class CustomerOrderItem {
     );
   }
 
+  final String productId;
   final String productName;
   final int quantity;
   final int lineTotal;
@@ -137,6 +140,7 @@ class CustomerOrderItem {
 
 class CustomerOrderModifier {
   const CustomerOrderModifier({
+    required this.optionId,
     required this.groupName,
     required this.optionName,
     required this.priceDelta,
@@ -144,12 +148,14 @@ class CustomerOrderModifier {
 
   factory CustomerOrderModifier.fromJson(Map<String, dynamic> json) {
     return CustomerOrderModifier(
+      optionId: json['optionId'] as String? ?? '',
       groupName: json['groupName'] as String? ?? '',
       optionName: json['optionName'] as String? ?? '',
       priceDelta: json['priceDelta'] as int? ?? 0,
     );
   }
 
+  final String optionId;
   final String groupName;
   final String optionName;
   final int priceDelta;
