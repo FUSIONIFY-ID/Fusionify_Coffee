@@ -124,6 +124,18 @@ Production release signing is intentionally not configured in Git.
 
 See `../../docs/android/SIGNING.md`.
 
+## Preview GitHub Releases
+
+Pushing an explicit repository tag that starts with `v`, for example:
+
+```text
+v0.3.0-preview.1
+```
+
+runs the `Preview Release` workflow. It validates formatting, analyzes/tests the customer app, builds a debug-signed Android APK, creates a GitHub prerelease, and attaches the APK.
+
+Preview APKs are development artifacts only. They are not production-signed Google Play builds.
+
 ## Repository Rules
 
 Read:
