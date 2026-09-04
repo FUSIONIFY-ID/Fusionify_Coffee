@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Headers,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Headers, Req, UseGuards } from '@nestjs/common';
 import type { AuthenticatedRequest } from '../auth/auth.guard';
 import { CustomerAuthGuard } from '../auth/auth.guard';
 import { RewardsService } from './rewards.service';
