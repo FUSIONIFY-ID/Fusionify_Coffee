@@ -26,9 +26,11 @@ class VoucherDefinition {
       maximumDiscount: json['maximumDiscount'] as int?,
       outletId: json['outletId'] as String?,
       active: json['active'] as bool? ?? false,
-      validFrom: DateTime.tryParse(json['validFrom'] as String? ?? '') ??
+      validFrom:
+          DateTime.tryParse(json['validFrom'] as String? ?? '') ??
           DateTime(2026),
-      validUntil: DateTime.tryParse(json['validUntil'] as String? ?? '') ??
+      validUntil:
+          DateTime.tryParse(json['validUntil'] as String? ?? '') ??
           DateTime(2026),
     );
   }
@@ -64,7 +66,8 @@ class CustomerVoucherWalletEntry {
       id: json['id'] as String? ?? '',
       status: json['status'] as String? ?? '',
       source: json['source'] as String? ?? '',
-      issuedAt: DateTime.tryParse(json['issuedAt'] as String? ?? '') ??
+      issuedAt:
+          DateTime.tryParse(json['issuedAt'] as String? ?? '') ??
           DateTime(2026),
       expiresAt: DateTime.tryParse(json['expiresAt'] as String? ?? ''),
       usable: json['usable'] as bool? ?? false,
@@ -99,7 +102,8 @@ class DigitalBenefitOrderRef {
         : const <String, dynamic>{};
     return DigitalBenefitOrderRef(
       id: json['id'] as String? ?? '',
-      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+      createdAt:
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime(2026),
       outletName: outlet['name'] as String? ?? 'Fusionify Coffee',
     );
@@ -135,9 +139,11 @@ class DigitalBenefitEntitlement {
       id: json['id'] as String? ?? '',
       type: json['type'] as String? ?? '',
       active: json['active'] as bool? ?? false,
-      validFrom: DateTime.tryParse(json['validFrom'] as String? ?? '') ??
+      validFrom:
+          DateTime.tryParse(json['validFrom'] as String? ?? '') ??
           DateTime(2026),
-      validUntil: DateTime.tryParse(json['validUntil'] as String? ?? '') ??
+      validUntil:
+          DateTime.tryParse(json['validUntil'] as String? ?? '') ??
           DateTime(2026),
       quotaTotal: json['quotaTotal'] as int?,
       quotaUsed: json['quotaUsed'] as int? ?? 0,

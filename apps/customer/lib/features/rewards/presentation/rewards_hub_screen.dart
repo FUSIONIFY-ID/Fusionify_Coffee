@@ -38,11 +38,7 @@ class RewardsHubScreen extends StatelessWidget {
           ),
           const Expanded(
             child: TabBarView(
-              children: [
-                RewardsScreen(),
-                VouchersScreen(),
-                BenefitsScreen(),
-              ],
+              children: [RewardsScreen(), VouchersScreen(), BenefitsScreen()],
             ),
           ),
         ],

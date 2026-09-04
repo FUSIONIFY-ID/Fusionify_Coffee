@@ -26,8 +26,10 @@ extension RewardExtrasStrings on AppStrings {
   );
   String get availableVoucher =>
       _extrasPick('Bisa digunakan', 'Boleh digunakan', 'Available');
-  String get voucherUsed => _extrasPick('Sudah digunakan', 'Telah digunakan', 'Used');
-  String get voucherExpired => _extrasPick('Kedaluwarsa', 'Tamat tempoh', 'Expired');
+  String get voucherUsed =>
+      _extrasPick('Sudah digunakan', 'Telah digunakan', 'Used');
+  String get voucherExpired =>
+      _extrasPick('Kedaluwarsa', 'Tamat tempoh', 'Expired');
   String voucherMinimum(String amount) => _extrasPick(
     'Minimum belanja $amount',
     'Belanja minimum $amount',
@@ -53,12 +55,16 @@ extension RewardExtrasStrings on AppStrings {
     'Manfaat digital belum dapat dimuatkan.',
     'Digital benefits could not be loaded.',
   );
-  String get wifiAccess => _extrasPick('Akses Wi-Fi', 'Akses Wi-Fi', 'Wi-Fi Access');
+  String get wifiAccess =>
+      _extrasPick('Akses Wi-Fi', 'Akses Wi-Fi', 'Wi-Fi Access');
   String get aiAccess => _extrasPick('Benefit AI', 'Manfaat AI', 'AI Benefit');
   String get activeBenefit => _extrasPick('Aktif', 'Aktif', 'Active');
-  String get inactiveBenefit => _extrasPick('Tidak aktif', 'Tidak aktif', 'Inactive');
-  String get networkName => _extrasPick('Nama jaringan', 'Nama rangkaian', 'Network name');
-  String get wifiPassword => _extrasPick('Password Wi-Fi', 'Kata laluan Wi-Fi', 'Wi-Fi password');
+  String get inactiveBenefit =>
+      _extrasPick('Tidak aktif', 'Tidak aktif', 'Inactive');
+  String get networkName =>
+      _extrasPick('Nama jaringan', 'Nama rangkaian', 'Network name');
+  String get wifiPassword =>
+      _extrasPick('Password Wi-Fi', 'Kata laluan Wi-Fi', 'Wi-Fi password');
   String get showPassword => _extrasPick('Tampilkan', 'Tunjukkan', 'Show');
   String get hidePassword => _extrasPick('Sembunyikan', 'Sembunyikan', 'Hide');
   String quotaRemaining(int remaining, int total) => _extrasPick(

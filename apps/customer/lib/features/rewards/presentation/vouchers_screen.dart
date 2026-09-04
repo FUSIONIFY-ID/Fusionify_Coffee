@@ -88,9 +88,8 @@ class _VoucherCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     voucher.title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w800),
                   ),
                 ),
                 Container(

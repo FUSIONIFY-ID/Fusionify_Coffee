@@ -112,13 +112,14 @@ class _BenefitCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     isWifi ? strings.wifiAccess : strings.aiAccess,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w800),
                   ),
                 ),
                 Text(
-                  benefit.active ? strings.activeBenefit : strings.inactiveBenefit,
+                  benefit.active
+                      ? strings.activeBenefit
+                      : strings.inactiveBenefit,
                   style: TextStyle(
                     color: benefit.active
                         ? CoffeeColors.success
