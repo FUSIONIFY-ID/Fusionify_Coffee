@@ -4,8 +4,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { BenefitsService } from '../benefits/benefits.service';
 import { PrismaService } from '../database/prisma.service';
 import { OrderStatus } from '../generated/prisma/enums';
+import { InventoryConsumptionService } from '../operations/inventory-consumption.service';
 import { RewardsService } from '../rewards/rewards.service';
 import { StaffAuthService } from '../staff/staff-auth.service';
 import { OrdersService } from './orders.service';
@@ -30,6 +32,8 @@ export class StaffOrdersService {
     private readonly staffAuthService: StaffAuthService,
     private readonly ordersService: OrdersService,
     private readonly rewardsService: RewardsService,
+    private readonly inventoryConsumptionService: InventoryConsumptionService,
+    private readonly benefitsService: BenefitsService,
   ) {}
 
   async createPosOrder(
@@ -50,12 +54,8 @@ export class StaffOrdersService {
     await this.staffAuthService.audit(actor.staffUserId, 'POS_ORDER_CREATED', {
       targetType: 'Order',
       targetId: order.id,
-      metadata: {
-        outletId,
-        totalAmount: order.totalAmount,
-      },
+      metadata: { outletId, totalAmount: order.totalAmount },
     });
-
     return order;
   }
 
@@ -65,23 +65,15 @@ export class StaffOrdersService {
   ) {
     const status = this.parseStatus(filters.status);
     const outletId = this.resolveOutlet(actor, filters.outletId);
-
     return this.prisma.order.findMany({
       where: {
         ...(status ? { status } : {}),
         ...(outletId ? { outletId } : {}),
       },
       include: {
-        outlet: {
-          select: { id: true, name: true },
-        },
-        items: {
-          orderBy: { createdAt: 'asc' },
-        },
-        payments: {
-          orderBy: { createdAt: 'desc' },
-          take: 1,
-        },
+        outlet: { select: { id: true, name: true } },
+        items: { orderBy: { createdAt: 'asc' } },
+        payments: { orderBy: { createdAt: 'desc' }, take: 1 },
       },
       orderBy: { createdAt: 'asc' },
       take: 250,
@@ -92,14 +84,11 @@ export class StaffOrdersService {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: {
-        outlet: {
-          select: { id: true, name: true },
-        },
-        items: {
-          orderBy: { createdAt: 'asc' },
-        },
-        payments: {
-          orderBy: { createdAt: 'desc' },
+        outlet: { select: { id: true, name: true } },
+        items: { orderBy: { createdAt: 'asc' } },
+        payments: { orderBy: { createdAt: 'desc' } },
+        voucherRedemption: {
+          include: { customerVoucher: { include: { voucher: true } } },
         },
         statusEvents: {
           select: {
@@ -109,22 +98,16 @@ export class StaffOrdersService {
             note: true,
             createdAt: true,
             staffUser: {
-              select: {
-                id: true,
-                fullName: true,
-                role: true,
-              },
+              select: { id: true, fullName: true, role: true },
             },
           },
           orderBy: { createdAt: 'asc' },
         },
       },
     });
-
     if (!order || (actor.outletId && order.outletId !== actor.outletId)) {
       throw new NotFoundException('Order not found.');
     }
-
     return order;
   }
 
@@ -137,13 +120,8 @@ export class StaffOrdersService {
     const note = this.validateNote(input.note);
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      select: {
-        id: true,
-        status: true,
-        outletId: true,
-      },
+      select: { id: true, status: true, outletId: true },
     });
-
     if (!order || (actor.outletId && order.outletId !== actor.outletId)) {
       throw new NotFoundException('Order not found.');
     }
@@ -157,18 +135,20 @@ export class StaffOrdersService {
 
     const result = await this.prisma.$transaction(async (tx) => {
       const updated = await tx.order.updateMany({
-        where: {
-          id: order.id,
-          status: order.status,
-        },
-        data: {
-          status: requested,
-        },
+        where: { id: order.id, status: order.status },
+        data: { status: requested },
       });
-
       if (updated.count !== 1) {
         throw new ConflictException(
           'Order status changed concurrently. Refresh and try again.',
+        );
+      }
+
+      if (requested === OrderStatus.PREPARING) {
+        await this.inventoryConsumptionService.consumeOrder(
+          tx,
+          order.id,
+          actor.staffUserId,
         );
       }
 
@@ -184,17 +164,15 @@ export class StaffOrdersService {
 
       if (requested === OrderStatus.COMPLETED) {
         await this.rewardsService.awardCompletedOrder(tx, order.id);
+        await this.benefitsService.issueCompletedOrder(tx, order.id);
       }
 
       return tx.order.findUniqueOrThrow({
         where: { id: order.id },
         include: {
-          outlet: {
-            select: { id: true, name: true },
-          },
-          items: {
-            orderBy: { createdAt: 'asc' },
-          },
+          outlet: { select: { id: true, name: true } },
+          items: { orderBy: { createdAt: 'asc' } },
+          digitalEntitlements: true,
           statusEvents: {
             select: {
               id: true,
@@ -222,7 +200,6 @@ export class StaffOrdersService {
         },
       },
     );
-
     return result;
   }
 
