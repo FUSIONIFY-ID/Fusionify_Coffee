@@ -51,12 +51,10 @@ class SavedAddress {
   final bool isDefault;
 
   String get compactAddress {
-    return [
-      line1,
-      city,
-      region,
-      postalCode,
-    ].where((value) => value != null && value!.trim().isNotEmpty).join(', ');
+    return [line1, city, region, postalCode]
+        .whereType<String>()
+        .where((value) => value.trim().isNotEmpty)
+        .join(', ');
   }
 }
 
