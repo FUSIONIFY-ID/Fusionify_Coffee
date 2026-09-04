@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AddressesModule } from './addresses/addresses.module';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { CatalogModule } from './catalog/catalog.module';
@@ -14,6 +15,7 @@ import { VouchersModule } from './vouchers/vouchers.module';
   imports: [
     DatabaseModule,
     AuthModule,
+    AddressesModule,
     CatalogModule,
     FavoritesModule,
     OrdersModule,
