@@ -138,7 +138,7 @@ npm run build
 CI uses PostgreSQL 17.
 
 Latest previously validated implementation head: `a139346b5dab4d5cb53bfa8b6eb5c02356cefd56`.
-The current voucher/rewards/inventory head is being revalidated after repo-wide API formatting with the repository's Prettier version.
+The current voucher/rewards/inventory head is being revalidated after repo-wide API formatting and strict TypeScript build fixes.
 
 ## Security
 
