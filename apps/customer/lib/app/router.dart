@@ -21,6 +21,7 @@ import '../features/orders/presentation/order_detail_screen.dart';
 import '../features/orders/presentation/orders_screen.dart';
 import '../features/payment/presentation/payment_screen.dart';
 import '../features/product/presentation/product_detail_screen.dart';
+import '../features/receipts/presentation/digital_receipt_screen.dart';
 import '../features/rewards/presentation/rewards_hub_screen.dart';
 import '../features/shell/presentation/app_shell.dart';
 
@@ -51,6 +52,11 @@ final appRouter = GoRouter(
       path: '/orders/:orderId',
       builder: (context, state) =>
           OrderDetailScreen(orderId: state.pathParameters['orderId'] ?? ''),
+    ),
+    GoRoute(
+      path: '/orders/:orderId/receipt',
+      builder: (context, state) =>
+          DigitalReceiptScreen(orderId: state.pathParameters['orderId'] ?? ''),
     ),
     GoRoute(
       path: '/payment/:paymentId',
