@@ -23,7 +23,9 @@ void main() {
         id: 'outlet',
         name: 'Fusionify Coffee',
         note: '',
+        currency: 'IDR',
         pickupEnabled: true,
+        deliveryEnabled: false,
       ),
       products: [
         Product(
