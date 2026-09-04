@@ -11,7 +11,9 @@ void main() {
         id: 'preview-outlet',
         name: 'Preview Store',
         note: '',
+        currency: 'IDR',
         pickupEnabled: true,
+        deliveryEnabled: false,
       ),
       products: [
         Product(
