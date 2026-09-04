@@ -15,13 +15,13 @@ class ReorderBuildResult {
 }
 
 ReorderBuildResult buildReorderCart({
-  required CustomerOrderDetail order,
+  required List<CustomerOrderItem> orderItems,
   required CatalogSnapshot catalog,
 }) {
   final cartItems = <CartItem>[];
   final unavailable = <String>[];
 
-  for (final orderItem in order.items) {
+  for (final orderItem in orderItems) {
     final product = catalog.products.where((item) {
       return item.id == orderItem.productId;
     }).firstOrNull;
