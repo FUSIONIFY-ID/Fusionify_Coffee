@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AddressesModule } from './addresses/addresses.module';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
+import { BenefitsModule } from './benefits/benefits.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { DatabaseModule } from './database/database.module';
 import { FavoritesModule } from './favorites/favorites.module';
@@ -17,6 +18,7 @@ import { VouchersModule } from './vouchers/vouchers.module';
     DatabaseModule,
     AuthModule,
     AddressesModule,
+    BenefitsModule,
     CatalogModule,
     FavoritesModule,
     OperationsModule,
