@@ -1,0 +1,96 @@
+name: Preview Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing v* tag to publish as a preview release
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Resolve release tag
+        id: release
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+
+          if [[ ! "$TAG" =~ ^v.+ ]]; then
+            echo "Release tag must start with v." >&2
+            exit 1
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.release.outputs.tag }}
+          fetch-depth: 0
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.0"
+          channel: stable
+          cache: true
+
+      - name: Resolve Flutter dependencies
+        working-directory: apps/customer
+        run: flutter pub get
+
+      - name: Validate formatting
+        working-directory: apps/customer
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analyze customer app
+        working-directory: apps/customer
+        run: flutter analyze
+
+      - name: Run customer tests
+        working-directory: apps/customer
+        run: flutter test
+
+      - name: Build preview APK
+        working-directory: apps/customer
+        run: flutter build apk --debug
+
+      - name: Prepare release asset
+        id: asset
+        shell: bash
+        run: |
+          TAG="${{ steps.release.outputs.tag }}"
+          ASSET="Fusionify-Coffee-${TAG}-preview-debug.apk"
+          cp apps/customer/build/app/outputs/flutter-apk/app-debug.apk "$ASSET"
+          echo "path=$ASSET" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub prerelease
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.release.outputs.tag }}
+          ASSET: ${{ steps.asset.outputs.path }}
+        shell: bash
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; uploading/replacing preview asset only."
+            gh release upload "$TAG" "$ASSET" --clobber
+          else
+            gh release create "$TAG" "$ASSET" \
+              --verify-tag \
+              --prerelease \
+              --generate-notes \
+              --title "Fusionify Coffee $TAG (Preview)" \
+              --notes "Preview/development release. The attached Android APK uses debug signing and is not a production Google Play build."
+          fi
