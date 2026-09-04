@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Param,
-  Put,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Param, Put, Req, UseGuards } from '@nestjs/common';
 import type { AuthenticatedStaffRequest } from '../staff/staff-auth.guard';
 import { StaffAuthGuard } from '../staff/staff-auth.guard';
 import { RequireStaffPermissions } from '../staff/staff.decorators';

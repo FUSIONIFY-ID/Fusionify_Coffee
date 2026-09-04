@@ -60,7 +60,10 @@ export class BenefitsService {
     await this.staffAuthService.audit(staffUserId, 'WIFI_BENEFIT_CONFIGURED', {
       targetType: 'Outlet',
       targetId: outletId,
-      metadata: { active: config.active, entitlementHours: config.entitlementHours },
+      metadata: {
+        active: config.active,
+        entitlementHours: config.entitlementHours,
+      },
     });
     return {
       id: config.id,
@@ -80,7 +83,11 @@ export class BenefitsService {
       where: { id: outletId },
     });
     if (!outlet) throw new NotFoundException('Outlet not found.');
-    if (!Number.isInteger(input.dailyQuota) || input.dailyQuota <= 0 || input.dailyQuota > 100000) {
+    if (
+      !Number.isInteger(input.dailyQuota) ||
+      input.dailyQuota <= 0 ||
+      input.dailyQuota > 100000
+    ) {
       throw new BadRequestException('dailyQuota must be a positive integer.');
     }
     this.validateHours(input.entitlementHours);
@@ -196,8 +203,7 @@ export class BenefitsService {
     return rows.map((row) => ({
       id: row.id,
       type: row.type,
-      active:
-        !row.revokedAt && row.validFrom <= now && row.validUntil > now,
+      active: !row.revokedAt && row.validFrom <= now && row.validUntil > now,
       validFrom: row.validFrom,
       validUntil: row.validUntil,
       quotaTotal: row.quotaTotal,

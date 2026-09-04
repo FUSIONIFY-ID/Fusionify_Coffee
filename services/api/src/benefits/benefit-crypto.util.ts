@@ -1,8 +1,4 @@
-import {
-  createCipheriv,
-  createDecipheriv,
-  randomBytes,
-} from 'node:crypto';
+import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 
 function encryptionKey() {
   const value = process.env.DIGITAL_BENEFIT_ENCRYPTION_KEY;

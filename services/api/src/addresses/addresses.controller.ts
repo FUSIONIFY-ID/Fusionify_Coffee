@@ -26,10 +26,7 @@ export class AddressesController {
   }
 
   @Post()
-  create(
-    @Req() request: AuthenticatedRequest,
-    @Body() body: SaveAddressInput,
-  ) {
+  create(@Req() request: AuthenticatedRequest, @Body() body: SaveAddressInput) {
     return this.addressesService.create(request.auth!.userId, body);
   }
 
@@ -39,11 +36,7 @@ export class AddressesController {
     @Param('addressId') addressId: string,
     @Body() body: SaveAddressInput,
   ) {
-    return this.addressesService.update(
-      request.auth!.userId,
-      addressId,
-      body,
-    );
+    return this.addressesService.update(request.auth!.userId, addressId, body);
   }
 
   @Delete(':addressId')

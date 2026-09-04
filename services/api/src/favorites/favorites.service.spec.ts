@@ -7,7 +7,9 @@ type FavoriteListArgs = {
 
 describe('FavoritesService', () => {
   it('scopes favorite listing to the authenticated customer', async () => {
-    const findMany = jest.fn<Promise<unknown[]>, [FavoriteListArgs]>().mockResolvedValue([]);
+    const findMany = jest
+      .fn<Promise<unknown[]>, [FavoriteListArgs]>()
+      .mockResolvedValue([]);
     const prisma = {
       favoriteProduct: { findMany },
     } as unknown as PrismaService;

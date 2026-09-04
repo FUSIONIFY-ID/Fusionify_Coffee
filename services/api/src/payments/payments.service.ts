@@ -305,9 +305,7 @@ export class PaymentsService {
         const voucherRedemption = await tx.voucherRedemption.findUnique({
           where: { orderId: payment.orderId },
         });
-        if (
-          voucherRedemption?.status === VoucherRedemptionStatus.RESERVED
-        ) {
+        if (voucherRedemption?.status === VoucherRedemptionStatus.RESERVED) {
           await tx.voucherRedemption.update({
             where: { id: voucherRedemption.id },
             data: {

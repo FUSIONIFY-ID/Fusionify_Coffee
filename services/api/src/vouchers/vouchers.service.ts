@@ -245,10 +245,7 @@ export class VouchersService {
 
   private translationObject(value: Prisma.JsonValue | null) {
     if (!value || Array.isArray(value) || typeof value !== 'object') {
-      return {} as Record<
-        string,
-        { title?: string; description?: string }
-      >;
+      return {} as Record<string, { title?: string; description?: string }>;
     }
     const result: Record<string, { title?: string; description?: string }> = {};
     for (const [key, entry] of Object.entries(value)) {

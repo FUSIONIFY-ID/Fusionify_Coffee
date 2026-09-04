@@ -124,7 +124,9 @@ export class AddressesService {
       input.longitude < -180 ||
       input.longitude > 180
     ) {
-      throw new BadRequestException('Valid latitude and longitude are required.');
+      throw new BadRequestException(
+        'Valid latitude and longitude are required.',
+      );
     }
     return {
       label,

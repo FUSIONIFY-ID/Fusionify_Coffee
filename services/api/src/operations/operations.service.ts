@@ -30,7 +30,10 @@ export class OperationsService {
     private readonly staffAuthService: StaffAuthService,
   ) {}
 
-  async listInventory(staffOutletId: string | null, requestedOutletId?: string) {
+  async listInventory(
+    staffOutletId: string | null,
+    requestedOutletId?: string,
+  ) {
     const outletId = this.resolveOutlet(staffOutletId, requestedOutletId);
     return this.prisma.outletInventory.findMany({
       where: { outletId },
@@ -98,14 +101,20 @@ export class OperationsService {
       where: { id: productId },
     });
     if (!product) throw new NotFoundException('Product not found.');
-    if (!Array.isArray(items)) throw new BadRequestException('items is required.');
+    if (!Array.isArray(items))
+      throw new BadRequestException('items is required.');
     const ids = new Set<string>();
     for (const item of items) {
       if (!item.inventoryItemId || ids.has(item.inventoryItemId)) {
         throw new BadRequestException('Recipe inventory items must be unique.');
       }
-      if (!Number.isInteger(item.quantityBaseUnit) || item.quantityBaseUnit <= 0) {
-        throw new BadRequestException('Recipe quantities must be positive integers.');
+      if (
+        !Number.isInteger(item.quantityBaseUnit) ||
+        item.quantityBaseUnit <= 0
+      ) {
+        throw new BadRequestException(
+          'Recipe quantities must be positive integers.',
+        );
       }
       ids.add(item.inventoryItemId);
     }
@@ -113,7 +122,9 @@ export class OperationsService {
       where: { id: { in: [...ids] }, active: true },
     });
     if (known !== ids.size) {
-      throw new BadRequestException('Recipe contains unavailable inventory item.');
+      throw new BadRequestException(
+        'Recipe contains unavailable inventory item.',
+      );
     }
 
     await this.prisma.$transaction(async (tx) => {
@@ -148,7 +159,9 @@ export class OperationsService {
       !Number.isInteger(input.quantityBaseUnit) ||
       input.quantityBaseUnit === 0
     ) {
-      throw new BadRequestException('quantityBaseUnit must be a non-zero integer.');
+      throw new BadRequestException(
+        'quantityBaseUnit must be a non-zero integer.',
+      );
     }
     const item = await this.prisma.inventoryItem.findUnique({
       where: { id: input.inventoryItemId },
@@ -266,7 +279,9 @@ export class OperationsService {
     ]);
     if (!supplier) throw new NotFoundException('Supplier not found.');
     if (inventoryCount !== itemIds.size) {
-      throw new BadRequestException('Unknown inventory item in purchase order.');
+      throw new BadRequestException(
+        'Unknown inventory item in purchase order.',
+      );
     }
     const purchaseOrder = await this.prisma.purchaseOrder.create({
       data: {
@@ -323,11 +338,13 @@ export class OperationsService {
       },
       include: { items: true },
     });
-    if (!purchaseOrder) throw new NotFoundException('Purchase order not found.');
+    if (!purchaseOrder)
+      throw new NotFoundException('Purchase order not found.');
     if (
-      ![PurchaseOrderStatus.ORDERED, PurchaseOrderStatus.PARTIALLY_RECEIVED].includes(
-        purchaseOrder.status,
-      )
+      ![
+        PurchaseOrderStatus.ORDERED,
+        PurchaseOrderStatus.PARTIALLY_RECEIVED,
+      ].includes(purchaseOrder.status)
     ) {
       throw new ConflictException('Purchase order cannot receive stock now.');
     }
@@ -349,7 +366,9 @@ export class OperationsService {
         }
         const remaining = poItem.quantityBaseUnit - poItem.receivedBaseUnit;
         if (quantity > remaining) {
-          throw new BadRequestException('Received quantity exceeds ordered quantity.');
+          throw new BadRequestException(
+            'Received quantity exceeds ordered quantity.',
+          );
         }
         if (quantity === 0) continue;
 
@@ -409,11 +428,15 @@ export class OperationsService {
         },
         include: { supplier: true, items: true },
       });
-      await this.staffAuthService.audit(staffUserId, 'PURCHASE_ORDER_RECEIVED', {
-        targetType: 'PurchaseOrder',
-        targetId: updated.id,
-        metadata: { complete },
-      });
+      await this.staffAuthService.audit(
+        staffUserId,
+        'PURCHASE_ORDER_RECEIVED',
+        {
+          targetType: 'PurchaseOrder',
+          targetId: updated.id,
+          metadata: { complete },
+        },
+      );
       return updated;
     });
   }
@@ -477,7 +500,10 @@ export class OperationsService {
       },
     });
     if (!asset) throw new NotFoundException('Asset not found.');
-    if (input.cost != null && (!Number.isInteger(input.cost) || input.cost < 0)) {
+    if (
+      input.cost != null &&
+      (!Number.isInteger(input.cost) || input.cost < 0)
+    ) {
       throw new BadRequestException('Maintenance cost must be non-negative.');
     }
     const maintenance = await this.prisma.assetMaintenance.create({

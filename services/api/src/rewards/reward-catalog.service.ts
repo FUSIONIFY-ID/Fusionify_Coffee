@@ -175,8 +175,7 @@ export class RewardCatalogService {
         if (!item || !item.active) {
           throw new NotFoundException('Reward item is not available.');
         }
-        const currency =
-          user.phoneCountry === PhoneCountry.MY ? 'MYR' : 'IDR';
+        const currency = user.phoneCountry === PhoneCountry.MY ? 'MYR' : 'IDR';
         const now = new Date();
         if (
           item.currency !== currency ||
@@ -184,7 +183,9 @@ export class RewardCatalogService {
           item.voucher.validFrom > now ||
           item.voucher.validUntil <= now
         ) {
-          throw new ConflictException('Reward item is not currently redeemable.');
+          throw new ConflictException(
+            'Reward item is not currently redeemable.',
+          );
         }
         const account = user.loyaltyAccount;
         if (!account || account.balance < item.pointsCost) {

@@ -13,7 +13,10 @@ import { StaffAuthGuard } from '../staff/staff-auth.guard';
 import { RequireStaffPermissions } from '../staff/staff.decorators';
 import { StaffPermissionsGuard } from '../staff/staff-permissions.guard';
 import { StaffPermission } from '../staff/staff.types';
-import type { ConfigureVoucherInput, IssueVoucherInput } from './vouchers.types';
+import type {
+  ConfigureVoucherInput,
+  IssueVoucherInput,
+} from './vouchers.types';
 import { VouchersService } from './vouchers.service';
 
 @Controller('v1/staff/vouchers')

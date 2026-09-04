@@ -87,7 +87,9 @@ export class OrdersService {
         throw new BadRequestException('Delivery is not configured for outlet.');
       }
       if (!input.savedAddressId) {
-        throw new BadRequestException('savedAddressId is required for delivery.');
+        throw new BadRequestException(
+          'savedAddressId is required for delivery.',
+        );
       }
       const address = await this.prisma.savedAddress.findFirst({
         where: { id: input.savedAddressId, userId },
@@ -142,11 +144,15 @@ export class OrdersService {
         },
       },
     });
-    const productMap = new Map(products.map((product) => [product.id, product]));
+    const productMap = new Map(
+      products.map((product) => [product.id, product]),
+    );
     const pricedItems = input.items.map((item) => {
       const product = productMap.get(item.productId);
       if (!product) {
-        throw new BadRequestException(`Product ${item.productId} is not available.`);
+        throw new BadRequestException(
+          `Product ${item.productId} is not available.`,
+        );
       }
       const selectedOptionIds = item.modifierOptionIds ?? [];
       if (new Set(selectedOptionIds).size !== selectedOptionIds.length) {
@@ -213,7 +219,9 @@ export class OrdersService {
     let discountAmount = 0;
     if (input.customerVoucherId) {
       if (!userId) {
-        throw new BadRequestException('Guest staff orders cannot use vouchers.');
+        throw new BadRequestException(
+          'Guest staff orders cannot use vouchers.',
+        );
       }
       const row = await this.prisma.customerVoucher.findFirst({
         where: { id: input.customerVoucherId, userId },
@@ -238,7 +246,9 @@ export class OrdersService {
         throw new BadRequestException('Voucher does not apply to this order.');
       }
       if (subtotal < row.voucher.minimumSpend) {
-        throw new BadRequestException('Order does not meet voucher minimum spend.');
+        throw new BadRequestException(
+          'Order does not meet voucher minimum spend.',
+        );
       }
       discountAmount = this.discountForVoucher(
         subtotal,
@@ -436,7 +446,10 @@ export class OrdersService {
       discountType === VoucherDiscountType.FIXED_AMOUNT
         ? discountValue
         : Math.floor((subtotal * discountValue) / 10000);
-    return Math.min(subtotal, maximumDiscount ? Math.min(raw, maximumDiscount) : raw);
+    return Math.min(
+      subtotal,
+      maximumDiscount ? Math.min(raw, maximumDiscount) : raw,
+    );
   }
 
   private resolveSchedule(value?: string | null) {
@@ -447,10 +460,14 @@ export class OrdersService {
     }
     const now = Date.now();
     if (scheduled.getTime() < now + scheduleLeadMs) {
-      throw new BadRequestException('Scheduled orders require 15 minutes lead time.');
+      throw new BadRequestException(
+        'Scheduled orders require 15 minutes lead time.',
+      );
     }
     if (scheduled.getTime() > now + scheduleHorizonMs) {
-      throw new BadRequestException('Scheduled orders can be at most 7 days ahead.');
+      throw new BadRequestException(
+        'Scheduled orders can be at most 7 days ahead.',
+      );
     }
     return scheduled;
   }
