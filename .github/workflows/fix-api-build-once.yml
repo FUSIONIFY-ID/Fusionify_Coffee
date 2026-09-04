@@ -1,0 +1,54 @@
+name: Fix API Build Once
+
+on:
+  push:
+    paths:
+      - ".github/workflows/fix-api-build-once.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch strict TypeScript build errors
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          operations = Path('services/api/src/operations/operations.service.ts')
+          text = operations.read_text()
+          old = """    if (\n      ![\n        PurchaseOrderStatus.ORDERED,\n        PurchaseOrderStatus.PARTIALLY_RECEIVED,\n      ].includes(purchaseOrder.status)\n    ) {\n"""
+          new = """    if (\n      purchaseOrder.status !== PurchaseOrderStatus.ORDERED &&\n      purchaseOrder.status !== PurchaseOrderStatus.PARTIALLY_RECEIVED\n    ) {\n"""
+          if old not in text:
+              raise SystemExit('operations status snippet not found')
+          operations.write_text(text.replace(old, new, 1))
+
+          orders = Path('services/api/src/orders/orders.service.ts')
+          text = orders.read_text()
+          import_anchor = "import { PrismaService } from '../database/prisma.service';\n"
+          if "import type { Prisma } from '../generated/prisma/client';\n" not in text:
+              if import_anchor not in text:
+                  raise SystemExit('orders import anchor not found')
+              text = text.replace(
+                  import_anchor,
+                  import_anchor + "import type { Prisma } from '../generated/prisma/client';\n",
+                  1,
+              )
+          old_decl = "    let deliveryAddressSnapshot: Record<string, unknown> | null = null;\n"
+          new_decl = "    let deliveryAddressSnapshot: Prisma.InputJsonValue | undefined;\n"
+          if old_decl not in text:
+              raise SystemExit('delivery snapshot declaration not found')
+          orders.write_text(text.replace(old_decl, new_decl, 1))
+          PY
+
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add services/api/src/operations/operations.service.ts services/api/src/orders/orders.service.ts
+          git commit -m "fix: resolve strict API build types"
+          git push
