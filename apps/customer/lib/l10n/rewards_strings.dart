@@ -35,9 +35,9 @@ extension RewardsStrings on AppStrings {
     'You are on the highest active tier.',
   );
   String pointsMultiplier(String multiplier) => _rewardPick(
-    'Multiplier poin ${multiplier}×',
-    'Pengganda mata ${multiplier}×',
-    '${multiplier}× points multiplier',
+    'Multiplier poin $multiplier×',
+    'Pengganda mata $multiplier×',
+    '$multiplier× points multiplier',
   );
   String get pointsBalance =>
       _rewardPick('Saldo poin', 'Baki mata', 'Points balance');
