@@ -1,0 +1,42 @@
+name: Format Reward Extras Once
+
+on:
+  push:
+    paths:
+      - ".github/workflows/format-reward-extras-once.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.0"
+          channel: stable
+          cache: true
+
+      - name: Format reward extras
+        working-directory: apps/customer
+        run: dart format \
+          lib/features/rewards/domain/reward_extras_models.dart \
+          lib/features/rewards/presentation/benefits_screen.dart \
+          lib/features/rewards/presentation/rewards_hub_screen.dart \
+          lib/features/rewards/presentation/vouchers_screen.dart \
+          lib/l10n/reward_extras_strings.dart
+
+      - name: Commit formatting
+        run: |
+          if git status --porcelain apps/customer | grep . >/dev/null; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add apps/customer
+            git commit -m "style: format rewards and benefits UI"
+            git push
+          else
+            echo "No formatting changes."
+          fi
