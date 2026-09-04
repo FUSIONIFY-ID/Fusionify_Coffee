@@ -15,7 +15,9 @@ describe('CatalogService', () => {
               note: 'Data pembangunan',
             },
           },
+          currency: 'IDR',
           pickupEnabled: true,
+          deliveryEnabled: true,
         }),
       },
       product: {
@@ -71,6 +73,8 @@ describe('CatalogService', () => {
 
     expect(catalog.language).toBe('MS_MY');
     expect(catalog.outlet.name).toBe('Kedai Pratonton');
+    expect(catalog.outlet.currency).toBe('IDR');
+    expect(catalog.outlet.deliveryEnabled).toBe(true);
     expect(catalog.products[0].name).toBe('Aren Latte');
     expect(catalog.products[0].description).toBe('Espresso dan susu segar.');
     expect(catalog.products[0].categoryId).toBe('coffee');
@@ -94,7 +98,9 @@ describe('CatalogService', () => {
           name: 'Preview Store',
           note: '',
           translations: null,
+          currency: 'IDR',
           pickupEnabled: true,
+          deliveryEnabled: false,
         }),
       },
       product: {
