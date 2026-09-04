@@ -1,9 +1,13 @@
 import { PrismaService } from '../database/prisma.service';
 import { FavoritesService } from './favorites.service';
 
+type FavoriteListArgs = {
+  where: { userId: string };
+};
+
 describe('FavoritesService', () => {
   it('scopes favorite listing to the authenticated customer', async () => {
-    const findMany = jest.fn().mockResolvedValue([]);
+    const findMany = jest.fn<Promise<unknown[]>, [FavoriteListArgs]>().mockResolvedValue([]);
     const prisma = {
       favoriteProduct: { findMany },
     } as unknown as PrismaService;
@@ -12,7 +16,8 @@ describe('FavoritesService', () => {
     await service.list('customer-a');
 
     expect(findMany).toHaveBeenCalledTimes(1);
-    expect(findMany.mock.calls[0]?.[0]).toMatchObject({
+    const firstCall = findMany.mock.calls[0];
+    expect(firstCall?.[0]).toMatchObject({
       where: { userId: 'customer-a' },
     });
   });
