@@ -5,6 +5,7 @@ import { CatalogModule } from './catalog/catalog.module';
 import { DatabaseModule } from './database/database.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
+import { RewardsModule } from './rewards/rewards.module';
 import { StaffModule } from './staff/staff.module';
 
 @Module({
@@ -14,6 +15,7 @@ import { StaffModule } from './staff/staff.module';
     CatalogModule,
     OrdersModule,
     PaymentsModule,
+    RewardsModule,
     StaffModule,
   ],
   controllers: [AppController],

@@ -4,8 +4,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { OrderStatus } from '../generated/prisma/enums';
 import { PrismaService } from '../database/prisma.service';
+import { OrderStatus } from '../generated/prisma/enums';
+import { RewardsService } from '../rewards/rewards.service';
 import { StaffAuthService } from '../staff/staff-auth.service';
 import { OrdersService } from './orders.service';
 import type { CreateOrderInput } from './orders.types';
@@ -28,6 +29,7 @@ export class StaffOrdersService {
     private readonly prisma: PrismaService,
     private readonly staffAuthService: StaffAuthService,
     private readonly ordersService: OrdersService,
+    private readonly rewardsService: RewardsService,
   ) {}
 
   async createPosOrder(
@@ -179,6 +181,10 @@ export class StaffOrdersService {
           note,
         },
       });
+
+      if (requested === OrderStatus.COMPLETED) {
+        await this.rewardsService.awardCompletedOrder(tx, order.id);
+      }
 
       return tx.order.findUniqueOrThrow({
         where: { id: order.id },

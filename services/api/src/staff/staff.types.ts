@@ -8,6 +8,7 @@ export enum StaffPermission {
   InventoryRead = 'inventory.read',
   InventoryManage = 'inventory.manage',
   FinanceRead = 'finance.read',
+  RewardsManage = 'rewards.manage',
   StaffManage = 'staff.manage',
   AuditRead = 'audit.read',
   SystemManage = 'system.manage',
