@@ -19,6 +19,11 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum FulfillmentType {
+  PICKUP
+  DELIVERY
+}
+
 enum PaymentStatus {
   PENDING
   PAID
@@ -93,17 +98,87 @@ enum LoyaltyEntryType {
   MANUAL_ADJUSTMENT
 }
 
+enum VoucherDiscountType {
+  FIXED_AMOUNT
+  PERCENTAGE_BPS
+}
+
+enum CustomerVoucherStatus {
+  AVAILABLE
+  RESERVED
+  REDEEMED
+}
+
+enum VoucherRedemptionStatus {
+  RESERVED
+  APPLIED
+  RELEASED
+}
+
+enum InventoryItemType {
+  INGREDIENT
+  PACKAGING
+  SUPPLY
+}
+
+enum StockMovementType {
+  PURCHASE
+  SALE
+  WASTE
+  TRANSFER_IN
+  TRANSFER_OUT
+  ADJUSTMENT
+  RETURN
+  EXPIRED
+  DAMAGED
+  STOCK_OPNAME
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  ORDERED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+enum AssetStatus {
+  ACTIVE
+  MAINTENANCE
+  RETIRED
+  LOST
+}
+
+enum DigitalBenefitType {
+  WIFI
+  AI
+}
+
 model Outlet {
-  id              String      @id
-  name            String
-  note            String      @default("")
-  translations    Json?
-  pickupEnabled   Boolean     @default(true)
-  deliveryEnabled Boolean     @default(false)
-  orders          Order[]
-  staffUsers      StaffUser[]
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id                   String               @id
+  name                 String
+  note                 String               @default("")
+  translations         Json?
+  currency             String               @default("IDR")
+  timezone             String               @default("Asia/Jakarta")
+  pickupEnabled        Boolean              @default(true)
+  deliveryEnabled      Boolean              @default(false)
+  latitude             Float?
+  longitude            Float?
+  deliveryRadiusMeters Int?
+  deliveryBaseFee      Int                  @default(0)
+  deliveryPerKmFee     Int                  @default(0)
+  orders               Order[]
+  staffUsers           StaffUser[]
+  vouchers             Voucher[]
+  inventoryLevels      OutletInventory[]
+  stockMovements       StockMovement[]
+  purchaseOrders       PurchaseOrder[]
+  assets               Asset[]
+  wifiBenefitConfig    WifiBenefitConfig?
+  aiBenefitConfig      AiBenefitConfig?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
 }
 
 model Category {
@@ -117,20 +192,21 @@ model Category {
 }
 
 model Product {
-  id             String            @id
+  id             String              @id
   name           String
   description    String
   translations   Json?
   basePrice      Int
-  active         Boolean           @default(true)
-  isBestseller   Boolean           @default(false)
+  active         Boolean             @default(true)
+  isBestseller   Boolean             @default(false)
   categoryId     String
-  category       Category          @relation(fields: [categoryId], references: [id])
+  category       Category            @relation(fields: [categoryId], references: [id])
   modifierGroups ModifierGroup[]
   orderItems     OrderItem[]
   favoritedBy    FavoriteProduct[]
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  recipeItems    ProductRecipeItem[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
 }
 
 model ModifierGroup {
@@ -162,26 +238,38 @@ model ModifierOption {
 }
 
 model Order {
-  id                 String              @id @default(cuid())
-  checkoutKey        String              @unique
-  userId             String?
-  user               CustomerUser?       @relation(fields: [userId], references: [id])
-  outletId           String
-  outlet             Outlet              @relation(fields: [outletId], references: [id])
-  status             OrderStatus         @default(AWAITING_PAYMENT)
-  currency           String              @default("IDR")
-  subtotal           Int
-  totalAmount        Int
-  items              OrderItem[]
-  payments           Payment[]
-  statusEvents       OrderStatusEvent[]
-  loyaltyEntry       LoyaltyLedgerEntry?
-  loyaltyProcessedAt DateTime?
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
+  id                     String                      @id @default(cuid())
+  checkoutKey            String                      @unique
+  userId                 String?
+  user                   CustomerUser?               @relation(fields: [userId], references: [id])
+  outletId               String
+  outlet                 Outlet                      @relation(fields: [outletId], references: [id])
+  status                 OrderStatus                 @default(AWAITING_PAYMENT)
+  fulfillmentType        FulfillmentType             @default(PICKUP)
+  scheduledFor           DateTime?
+  savedAddressId         String?
+  savedAddress           SavedAddress?               @relation(fields: [savedAddressId], references: [id], onDelete: SetNull)
+  deliveryAddressSnapshot Json?
+  deliveryDistanceMeters Int?
+  deliveryFee            Int                         @default(0)
+  currency               String                      @default("IDR")
+  subtotal               Int
+  discountAmount         Int                         @default(0)
+  totalAmount            Int
+  items                  OrderItem[]
+  payments               Payment[]
+  statusEvents           OrderStatusEvent[]
+  loyaltyEntry           LoyaltyLedgerEntry?
+  loyaltyProcessedAt     DateTime?
+  voucherRedemption      VoucherRedemption?
+  stockMovements         StockMovement[]
+  digitalEntitlements    DigitalBenefitEntitlement[]
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
 
   @@index([outletId, status])
   @@index([userId, createdAt])
+  @@index([fulfillmentType, scheduledFor])
 }
 
 model OrderItem {
@@ -230,23 +318,27 @@ model Payment {
 }
 
 model CustomerUser {
-  id                String            @id @default(cuid())
+  id                String                    @id @default(cuid())
   fullName          String
   phoneCountry      PhoneCountry
-  phoneE164         String            @unique
+  phoneE164         String                    @unique
   phoneVerifiedAt   DateTime
-  email             String?           @unique
+  email             String?                   @unique
   passwordHash      String
-  preferredLanguage AppLanguage       @default(ID_ID)
+  preferredLanguage AppLanguage               @default(ID_ID)
   birthDate         DateTime?
   avatarUrl         String?
-  status            CustomerStatus    @default(ACTIVE)
+  status            CustomerStatus            @default(ACTIVE)
   orders            Order[]
   sessions          UserSession[]
   loyaltyAccount    LoyaltyAccount?
   favoriteProducts  FavoriteProduct[]
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  savedAddresses    SavedAddress[]
+  customerVouchers  CustomerVoucher[]
+  rewardRedemptions RewardRedemption[]
+  digitalEntitlements DigitalBenefitEntitlement[]
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
 
   @@index([phoneCountry, status])
 }
@@ -303,22 +395,26 @@ model OtpChallenge {
 }
 
 model StaffUser {
-  id                  String                @id @default(cuid())
-  fullName            String
-  email               String                @unique
-  passwordHash        String
-  role                StaffRole
-  status              StaffStatus           @default(ACTIVE)
-  outletId            String?
-  outlet              Outlet?               @relation(fields: [outletId], references: [id])
-  totpSecretEncrypted String?
-  totpEnabledAt       DateTime?
-  sessions            StaffSession[]
-  loginChallenges     StaffLoginChallenge[]
-  auditLogs           StaffAuditLog[]
-  orderStatusEvents   OrderStatusEvent[]
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  id                    String                @id @default(cuid())
+  fullName              String
+  email                 String                @unique
+  passwordHash          String
+  role                  StaffRole
+  status                StaffStatus           @default(ACTIVE)
+  outletId              String?
+  outlet                Outlet?               @relation(fields: [outletId], references: [id])
+  totpSecretEncrypted   String?
+  totpEnabledAt         DateTime?
+  sessions              StaffSession[]
+  loginChallenges       StaffLoginChallenge[]
+  auditLogs             StaffAuditLog[]
+  orderStatusEvents     OrderStatusEvent[]
+  stockMovements        StockMovement[]
+  purchaseOrdersCreated PurchaseOrder[]        @relation("PurchaseOrderCreatedBy")
+  purchaseOrdersReceived PurchaseOrder[]       @relation("PurchaseOrderReceivedBy")
+  assetMaintenances     AssetMaintenance[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
 
   @@index([role, status])
   @@index([outletId])
@@ -448,4 +544,315 @@ model LoyaltyLedgerEntry {
 
   @@index([accountId, createdAt])
   @@index([type, createdAt])
+}
+
+model Voucher {
+  id             String              @id @default(cuid())
+  code           String              @unique
+  title          String
+  description    String              @default("")
+  translations   Json?
+  currency       String
+  discountType   VoucherDiscountType
+  discountValue  Int
+  minimumSpend   Int                 @default(0)
+  maximumDiscount Int?
+  outletId       String?
+  outlet         Outlet?             @relation(fields: [outletId], references: [id], onDelete: SetNull)
+  validFrom      DateTime
+  validUntil     DateTime
+  active         Boolean             @default(false)
+  customerVouchers CustomerVoucher[]
+  rewardItems    RewardCatalogItem[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@index([currency, active, validFrom, validUntil])
+  @@index([outletId, active])
+}
+
+model CustomerVoucher {
+  id          String                @id @default(cuid())
+  userId      String
+  user        CustomerUser          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  voucherId   String
+  voucher     Voucher               @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  status      CustomerVoucherStatus @default(AVAILABLE)
+  source      String                @default("CAMPAIGN")
+  issuedAt    DateTime              @default(now())
+  expiresAt   DateTime?
+  redemption  VoucherRedemption?
+  rewardRedemption RewardRedemption?
+
+  @@index([userId, status, issuedAt])
+  @@index([voucherId])
+}
+
+model VoucherRedemption {
+  id                String                  @id @default(cuid())
+  customerVoucherId String                  @unique
+  customerVoucher   CustomerVoucher         @relation(fields: [customerVoucherId], references: [id], onDelete: Cascade)
+  orderId           String                  @unique
+  order             Order                   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status            VoucherRedemptionStatus @default(RESERVED)
+  discountAmount    Int
+  reservedAt        DateTime                @default(now())
+  appliedAt         DateTime?
+  releasedAt        DateTime?
+
+  @@index([status, reservedAt])
+}
+
+model RewardCatalogItem {
+  id            String             @id @default(cuid())
+  title         String
+  description   String             @default("")
+  translations  Json?
+  currency      String
+  pointsCost    Int
+  voucherId     String
+  voucher       Voucher            @relation(fields: [voucherId], references: [id], onDelete: Restrict)
+  active        Boolean            @default(false)
+  stockLimit    Int?
+  redeemedCount Int                @default(0)
+  redemptions   RewardRedemption[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([currency, active, pointsCost])
+}
+
+model RewardRedemption {
+  id                String            @id @default(cuid())
+  idempotencyKey    String            @unique
+  userId            String
+  user              CustomerUser      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rewardItemId      String
+  rewardItem        RewardCatalogItem @relation(fields: [rewardItemId], references: [id], onDelete: Restrict)
+  customerVoucherId String            @unique
+  customerVoucher   CustomerVoucher   @relation(fields: [customerVoucherId], references: [id], onDelete: Restrict)
+  pointsSpent       Int
+  createdAt         DateTime          @default(now())
+
+  @@index([userId, createdAt])
+  @@index([rewardItemId, createdAt])
+}
+
+model SavedAddress {
+  id            String       @id @default(cuid())
+  userId        String
+  user          CustomerUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label         String
+  recipientName String
+  phoneE164     String
+  line1         String
+  line2         String?
+  city          String
+  region        String?
+  postalCode    String?
+  country       PhoneCountry
+  latitude      Float
+  longitude     Float
+  deliveryNotes String?
+  isDefault     Boolean      @default(false)
+  orders        Order[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([userId, isDefault])
+}
+
+model InventoryItem {
+  id              String            @id @default(cuid())
+  sku             String            @unique
+  name            String
+  type            InventoryItemType
+  baseUnit        String
+  costPerBaseUnit Int               @default(0)
+  active          Boolean           @default(true)
+  recipeItems     ProductRecipeItem[]
+  outletLevels    OutletInventory[]
+  movements       StockMovement[]
+  purchaseItems   PurchaseOrderItem[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([type, active])
+}
+
+model ProductRecipeItem {
+  id                String        @id @default(cuid())
+  productId         String
+  product           Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventoryItemId   String
+  inventoryItem     InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Restrict)
+  quantityBaseUnit  Int
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@unique([productId, inventoryItemId])
+  @@index([inventoryItemId])
+}
+
+model OutletInventory {
+  id               String        @id @default(cuid())
+  outletId         String
+  outlet           Outlet        @relation(fields: [outletId], references: [id], onDelete: Cascade)
+  inventoryItemId  String
+  inventoryItem    InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  onHandBaseUnit   Int           @default(0)
+  reorderPointBaseUnit Int       @default(0)
+  updatedAt        DateTime      @updatedAt
+
+  @@unique([outletId, inventoryItemId])
+  @@index([outletId, onHandBaseUnit])
+}
+
+model StockMovement {
+  id               String            @id @default(cuid())
+  outletId         String
+  outlet           Outlet            @relation(fields: [outletId], references: [id], onDelete: Cascade)
+  inventoryItemId  String
+  inventoryItem    InventoryItem     @relation(fields: [inventoryItemId], references: [id], onDelete: Restrict)
+  type             StockMovementType
+  quantityBaseUnit Int
+  balanceAfterBaseUnit Int
+  reason           String?
+  orderId          String?
+  order            Order?            @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  staffUserId      String?
+  staffUser        StaffUser?        @relation(fields: [staffUserId], references: [id], onDelete: SetNull)
+  createdAt        DateTime          @default(now())
+
+  @@index([outletId, inventoryItemId, createdAt])
+  @@index([orderId, createdAt])
+}
+
+model Supplier {
+  id             String          @id @default(cuid())
+  name           String
+  contactName    String?
+  phone          String?
+  email          String?
+  address        String?
+  active         Boolean         @default(true)
+  purchaseOrders PurchaseOrder[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([active, name])
+}
+
+model PurchaseOrder {
+  id               String              @id @default(cuid())
+  supplierId       String
+  supplier         Supplier            @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  outletId         String
+  outlet           Outlet              @relation(fields: [outletId], references: [id], onDelete: Restrict)
+  status           PurchaseOrderStatus @default(DRAFT)
+  currency         String
+  notes            String?
+  createdById      String
+  createdBy        StaffUser           @relation("PurchaseOrderCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  receivedById     String?
+  receivedBy       StaffUser?          @relation("PurchaseOrderReceivedBy", fields: [receivedById], references: [id], onDelete: SetNull)
+  orderedAt        DateTime?
+  receivedAt       DateTime?
+  items            PurchaseOrderItem[]
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@index([outletId, status, createdAt])
+  @@index([supplierId, status])
+}
+
+model PurchaseOrderItem {
+  id                String        @id @default(cuid())
+  purchaseOrderId   String
+  purchaseOrder     PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  inventoryItemId   String
+  inventoryItem     InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Restrict)
+  quantityBaseUnit  Int
+  receivedBaseUnit  Int           @default(0)
+  unitCost          Int
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@unique([purchaseOrderId, inventoryItemId])
+}
+
+model Asset {
+  id             String            @id @default(cuid())
+  assetTag       String            @unique
+  outletId       String
+  outlet         Outlet            @relation(fields: [outletId], references: [id], onDelete: Restrict)
+  name           String
+  category       String
+  status         AssetStatus       @default(ACTIVE)
+  purchaseDate   DateTime?
+  purchaseCost   Int?
+  serialNumber   String?
+  notes          String?
+  maintenances   AssetMaintenance[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([outletId, status])
+}
+
+model AssetMaintenance {
+  id          String    @id @default(cuid())
+  assetId     String
+  asset       Asset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  staffUserId String?
+  staffUser   StaffUser? @relation(fields: [staffUserId], references: [id], onDelete: SetNull)
+  description String
+  cost        Int?
+  performedAt DateTime
+  createdAt   DateTime  @default(now())
+
+  @@index([assetId, performedAt])
+}
+
+model WifiBenefitConfig {
+  id                  String   @id @default(cuid())
+  outletId            String   @unique
+  outlet              Outlet   @relation(fields: [outletId], references: [id], onDelete: Cascade)
+  ssid                 String
+  passwordEncrypted    String
+  entitlementHours     Int      @default(8)
+  active               Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model AiBenefitConfig {
+  id                  String   @id @default(cuid())
+  outletId            String   @unique
+  outlet              Outlet   @relation(fields: [outletId], references: [id], onDelete: Cascade)
+  dailyQuota          Int      @default(30)
+  entitlementHours    Int      @default(24)
+  active               Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model DigitalBenefitEntitlement {
+  id               String             @id @default(cuid())
+  userId           String
+  user             CustomerUser       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId          String
+  order            Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type             DigitalBenefitType
+  payloadEncrypted String?
+  quotaTotal       Int?
+  quotaUsed        Int                @default(0)
+  validFrom        DateTime           @default(now())
+  validUntil       DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@unique([orderId, type])
+  @@index([userId, type, validUntil])
 }
