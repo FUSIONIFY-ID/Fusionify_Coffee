@@ -1,0 +1,37 @@
+name: Format Delivery Once
+
+on:
+  push:
+    paths:
+      - ".github/workflows/format-delivery-once.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.0"
+          channel: stable
+          cache: true
+
+      - name: Format customer source
+        working-directory: apps/customer
+        run: dart format lib test
+
+      - name: Commit formatting
+        run: |
+          if git status --porcelain apps/customer | grep . >/dev/null; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add apps/customer
+            git commit -m "style: format delivery customer flow"
+            git push
+          else
+            echo "No formatting changes."
+          fi
