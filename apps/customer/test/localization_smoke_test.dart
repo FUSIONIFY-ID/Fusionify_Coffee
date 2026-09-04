@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fusionify_coffee/l10n/app_language.dart';
 import 'package:fusionify_coffee/l10n/app_strings.dart';
+import 'package:fusionify_coffee/l10n/delivery_strings.dart';
 
 void main() {
   test('maps supported locales to API and HTTP language values', () {
@@ -37,5 +38,17 @@ void main() {
     expect(indonesia.paymentReceived, isNotEmpty);
     expect(malaysia.paymentReceived, isNotEmpty);
     expect(english.paymentReceived, isNotEmpty);
+
+    expect(indonesia.savedAddresses, 'Alamat tersimpan');
+    expect(malaysia.savedAddresses, 'Alamat disimpan');
+    expect(english.savedAddresses, 'Saved addresses');
+
+    expect(indonesia.scheduledPickup, isNotEmpty);
+    expect(malaysia.scheduledPickup, isNotEmpty);
+    expect(english.scheduledPickup, isNotEmpty);
+
+    expect(indonesia.deliveryFee, isNotEmpty);
+    expect(malaysia.deliveryFee, isNotEmpty);
+    expect(english.deliveryFee, isNotEmpty);
   });
 }
