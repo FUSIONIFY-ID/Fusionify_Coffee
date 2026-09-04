@@ -7,7 +7,10 @@ import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
 import '../../../core/utils/idempotency_key.dart';
 import '../../../l10n/app_strings.dart';
+import '../../../l10n/delivery_strings.dart';
 import '../../../l10n/reward_extras_strings.dart';
+import '../../addresses/application/addresses_provider.dart';
+import '../../addresses/domain/address_models.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../cart/application/cart_controller.dart';
 import '../../cart/domain/cart_item.dart';
@@ -29,6 +32,9 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   late final String _checkoutKey;
   late final String _paymentKey;
+  String _fulfillmentType = 'PICKUP';
+  DateTime? _scheduledFor;
+  String? _selectedAddressId;
   String? _selectedVoucherId;
   bool _submitting = false;
   String? _error;
@@ -45,8 +51,36 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     final items = ref.read(cartProvider);
     final catalog = ref.read(catalogProvider).value;
-
     if (items.isEmpty || catalog == null) return;
+
+    if (_fulfillmentType == 'DELIVERY') {
+      final addressId = _selectedAddressId;
+      if (addressId == null) {
+        setState(() => _error = context.strings.deliveryAddressRequired);
+        return;
+      }
+      try {
+        final quote = await ref.read(
+          deliveryQuoteProvider((
+            addressId: addressId,
+            outletId: catalog.outlet.id,
+          )).future,
+        );
+        if (!quote.serviceable) {
+          if (mounted) {
+            setState(
+              () => _error = context.strings.deliveryUnavailableForAddress,
+            );
+          }
+          return;
+        }
+      } catch (_) {
+        if (mounted) {
+          setState(() => _error = context.strings.deliveryQuoteFailed);
+        }
+        return;
+      }
+    }
 
     setState(() {
       _submitting = true;
@@ -59,6 +93,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         outletId: catalog.outlet.id,
         items: items,
         idempotencyKey: _checkoutKey,
+        fulfillmentType: _fulfillmentType,
+        scheduledFor: _fulfillmentType == 'PICKUP' ? _scheduledFor : null,
+        savedAddressId:
+            _fulfillmentType == 'DELIVERY' ? _selectedAddressId : null,
         customerVoucherId: _selectedVoucherId,
       );
 
@@ -82,26 +120,56 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         idempotencyKey: _paymentKey,
       );
 
-      if (mounted) {
-        context.go('/payment/${payment.id}');
-      }
+      if (mounted) context.go('/payment/${payment.id}');
     } on DioException catch (error) {
       if (mounted) {
-        setState(() {
-          _error = _messageFromDio(error, context.strings);
-        });
+        setState(() => _error = _messageFromDio(error, context.strings));
       }
     } catch (_) {
       if (mounted) {
-        setState(() {
-          _error = context.strings.checkoutProcessingFailed;
-        });
+        setState(() => _error = context.strings.checkoutProcessingFailed);
       }
     } finally {
-      if (mounted) {
-        setState(() => _submitting = false);
-      }
+      if (mounted) setState(() => _submitting = false);
     }
+  }
+
+  Future<void> _pickSchedule() async {
+    final now = DateTime.now();
+    final earliest = now.add(const Duration(minutes: 15));
+    final latest = now.add(const Duration(days: 7));
+    final initial = _scheduledFor ?? earliest.add(const Duration(minutes: 15));
+
+    final date = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(now.year, now.month, now.day),
+      lastDate: latest,
+    );
+    if (date == null || !mounted) return;
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(initial),
+    );
+    if (time == null) return;
+
+    final selected = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+    if (selected.isBefore(earliest) || selected.isAfter(latest)) {
+      setState(() => _error = context.strings.scheduleWindowHelp);
+      return;
+    }
+
+    setState(() {
+      _scheduledFor = selected;
+      _error = null;
+    });
   }
 
   String _messageFromDio(DioException error, AppStrings strings) {
@@ -175,40 +243,53 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           padding: const EdgeInsets.all(CoffeeSpacing.md),
           children: [
             Text(
-              strings.pickup,
-              style: Theme.of(context).textTheme.headlineSmall,
+              strings.fulfillmentMethod,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: CoffeeSpacing.sm),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(CoffeeSpacing.md),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.storefront_outlined,
-                      color: CoffeeColors.primary,
-                    ),
-                    const SizedBox(width: CoffeeSpacing.sm),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            snapshot.outlet.name,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: CoffeeSpacing.xxs),
-                          Text(
-                            strings.pickupReadyInstruction,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+            SegmentedButton<String>(
+              segments: [
+                ButtonSegment(
+                  value: 'PICKUP',
+                  icon: const Icon(Icons.storefront_outlined),
+                  label: Text(strings.pickup),
+                  enabled: snapshot.outlet.pickupEnabled,
                 ),
-              ),
+                ButtonSegment(
+                  value: 'DELIVERY',
+                  icon: const Icon(Icons.delivery_dining_outlined),
+                  label: Text(strings.delivery),
+                  enabled: snapshot.outlet.deliveryEnabled,
+                ),
+              ],
+              selected: {_fulfillmentType},
+              onSelectionChanged: (selection) {
+                setState(() {
+                  _fulfillmentType = selection.first;
+                  _error = null;
+                  if (_fulfillmentType == 'DELIVERY') _scheduledFor = null;
+                });
+              },
             ),
+            const SizedBox(height: CoffeeSpacing.md),
+            if (_fulfillmentType == 'PICKUP')
+              _PickupOptions(
+                outletName: snapshot.outlet.name,
+                scheduledFor: _scheduledFor,
+                onAsap: () => setState(() => _scheduledFor = null),
+                onSchedule: _pickSchedule,
+              )
+            else
+              _DeliveryOptions(
+                outletId: snapshot.outlet.id,
+                selectedAddressId: _selectedAddressId,
+                onSelected: (value) {
+                  setState(() {
+                    _selectedAddressId = value;
+                    _error = null;
+                  });
+                },
+              ),
             const SizedBox(height: CoffeeSpacing.lg),
             Text(
               strings.orderSummary,
@@ -219,15 +300,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               _OrderLine(item: item, catalog: snapshot),
               const Divider(height: CoffeeSpacing.lg),
             ],
-            const SizedBox(height: CoffeeSpacing.sm),
-            Row(
-              children: [
-                Expanded(child: Text(strings.estimatedSubtotal)),
-                Text(
-                  formatRupiah(localSubtotal),
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-              ],
+            _CheckoutTotals(
+              subtotal: localSubtotal,
+              currency: snapshot.outlet.currency,
+              fulfillmentType: _fulfillmentType,
+              selectedAddressId: _selectedAddressId,
+              outletId: snapshot.outlet.id,
             ),
             const SizedBox(height: CoffeeSpacing.lg),
             Text(
@@ -349,6 +427,285 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 }
 
+class _PickupOptions extends StatelessWidget {
+  const _PickupOptions({
+    required this.outletName,
+    required this.scheduledFor,
+    required this.onAsap,
+    required this.onSchedule,
+  });
+
+  final String outletName;
+  final DateTime? scheduledFor;
+  final VoidCallback onAsap;
+  final VoidCallback onSchedule;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(CoffeeSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.storefront_outlined,
+                  color: CoffeeColors.primary,
+                ),
+                const SizedBox(width: CoffeeSpacing.sm),
+                Expanded(
+                  child: Text(
+                    outletName,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: CoffeeSpacing.sm),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              onTap: onAsap,
+              leading: Icon(
+                scheduledFor == null
+                    ? Icons.check_circle
+                    : Icons.circle_outlined,
+                color: CoffeeColors.primary,
+              ),
+              title: Text(strings.pickupNow),
+              subtitle: Text(strings.pickupReadyInstruction),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              onTap: onSchedule,
+              leading: Icon(
+                scheduledFor != null
+                    ? Icons.check_circle
+                    : Icons.circle_outlined,
+                color: CoffeeColors.primary,
+              ),
+              title: Text(strings.scheduledPickup),
+              subtitle: Text(
+                scheduledFor == null
+                    ? strings.scheduleWindowHelp
+                    : strings.scheduledForLabel(_formatDateTime(scheduledFor!)),
+              ),
+              trailing: const Icon(Icons.schedule_outlined),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDateTime(DateTime value) {
+    final local = value.toLocal();
+    final day = local.day.toString().padLeft(2, '0');
+    final month = local.month.toString().padLeft(2, '0');
+    final hour = local.hour.toString().padLeft(2, '0');
+    final minute = local.minute.toString().padLeft(2, '0');
+    return '$day/$month/${local.year} $hour:$minute';
+  }
+}
+
+class _DeliveryOptions extends ConsumerWidget {
+  const _DeliveryOptions({
+    required this.outletId,
+    required this.selectedAddressId,
+    required this.onSelected,
+  });
+
+  final String outletId;
+  final String? selectedAddressId;
+  final ValueChanged<String?> onSelected;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final strings = context.strings;
+    final addresses = ref.watch(savedAddressesProvider);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(CoffeeSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    strings.chooseDeliveryAddress,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () => context.push('/account/addresses/new'),
+                  icon: const Icon(Icons.add_location_alt_outlined),
+                  label: Text(strings.addAddress),
+                ),
+              ],
+            ),
+            addresses.when(
+              data: (items) {
+                if (items.isEmpty) return Text(strings.addressesEmpty);
+                if (selectedAddressId == null) {
+                  final preferred = items.where((item) => item.isDefault).firstOrNull ??
+                      items.first;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    onSelected(preferred.id);
+                  });
+                }
+                return Column(
+                  children: [
+                    for (final address in items)
+                      RadioListTile<String>(
+                        value: address.id,
+                        groupValue: selectedAddressId,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(address.label),
+                        subtitle: Text(address.compactAddress),
+                        onChanged: onSelected,
+                      ),
+                    if (selectedAddressId != null)
+                      _DeliveryQuoteView(
+                        addressId: selectedAddressId!,
+                        outletId: outletId,
+                      ),
+                  ],
+                );
+              },
+              loading: () => const LinearProgressIndicator(),
+              error: (_, _) => Text(strings.addressesLoadFailed),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DeliveryQuoteView extends ConsumerWidget {
+  const _DeliveryQuoteView({
+    required this.addressId,
+    required this.outletId,
+  });
+
+  final String addressId;
+  final String outletId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final strings = context.strings;
+    final quote = ref.watch(
+      deliveryQuoteProvider((addressId: addressId, outletId: outletId)),
+    );
+    return quote.when(
+      data: (value) => ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: Icon(
+          value.serviceable ? Icons.check_circle : Icons.location_off_outlined,
+          color: value.serviceable ? CoffeeColors.success : CoffeeColors.error,
+        ),
+        title: Text(
+          value.serviceable
+              ? strings.deliveryAvailable
+              : value.reason == 'delivery_not_configured'
+                  ? strings.deliveryNotConfigured
+                  : strings.deliveryOutsideArea,
+        ),
+        subtitle: value.serviceable && value.fee != null
+            ? Text(
+                '${strings.deliveryFee}: ${_money(value.currency ?? 'IDR', value.fee!)}',
+              )
+            : null,
+      ),
+      loading: () => const LinearProgressIndicator(),
+      error: (_, _) => Text(strings.deliveryQuoteFailed),
+    );
+  }
+}
+
+class _CheckoutTotals extends ConsumerWidget {
+  const _CheckoutTotals({
+    required this.subtotal,
+    required this.currency,
+    required this.fulfillmentType,
+    required this.selectedAddressId,
+    required this.outletId,
+  });
+
+  final int subtotal;
+  final String currency;
+  final String fulfillmentType;
+  final String? selectedAddressId;
+  final String outletId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final strings = context.strings;
+    var deliveryFee = 0;
+    if (fulfillmentType == 'DELIVERY' && selectedAddressId != null) {
+      final quote = ref.watch(
+        deliveryQuoteProvider((
+          addressId: selectedAddressId!,
+          outletId: outletId,
+        )),
+      );
+      deliveryFee = quote.value?.serviceable == true ? quote.value?.fee ?? 0 : 0;
+    }
+
+    return Column(
+      children: [
+        _TotalRow(
+          label: strings.estimatedSubtotal,
+          value: _money(currency, subtotal),
+        ),
+        if (fulfillmentType == 'DELIVERY')
+          _TotalRow(
+            label: strings.deliveryFee,
+            value: _money(currency, deliveryFee),
+          ),
+        const Divider(),
+        _TotalRow(
+          label: strings.estimatedTotal,
+          value: _money(currency, subtotal + deliveryFee),
+          strong: true,
+        ),
+      ],
+    );
+  }
+}
+
+class _TotalRow extends StatelessWidget {
+  const _TotalRow({
+    required this.label,
+    required this.value,
+    this.strong = false,
+  });
+
+  final String label;
+  final String value;
+  final bool strong;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: CoffeeSpacing.xxs),
+      child: Row(
+        children: [
+          Expanded(child: Text(label)),
+          Text(
+            value,
+            style: TextStyle(fontWeight: strong ? FontWeight.w800 : FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _VoucherSelector extends StatelessWidget {
   const _VoucherSelector({
     required this.entries,
@@ -420,13 +777,7 @@ class _VoucherSelector extends StatelessWidget {
       final decimals = percentage == percentage.roundToDouble() ? 0 : 2;
       return '${percentage.toStringAsFixed(decimals)}%';
     }
-    if (voucher.currency == 'IDR') {
-      return formatRupiah(voucher.discountValue);
-    }
-    if (voucher.currency == 'MYR') {
-      return 'RM ${(voucher.discountValue / 100).toStringAsFixed(2)}';
-    }
-    return '${voucher.currency} ${voucher.discountValue}';
+    return _money(voucher.currency, voucher.discountValue);
   }
 }
 
@@ -459,10 +810,16 @@ class _OrderLine extends StatelessWidget {
         ),
         const SizedBox(width: CoffeeSpacing.sm),
         Text(
-          formatRupiah(item.lineTotal),
+          _money(catalog.outlet.currency, item.lineTotal),
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ],
     );
   }
+}
+
+String _money(String currency, int amount) {
+  if (currency == 'IDR') return formatRupiah(amount);
+  if (currency == 'MYR') return 'RM ${(amount / 100).toStringAsFixed(2)}';
+  return '$currency $amount';
 }
