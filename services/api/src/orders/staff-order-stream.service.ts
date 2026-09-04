@@ -27,7 +27,7 @@ const heartbeatIntervalMs = 15_000;
 
 type QueueSnapshot = {
   signature: string;
-  orders: Awaited<ReturnType<StaffOrderStreamService['loadQueue']>>['orders'];
+  orders: unknown[];
   generatedAt: string;
 };
 
@@ -46,16 +46,14 @@ export class StaffOrderStreamService {
       distinctUntilChanged((previous, next) => {
         return previous.signature === next.signature;
       }),
-      map(
-        (snapshot): MessageEvent => ({
-          type: 'orders',
-          retry: 3_000,
-          data: {
-            orders: snapshot.orders,
-            generatedAt: snapshot.generatedAt,
-          },
-        }),
-      ),
+      map((snapshot): MessageEvent => ({
+        type: 'orders',
+        retry: 3_000,
+        data: {
+          orders: snapshot.orders,
+          generatedAt: snapshot.generatedAt,
+        },
+      })),
     );
 
     const heartbeat = interval(heartbeatIntervalMs).pipe(
@@ -71,7 +69,7 @@ export class StaffOrderStreamService {
     return merge(updates, heartbeat);
   }
 
-  private async loadQueue(outletId: string | null) {
+  private async loadQueue(outletId: string | null): Promise<QueueSnapshot> {
     const orders = await this.prisma.order.findMany({
       where: {
         status: { in: queueStatuses },
