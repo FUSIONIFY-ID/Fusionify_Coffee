@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { DatabaseModule } from './database/database.module';
+import { FavoritesModule } from './favorites/favorites.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { RewardsModule } from './rewards/rewards.module';
@@ -13,6 +14,7 @@ import { StaffModule } from './staff/staff.module';
     DatabaseModule,
     AuthModule,
     CatalogModule,
+    FavoritesModule,
     OrdersModule,
     PaymentsModule,
     RewardsModule,
