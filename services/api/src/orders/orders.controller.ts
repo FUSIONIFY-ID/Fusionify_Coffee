@@ -6,17 +6,22 @@ import {
   Param,
   Post,
   Req,
+  Sse,
   UseGuards,
 } from '@nestjs/common';
 import type { AuthenticatedRequest } from '../auth/auth.guard';
 import { CustomerAuthGuard } from '../auth/auth.guard';
+import { CustomerOrderStreamService } from './customer-order-stream.service';
 import { OrdersService } from './orders.service';
 import type { CreateOrderInput } from './orders.types';
 
 @Controller('v1/orders')
 @UseGuards(CustomerAuthGuard)
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    private readonly customerOrderStreamService: CustomerOrderStreamService,
+  ) {}
 
   @Post()
   create(
@@ -34,6 +39,11 @@ export class OrdersController {
   @Get()
   list(@Req() request: AuthenticatedRequest) {
     return this.ordersService.listForUser(request.auth!.userId);
+  }
+
+  @Sse('events')
+  events(@Req() request: AuthenticatedRequest) {
+    return this.customerOrderStreamService.stream(request.auth!.userId);
   }
 
   @Get(':orderId')

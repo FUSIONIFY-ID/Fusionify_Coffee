@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
+import '../../../core/realtime/customer_realtime_provider.dart';
 import '../../../l10n/app_strings.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../cart/application/cart_controller.dart';
@@ -20,6 +21,14 @@ class OrdersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen(customerRealtimeProvider, (previous, next) {
+      final previousSignature = previous?.value?.signature;
+      final nextSignature = next.value?.signature;
+      if (nextSignature != null && nextSignature != previousSignature) {
+        ref.invalidate(orderHistoryProvider);
+      }
+    });
+
     final strings = context.strings;
     final profile = ref.watch(authControllerProvider).value;
 

@@ -8,6 +8,8 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
+import '../../../core/realtime/customer_realtime_models.dart';
+import '../../../core/realtime/customer_realtime_provider.dart';
 import '../../../l10n/app_strings.dart';
 import '../../cart/application/cart_controller.dart';
 import '../../checkout/application/checkout_provider.dart';
@@ -25,7 +27,7 @@ class PaymentScreen extends ConsumerStatefulWidget {
 class _PaymentScreenState extends ConsumerState<PaymentScreen>
     with WidgetsBindingObserver {
   PaymentView? _payment;
-  Timer? _pollTimer;
+  Timer? _fallbackTimer;
   Timer? _clockTimer;
   bool _loading = true;
   bool _checking = false;
@@ -38,8 +40,8 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _refreshLocal();
-    _pollTimer = Timer.periodic(
-      const Duration(seconds: 3),
+    _fallbackTimer = Timer.periodic(
+      const Duration(seconds: 30),
       (_) => _refreshLocal(silent: true),
     );
     _clockTimer = Timer.periodic(
@@ -51,7 +53,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _pollTimer?.cancel();
+    _fallbackTimer?.cancel();
     _clockTimer?.cancel();
     super.dispose();
   }
@@ -143,6 +145,27 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
     }
   }
 
+  void _applyRealtimePayment(CustomerRealtimePayment payment) {
+    _applyPayment(
+      PaymentView(
+        id: payment.id,
+        orderId: payment.orderId,
+        provider: payment.provider,
+        channel: payment.channel,
+        status: payment.status,
+        amount: payment.amount,
+        currency: payment.currency,
+        qrString: payment.qrString,
+        qrUrl: payment.qrUrl,
+        checkoutUrl: payment.checkoutUrl,
+        expiryTime: payment.expiryTime,
+        providerRawStatus: payment.providerRawStatus,
+        paidAt: payment.paidAt,
+        cancelledAt: payment.cancelledAt,
+      ),
+    );
+  }
+
   void _applyPayment(PaymentView payment) {
     if (!mounted) return;
 
@@ -156,7 +179,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
     _updateRemaining();
 
     if (payment.isTerminal) {
-      _pollTimer?.cancel();
+      _fallbackTimer?.cancel();
     }
 
     if (becamePaid) {
@@ -185,6 +208,15 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(customerRealtimeProvider, (previous, next) {
+      next.whenData((snapshot) {
+        final payment = snapshot.paymentById(widget.paymentId);
+        if (payment != null) {
+          _applyRealtimePayment(payment);
+        }
+      });
+    });
+
     final strings = context.strings;
     final payment = _payment;
 

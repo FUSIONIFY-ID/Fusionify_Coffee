@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
+import '../../../core/realtime/customer_realtime_provider.dart';
 import '../../../l10n/app_strings.dart';
 import '../../../l10n/receipt_strings.dart';
 import '../application/orders_provider.dart';
@@ -17,6 +18,16 @@ class OrderDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen(customerRealtimeProvider, (previous, next) {
+      final previousOrder = previous?.value?.orderById(orderId);
+      final nextOrder = next.value?.orderById(orderId);
+      if (nextOrder != null &&
+          (previousOrder?.status != nextOrder.status ||
+              previousOrder?.updatedAt != nextOrder.updatedAt)) {
+        ref.invalidate(orderDetailProvider(orderId));
+      }
+    });
+
     final strings = context.strings;
     final order = ref.watch(orderDetailProvider(orderId));
 
