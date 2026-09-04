@@ -74,10 +74,10 @@ export class CustomerOrderStreamService {
             status: true,
             amount: true,
             currency: true,
-            qrString: true,
-            qrUrl: true,
-            checkoutUrl: true,
-            expiryTime: true,
+            providerQrString: true,
+            providerQrUrl: true,
+            providerCheckoutUrl: true,
+            providerExpiryTime: true,
             providerRawStatus: true,
             paidAt: true,
             cancelledAt: true,
@@ -89,9 +89,32 @@ export class CustomerOrderStreamService {
       take: 50,
     });
 
+    const normalizedOrders = orders.map((order) => ({
+      id: order.id,
+      status: order.status,
+      updatedAt: order.updatedAt,
+      payments: order.payments.map((payment) => ({
+        id: payment.id,
+        orderId: payment.orderId,
+        provider: payment.provider,
+        channel: payment.channel,
+        status: payment.status,
+        amount: payment.amount,
+        currency: payment.currency,
+        qrString: payment.providerQrString,
+        qrUrl: payment.providerQrUrl,
+        checkoutUrl: payment.providerCheckoutUrl,
+        expiryTime: payment.providerExpiryTime,
+        providerRawStatus: payment.providerRawStatus,
+        paidAt: payment.paidAt,
+        cancelledAt: payment.cancelledAt,
+        updatedAt: payment.updatedAt,
+      })),
+    }));
+
     return {
-      signature: JSON.stringify(orders),
-      orders,
+      signature: JSON.stringify(normalizedOrders),
+      orders: normalizedOrders,
       generatedAt: new Date().toISOString(),
     };
   }
