@@ -128,6 +128,7 @@ model Product {
   category       Category        @relation(fields: [categoryId], references: [id])
   modifierGroups ModifierGroup[]
   orderItems     OrderItem[]
+  favoritedBy    FavoriteProduct[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 }
@@ -161,23 +162,23 @@ model ModifierOption {
 }
 
 model Order {
-  id             String               @id @default(cuid())
-  checkoutKey    String               @unique
-  userId         String?
-  user           CustomerUser?        @relation(fields: [userId], references: [id])
-  outletId       String
-  outlet         Outlet               @relation(fields: [outletId], references: [id])
-  status         OrderStatus          @default(AWAITING_PAYMENT)
-  currency       String               @default("IDR")
-  subtotal       Int
-  totalAmount    Int
-  items          OrderItem[]
-  payments       Payment[]
-  statusEvents   OrderStatusEvent[]
+  id                String              @id @default(cuid())
+  checkoutKey       String              @unique
+  userId            String?
+  user              CustomerUser?       @relation(fields: [userId], references: [id])
+  outletId          String
+  outlet            Outlet              @relation(fields: [outletId], references: [id])
+  status            OrderStatus         @default(AWAITING_PAYMENT)
+  currency          String              @default("IDR")
+  subtotal          Int
+  totalAmount       Int
+  items             OrderItem[]
+  payments          Payment[]
+  statusEvents      OrderStatusEvent[]
   loyaltyEntry      LoyaltyLedgerEntry?
   loyaltyProcessedAt DateTime?
   createdAt         DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
+  updatedAt         DateTime             @updatedAt
 
   @@index([outletId, status])
   @@index([userId, createdAt])
@@ -243,10 +244,24 @@ model CustomerUser {
   orders            Order[]
   sessions          UserSession[]
   loyaltyAccount    LoyaltyAccount?
+  favoriteProducts  FavoriteProduct[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
   @@index([phoneCountry, status])
+}
+
+model FavoriteProduct {
+  id        String       @id @default(cuid())
+  userId    String
+  user      CustomerUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId, createdAt])
+  @@index([productId])
 }
 
 model UserSession {
@@ -407,16 +422,16 @@ model MembershipProgress {
 }
 
 model LoyaltyAccount {
-  id               String               @id @default(cuid())
-  userId           String               @unique
-  user             CustomerUser         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  balance          Int                  @default(0)
-  lifetimeEarned   Int                  @default(0)
-  lifetimeRedeemed Int                  @default(0)
+  id                   String                 @id @default(cuid())
+  userId               String                 @unique
+  user                 CustomerUser           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance              Int                    @default(0)
+  lifetimeEarned       Int                    @default(0)
+  lifetimeRedeemed     Int                    @default(0)
   entries              LoyaltyLedgerEntry[]
   membershipProgresses MembershipProgress[]
-  createdAt            DateTime             @default(now())
-  updatedAt        DateTime             @updatedAt
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
 }
 
 model LoyaltyLedgerEntry {
