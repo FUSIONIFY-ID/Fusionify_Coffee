@@ -83,11 +83,7 @@ class AccountHubView extends StatelessWidget {
         const SizedBox(height: CoffeeSpacing.lg),
         _ProfileHeader(profile: profile),
         const SizedBox(height: CoffeeSpacing.md),
-        _MemberCard(
-          profile: profile,
-          membership: membership,
-          onTap: onRewards,
-        ),
+        _MemberCard(profile: profile, membership: membership, onTap: onRewards),
         const SizedBox(height: CoffeeSpacing.xl),
         _SectionTitle(strings.yourCoffee),
         _AccountTile(
@@ -235,11 +231,7 @@ class _ProfileHeader extends StatelessWidget {
 }
 
 class _MemberCard extends StatelessWidget {
-  const _MemberCard({
-    required this.profile,
-    this.membership,
-    this.onTap,
-  });
+  const _MemberCard({required this.profile, this.membership, this.onTap});
 
   final CustomerProfile profile;
   final MembershipSummary? membership;

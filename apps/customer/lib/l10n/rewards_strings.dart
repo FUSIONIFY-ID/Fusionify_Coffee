@@ -11,8 +11,7 @@ extension RewardsStrings on AppStrings {
 
   String get fusionPoints =>
       _rewardPick('Fusion Points', 'Fusion Points', 'Fusion Points');
-  String get membership =>
-      _rewardPick('Membership', 'Keahlian', 'Membership');
+  String get membership => _rewardPick('Membership', 'Keahlian', 'Membership');
   String get baseMember =>
       _rewardPick('Fusion Member', 'Fusion Member', 'Fusion Member');
   String get membershipProgress => _rewardPick(

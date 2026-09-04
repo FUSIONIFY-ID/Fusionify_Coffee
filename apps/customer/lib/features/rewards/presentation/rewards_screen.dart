@@ -201,9 +201,8 @@ class _MembershipCard extends StatelessWidget {
                     children: [
                       Text(
                         current?.name ?? strings.baseMember,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
+                        style: Theme.of(context).textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.w800),
                       ),
                       if (current != null && multiplier > 1)
                         Text(
@@ -281,9 +280,8 @@ class _Metric extends StatelessWidget {
           const SizedBox(height: CoffeeSpacing.xs),
           Text(
             value.toString(),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: Theme.of(context).textTheme.titleLarge
+                ?.copyWith(fontWeight: FontWeight.w800),
           ),
         ],
       ),
