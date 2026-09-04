@@ -1,0 +1,42 @@
+name: Format Digital Receipt Once
+
+on:
+  push:
+    paths:
+      - ".github/workflows/format-digital-receipt-once.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.0"
+          channel: stable
+          cache: true
+
+      - name: Format digital receipt source
+        working-directory: apps/customer
+        run: |
+          dart format \
+            lib/features/receipts/application/digital_receipt_provider.dart \
+            lib/features/receipts/domain/digital_receipt.dart \
+            lib/features/receipts/presentation/digital_receipt_screen.dart \
+            lib/l10n/receipt_strings.dart
+
+      - name: Commit formatting
+        run: |
+          if git status --porcelain apps/customer/lib | grep . >/dev/null; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add apps/customer/lib/features/receipts apps/customer/lib/l10n/receipt_strings.dart
+            git commit -m "style: format digital receipt UI"
+            git push
+          else
+            echo "No formatting changes."
+          fi
