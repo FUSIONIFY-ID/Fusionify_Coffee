@@ -104,28 +104,40 @@ const modifierGroups: SeedGroup[] = [
     id: 'sugar',
     labels: {
       ID_ID: 'Gula',
-      MS_MY: 'Tahap Gula',
-      EN: 'Sugar Level',
+      MS_MY: 'Gula',
+      EN: 'Sugar',
     },
     required: true,
     options: [
-      { id: 'sugar-0', labels: { ID_ID: '0%', MS_MY: '0%', EN: '0%' } },
-      { id: 'sugar-25', labels: { ID_ID: '25%', MS_MY: '25%', EN: '25%' } },
+      {
+        id: 'sugar-0',
+        labels: { ID_ID: '0%', MS_MY: '0%', EN: '0%' },
+      },
+      {
+        id: 'sugar-25',
+        labels: { ID_ID: '25%', MS_MY: '25%', EN: '25%' },
+      },
       {
         id: 'sugar-50',
         labels: { ID_ID: '50%', MS_MY: '50%', EN: '50%' },
         isDefault: true,
       },
-      { id: 'sugar-75', labels: { ID_ID: '75%', MS_MY: '75%', EN: '75%' } },
-      { id: 'sugar-100', labels: { ID_ID: '100%', MS_MY: '100%', EN: '100%' } },
+      {
+        id: 'sugar-75',
+        labels: { ID_ID: '75%', MS_MY: '75%', EN: '75%' },
+      },
+      {
+        id: 'sugar-100',
+        labels: { ID_ID: '100%', MS_MY: '100%', EN: '100%' },
+      },
     ],
   },
   {
     id: 'ice',
     labels: {
       ID_ID: 'Es',
-      MS_MY: 'Tahap Ais',
-      EN: 'Ice Level',
+      MS_MY: 'Ais',
+      EN: 'Ice',
     },
     required: true,
     options: [
@@ -164,17 +176,13 @@ const modifierGroups: SeedGroup[] = [
       },
       {
         id: 'oat-milk',
-        labels: {
-          ID_ID: 'Susu Oat',
-          MS_MY: 'Susu Oat',
-          EN: 'Oat Milk',
-        },
+        labels: { ID_ID: 'Susu Oat', MS_MY: 'Susu Oat', EN: 'Oat Milk' },
         priceDelta: 8000,
       },
     ],
   },
   {
-    id: 'addons',
+    id: 'add-ons',
     labels: {
       ID_ID: 'Tambahan',
       MS_MY: 'Tambahan',
@@ -184,12 +192,20 @@ const modifierGroups: SeedGroup[] = [
     options: [
       {
         id: 'extra-shot',
-        labels: { ID_ID: 'Extra Shot', MS_MY: 'Extra Shot', EN: 'Extra Shot' },
+        labels: {
+          ID_ID: 'Extra Shot',
+          MS_MY: 'Extra Shot',
+          EN: 'Extra Shot',
+        },
         priceDelta: 7000,
       },
       {
         id: 'coffee-jelly',
-        labels: { ID_ID: 'Jeli Kopi', MS_MY: 'Jeli Kopi', EN: 'Coffee Jelly' },
+        labels: {
+          ID_ID: 'Coffee Jelly',
+          MS_MY: 'Coffee Jelly',
+          EN: 'Coffee Jelly',
+        },
         priceDelta: 5000,
       },
       {
@@ -209,7 +225,10 @@ async function seedProduct(input: {
   categoryId: string;
   isBestseller?: boolean;
 }) {
-  const translations = contentTranslations(input);
+  const translations = contentTranslations({
+    names: input.names,
+    descriptions: input.descriptions,
+  });
 
   await prisma.product.upsert({
     where: { id: input.id },
@@ -287,7 +306,12 @@ async function main() {
       note: 'Database-backed development fixture.',
       translations: outletTranslations,
       pickupEnabled: true,
-      deliveryEnabled: false,
+      deliveryEnabled: true,
+      latitude: -6.595,
+      longitude: 106.8166,
+      deliveryRadiusMeters: 10000,
+      deliveryBaseFee: 5000,
+      deliveryPerKmFee: 2000,
     },
     create: {
       id: 'preview-outlet',
@@ -295,7 +319,12 @@ async function main() {
       note: 'Database-backed development fixture.',
       translations: outletTranslations,
       pickupEnabled: true,
-      deliveryEnabled: false,
+      deliveryEnabled: true,
+      latitude: -6.595,
+      longitude: 106.8166,
+      deliveryRadiusMeters: 10000,
+      deliveryBaseFee: 5000,
+      deliveryPerKmFee: 2000,
     },
   });
 
