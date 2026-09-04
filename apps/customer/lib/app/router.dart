@@ -1,19 +1,20 @@
 import 'package:go_router/go_router.dart';
 
 import '../features/account/presentation/account_screen.dart';
+import '../features/account/presentation/active_sessions_screen.dart';
+import '../features/account/presentation/change_phone_screen.dart';
+import '../features/account/presentation/delete_account_screen.dart';
 import '../features/account/presentation/language_screen.dart';
 import '../features/account/presentation/personal_information_screen.dart';
 import '../features/account/presentation/security_screen.dart';
-import '../features/account/presentation/change_phone_screen.dart';
-import '../features/account/presentation/active_sessions_screen.dart';
-import '../features/account/presentation/delete_account_screen.dart';
 import '../features/auth/presentation/complete_profile_screen.dart';
-import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/forgot_password_screen.dart';
+import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/otp_verification_screen.dart';
 import '../features/auth/presentation/register_phone_screen.dart';
 import '../features/cart/presentation/cart_screen.dart';
 import '../features/checkout/presentation/checkout_screen.dart';
+import '../features/favorites/presentation/favorites_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/menu/presentation/menu_screen.dart';
 import '../features/orders/presentation/order_detail_screen.dart';
@@ -45,6 +46,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(path: '/cart', builder: (_, _) => const CartScreen()),
     GoRoute(path: '/checkout', builder: (_, _) => const CheckoutScreen()),
+    GoRoute(path: '/favorites', builder: (_, _) => const FavoritesScreen()),
     GoRoute(
       path: '/orders/:orderId',
       builder: (context, state) =>
