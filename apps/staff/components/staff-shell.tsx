@@ -17,6 +17,7 @@ export function StaffShell({
   const canManageStaff = staff.permissions.includes('staff.manage');
   const canManageOrders = staff.permissions.includes('orders.manage');
   const canManageRewards = staff.permissions.includes('rewards.manage');
+  const canReadInventory = staff.permissions.includes('inventory.read');
 
   async function logout() {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -49,6 +50,15 @@ export function StaffShell({
             <span>Queue</span>
             <small>KDS</small>
           </Link>
+          {canReadInventory ? (
+            <Link
+              className={pathname.startsWith('/operations') ? 'active' : ''}
+              href="/operations"
+            >
+              <span>Operations</span>
+              <small>Inventory</small>
+            </Link>
+          ) : null}
           {canManageRewards ? (
             <Link
               className={pathname.startsWith('/rewards') ? 'active' : ''}
