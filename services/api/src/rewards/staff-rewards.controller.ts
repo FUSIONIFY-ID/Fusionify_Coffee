@@ -13,7 +13,10 @@ import { RequireStaffPermissions } from '../staff/staff.decorators';
 import { StaffPermissionsGuard } from '../staff/staff-permissions.guard';
 import { StaffPermission } from '../staff/staff.types';
 import { RewardsService } from './rewards.service';
-import type { ConfigureLoyaltyProgramInput } from './rewards.types';
+import type {
+  ConfigureLoyaltyProgramInput,
+  ConfigureMembershipTierInput,
+} from './rewards.types';
 
 @Controller('v1/staff/rewards')
 @UseGuards(StaffAuthGuard, StaffPermissionsGuard)
@@ -35,6 +38,26 @@ export class StaffRewardsController {
     return this.rewardsService.configureProgram(
       request.staffAuth!.staffUserId,
       currency,
+      body,
+    );
+  }
+
+  @Get('membership-tiers')
+  membershipTiers() {
+    return this.rewardsService.listMembershipTiers();
+  }
+
+  @Put('membership-tiers/:currency/:rank')
+  configureMembershipTier(
+    @Req() request: AuthenticatedStaffRequest,
+    @Param('currency') currency: string,
+    @Param('rank') rank: string,
+    @Body() body: ConfigureMembershipTierInput,
+  ) {
+    return this.rewardsService.configureMembershipTier(
+      request.staffAuth!.staffUserId,
+      currency,
+      rank,
       body,
     );
   }

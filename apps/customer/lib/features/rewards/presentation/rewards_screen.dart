@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
+import '../../../core/formatters/currency.dart';
 import '../../../l10n/app_strings.dart';
 import '../../../l10n/rewards_strings.dart';
 import '../../auth/application/auth_controller.dart';
@@ -77,6 +78,13 @@ class _RewardsContent extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(CoffeeSpacing.md),
       children: [
+        Text(
+          strings.membership,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: CoffeeSpacing.md),
+        _MembershipCard(membership: summary.membership),
+        const SizedBox(height: CoffeeSpacing.xl),
         Text(
           strings.fusionPoints,
           style: Theme.of(context).textTheme.headlineSmall,
@@ -154,6 +162,104 @@ class _RewardsContent extends StatelessWidget {
   }
 }
 
+class _MembershipCard extends StatelessWidget {
+  const _MembershipCard({required this.membership});
+
+  final MembershipSummary membership;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+    final current = membership.currentTier;
+    final next = membership.nextTier;
+    final multiplier = membership.pointsMultiplierBps / 10000;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(CoffeeSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: CoffeeColors.surfaceBlue,
+                    borderRadius: BorderRadius.circular(CoffeeRadius.control),
+                  ),
+                  child: const Icon(
+                    Icons.workspace_premium_outlined,
+                    color: CoffeeColors.deep,
+                  ),
+                ),
+                const SizedBox(width: CoffeeSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        current?.name ?? strings.baseMember,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                      ),
+                      if (current != null && multiplier > 1)
+                        Text(
+                          strings.pointsMultiplier(
+                            multiplier.toStringAsFixed(
+                              multiplier == multiplier.roundToDouble() ? 0 : 2,
+                            ),
+                          ),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: CoffeeSpacing.lg),
+            if (current == null && next == null)
+              Text(strings.membershipNotConfigured)
+            else ...[
+              Text(
+                strings.membershipProgress,
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              const SizedBox(height: CoffeeSpacing.xs),
+              LinearProgressIndicator(
+                value: membership.progressToNextTier,
+                minHeight: 8,
+                borderRadius: BorderRadius.circular(CoffeeRadius.control),
+              ),
+              const SizedBox(height: CoffeeSpacing.sm),
+              Text(
+                next == null
+                    ? strings.topTierReached
+                    : strings.nextTierProgress(
+                        _formatSpend(
+                          membership.currency,
+                          membership.remainingToNextTier,
+                        ),
+                        next.name,
+                      ),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatSpend(String currency, int amount) {
+    if (currency == 'IDR') return formatRupiah(amount);
+    if (currency == 'MYR') return 'RM ${(amount / 100).toStringAsFixed(2)}';
+    return '$currency $amount';
+  }
+}
+
 class _Metric extends StatelessWidget {
   const _Metric({required this.label, required this.value});
 
@@ -175,8 +281,9 @@ class _Metric extends StatelessWidget {
           const SizedBox(height: CoffeeSpacing.xs),
           Text(
             value.toString(),
-            style: Theme.of(context).textTheme.titleLarge
-                ?.copyWith(fontWeight: FontWeight.w800),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
           ),
         ],
       ),

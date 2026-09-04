@@ -4,8 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
 import '../../../l10n/app_strings.dart';
+import '../../../l10n/rewards_strings.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/auth_models.dart';
+import '../../rewards/application/rewards_provider.dart';
+import '../../rewards/domain/rewards_models.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -13,6 +16,7 @@ class AccountScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authControllerProvider);
+    final rewards = ref.watch(rewardsSummaryProvider);
 
     return SafeArea(
       child: auth.when(
@@ -23,6 +27,8 @@ class AccountScreen extends ConsumerWidget {
 
           return AccountHubView(
             profile: profile,
+            membership: rewards.value?.membership,
+            onRewards: () => context.go('/rewards'),
             onOrders: () => context.go('/orders'),
             onPersonalInfo: () => context.push('/account/personal'),
             onLanguage: () => context.push('/account/language'),
@@ -43,6 +49,8 @@ class AccountHubView extends StatelessWidget {
   const AccountHubView({
     super.key,
     required this.profile,
+    this.membership,
+    this.onRewards,
     this.onOrders,
     this.onPersonalInfo,
     this.onLanguage,
@@ -51,6 +59,8 @@ class AccountHubView extends StatelessWidget {
   });
 
   final CustomerProfile profile;
+  final MembershipSummary? membership;
+  final VoidCallback? onRewards;
   final VoidCallback? onOrders;
   final VoidCallback? onPersonalInfo;
   final VoidCallback? onLanguage;
@@ -73,7 +83,11 @@ class AccountHubView extends StatelessWidget {
         const SizedBox(height: CoffeeSpacing.lg),
         _ProfileHeader(profile: profile),
         const SizedBox(height: CoffeeSpacing.md),
-        _MemberCard(profile: profile),
+        _MemberCard(
+          profile: profile,
+          membership: membership,
+          onTap: onRewards,
+        ),
         const SizedBox(height: CoffeeSpacing.xl),
         _SectionTitle(strings.yourCoffee),
         _AccountTile(
@@ -221,51 +235,91 @@ class _ProfileHeader extends StatelessWidget {
 }
 
 class _MemberCard extends StatelessWidget {
-  const _MemberCard({required this.profile});
+  const _MemberCard({
+    required this.profile,
+    this.membership,
+    this.onTap,
+  });
 
   final CustomerProfile profile;
+  final MembershipSummary? membership;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
     final year = profile.memberSince.year;
+    final tier = membership?.currentTier;
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(CoffeeSpacing.md),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: CoffeeColors.primary,
-                borderRadius: BorderRadius.circular(CoffeeRadius.control),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(CoffeeRadius.card),
+        child: Padding(
+          padding: const EdgeInsets.all(CoffeeSpacing.md),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: CoffeeColors.primary,
+                  borderRadius: BorderRadius.circular(CoffeeRadius.control),
+                ),
+                child: const Icon(
+                  Icons.local_cafe_outlined,
+                  color: Colors.white,
+                ),
               ),
-              child: const Icon(Icons.local_cafe_outlined, color: Colors.white),
-            ),
-            const SizedBox(width: CoffeeSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    strings.fusionMember,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: CoffeeSpacing.xxs),
-                  Text(
-                    '${strings.memberSince} $year',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
+              const SizedBox(width: CoffeeSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tier?.name ?? strings.baseMember,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: CoffeeSpacing.xxs),
+                    Text(
+                      membership?.nextTier == null
+                          ? '${strings.memberSince} $year'
+                          : strings.nextTierProgress(
+                              _formatSpend(
+                                membership!.currency,
+                                membership!.remainingToNextTier,
+                              ),
+                              membership!.nextTier!.name,
+                            ),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const Icon(Icons.verified_user_outlined, color: CoffeeColors.deep),
-          ],
+              if (onTap != null)
+                const Icon(
+                  Icons.chevron_right,
+                  color: CoffeeColors.textSecondary,
+                ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  String _formatSpend(String currency, int amount) {
+    if (currency == 'IDR') {
+      final digits = amount.toString();
+      final result = StringBuffer();
+      for (var index = 0; index < digits.length; index += 1) {
+        if (index > 0 && (digits.length - index) % 3 == 0) result.write('.');
+        result.write(digits[index]);
+      }
+      return 'Rp$result';
+    }
+    if (currency == 'MYR') return 'RM ${(amount / 100).toStringAsFixed(2)}';
+    return '$currency $amount';
   }
 }
 

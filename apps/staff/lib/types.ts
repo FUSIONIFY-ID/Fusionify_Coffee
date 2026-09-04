@@ -123,3 +123,16 @@ export type LoyaltyProgram = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type MembershipTier = {
+  id: string;
+  currency: string;
+  rank: number;
+  name: string;
+  translations: { ID_ID?: string; MS_MY?: string; EN?: string } | null;
+  minimumQualifyingSpend: number;
+  pointsMultiplierBps: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
