@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
+import '../../../l10n/app_strings.dart';
 import '../../../l10n/delivery_strings.dart';
 import '../application/addresses_provider.dart';
 import '../domain/address_models.dart';
@@ -38,7 +39,7 @@ class _AddressEditorScreenState extends ConsumerState<AddressEditorScreen> {
   void initState() {
     super.initState();
     final address = widget.initialAddress;
-    _label = TextEditingController(text: address?.label ?? 'Home');
+    _label = TextEditingController(text: address?.label ?? '');
     _recipient = TextEditingController(text: address?.recipientName ?? '');
     _phone = TextEditingController(text: address?.phoneE164 ?? '');
     _line1 = TextEditingController(text: address?.line1 ?? '');
