@@ -4,10 +4,12 @@ type RouteContext = {
   params: Promise<{ path: string[] }>;
 };
 
+type ProxyMethod = 'GET' | 'POST' | 'PUT' | 'PATCH';
+
 async function proxy(
   request: Request,
   context: RouteContext,
-  method: 'GET' | 'POST' | 'PATCH',
+  method: ProxyMethod,
 ) {
   const { path } = await context.params;
   const incoming = new URL(request.url);
@@ -34,6 +36,10 @@ export function GET(request: Request, context: RouteContext) {
 
 export function POST(request: Request, context: RouteContext) {
   return proxy(request, context, 'POST');
+}
+
+export function PUT(request: Request, context: RouteContext) {
+  return proxy(request, context, 'PUT');
 }
 
 export function PATCH(request: Request, context: RouteContext) {

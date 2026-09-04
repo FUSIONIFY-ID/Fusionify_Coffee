@@ -61,7 +61,6 @@ export type StaffUserView = {
   permissions: string[];
 };
 
-
 export type StaffCatalogModifierOption = {
   id: string;
   label: string;
@@ -113,4 +112,14 @@ export type StaffPaymentView = {
   checkoutUrl: string | null;
   expiryTime: string | null;
   providerRawStatus: string | null;
+};
+
+export type LoyaltyProgram = {
+  id: string;
+  currency: string;
+  spendUnit: number;
+  pointsPerUnit: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
