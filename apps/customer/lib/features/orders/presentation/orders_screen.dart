@@ -6,9 +6,13 @@ import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
 import '../../../l10n/app_strings.dart';
 import '../../auth/application/auth_controller.dart';
+import '../../cart/application/cart_controller.dart';
+import '../../catalog/application/catalog_provider.dart';
 import '../application/orders_provider.dart';
+import '../application/reorder_builder.dart';
 import '../domain/order_history_models.dart';
 import 'order_status_labels.dart';
+import 'reorder_strings.dart';
 
 class OrdersScreen extends ConsumerWidget {
   const OrdersScreen({super.key});
@@ -46,12 +50,17 @@ class OrdersScreen extends ConsumerWidget {
     }
 
     final orders = ref.watch(orderHistoryProvider);
+    final catalog = ref.watch(catalogProvider).value;
 
     return SafeArea(
       child: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(orderHistoryProvider);
-          await ref.read(orderHistoryProvider.future);
+          ref.invalidate(catalogProvider);
+          await Future.wait([
+            ref.read(orderHistoryProvider.future),
+            ref.read(catalogProvider.future),
+          ]);
         },
         child: orders.when(
           data: (items) {
@@ -81,10 +90,21 @@ class OrdersScreen extends ConsumerWidget {
               itemCount: items.length,
               separatorBuilder: (_, _) =>
                   const SizedBox(height: CoffeeSpacing.sm),
-              itemBuilder: (context, index) => _OrderCard(
-                order: items[index],
-                onTap: () => context.push('/orders/${items[index].id}'),
-              ),
+              itemBuilder: (context, index) {
+                final order = items[index];
+                return _OrderCard(
+                  order: order,
+                  onTap: () => context.push('/orders/${order.id}'),
+                  onBuyAgain: catalog == null || !_canBuyAgain(order.status)
+                      ? null
+                      : () => _buyAgain(
+                          context: context,
+                          ref: ref,
+                          order: order,
+                          catalog: catalog,
+                        ),
+                );
+              },
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -101,13 +121,53 @@ class OrdersScreen extends ConsumerWidget {
       ),
     );
   }
+
+  bool _canBuyAgain(String status) {
+    return switch (status) {
+      'COMPLETED' || 'PICKED_UP' || 'CANCELLED' => true,
+      _ => false,
+    };
+  }
+
+  void _buyAgain({
+    required BuildContext context,
+    required WidgetRef ref,
+    required CustomerOrderSummary order,
+    required dynamic catalog,
+  }) {
+    final result = buildReorderCart(
+      orderItems: order.items,
+      catalog: catalog,
+    );
+
+    if (!result.canReorder) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.reorderStrings.unavailable)),
+      );
+      return;
+    }
+
+    for (final item in result.items) {
+      ref.read(cartProvider.notifier).add(item);
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.reorderStrings.addedToCart)),
+    );
+    context.push('/cart');
+  }
 }
 
 class _OrderCard extends StatelessWidget {
-  const _OrderCard({required this.order, required this.onTap});
+  const _OrderCard({
+    required this.order,
+    required this.onTap,
+    this.onBuyAgain,
+  });
 
   final CustomerOrderSummary order;
   final VoidCallback onTap;
+  final VoidCallback? onBuyAgain;
 
   @override
   Widget build(BuildContext context) {
@@ -164,6 +224,24 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (onBuyAgain != null) ...[
+                const SizedBox(height: CoffeeSpacing.sm),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        context.reorderStrings.currentPricingNotice,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: onBuyAgain,
+                      icon: const Icon(Icons.replay_outlined),
+                      label: Text(strings.buyAgain),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
