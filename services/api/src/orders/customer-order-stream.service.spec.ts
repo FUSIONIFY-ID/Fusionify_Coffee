@@ -8,7 +8,12 @@ type AccountStreamData = {
   orders: Array<{
     id: string;
     status: string;
-    payments: Array<{ id: string; status: string }>;
+    payments: Array<{
+      id: string;
+      status: string;
+      qrString: string | null;
+      expiryTime: string | null;
+    }>;
   }>;
   generatedAt: string;
 };
@@ -35,10 +40,10 @@ describe('CustomerOrderStreamService', () => {
             status: PaymentStatus.PAID,
             amount: 28000,
             currency: 'IDR',
-            qrString: null,
-            qrUrl: null,
-            checkoutUrl: null,
-            expiryTime: null,
+            providerQrString: '000201010212',
+            providerQrUrl: null,
+            providerCheckoutUrl: null,
+            providerExpiryTime: '2026-09-04T12:05:00.000Z',
             providerRawStatus: 'PAID',
             paidAt: new Date('2026-09-04T12:00:00.000Z'),
             cancelledAt: null,
@@ -69,6 +74,8 @@ describe('CustomerOrderStreamService', () => {
     expect(data.orders[0].payments[0]).toMatchObject({
       id: 'payment-1',
       status: PaymentStatus.PAID,
+      qrString: '000201010212',
+      expiryTime: '2026-09-04T12:05:00.000Z',
     });
     expect(data.signature).toBeTruthy();
     expect(data.generatedAt).toBeTruthy();
