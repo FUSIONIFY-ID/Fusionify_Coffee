@@ -6,7 +6,9 @@ const catalogFixture = CatalogSnapshot(
     id: 'preview-outlet',
     name: 'Fusionify Coffee Preview Store',
     note: 'Test fixture',
+    currency: 'IDR',
     pickupEnabled: true,
+    deliveryEnabled: true,
   ),
   products: [
     Product(
