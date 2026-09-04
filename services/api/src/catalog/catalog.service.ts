@@ -43,7 +43,9 @@ export class CatalogService {
         id: outlet.id,
         name: this.text(outlet.translations, language, 'name', outlet.name),
         note: this.text(outlet.translations, language, 'note', outlet.note),
+        currency: outlet.currency,
         pickupEnabled: outlet.pickupEnabled,
+        deliveryEnabled: outlet.deliveryEnabled,
       },
       products: products.map((product) => ({
         id: product.id,
