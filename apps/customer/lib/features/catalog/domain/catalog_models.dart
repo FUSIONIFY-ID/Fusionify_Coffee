@@ -27,7 +27,9 @@ class Outlet {
     required this.id,
     required this.name,
     required this.note,
+    required this.currency,
     required this.pickupEnabled,
+    required this.deliveryEnabled,
   });
 
   factory Outlet.fromJson(Map<String, dynamic> json) {
@@ -35,14 +37,18 @@ class Outlet {
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? 'Unknown outlet',
       note: json['note'] as String? ?? '',
+      currency: json['currency'] as String? ?? 'IDR',
       pickupEnabled: json['pickupEnabled'] as bool? ?? false,
+      deliveryEnabled: json['deliveryEnabled'] as bool? ?? false,
     );
   }
 
   final String id;
   final String name;
   final String note;
+  final String currency;
   final bool pickupEnabled;
+  final bool deliveryEnabled;
 }
 
 class ModifierOption {
