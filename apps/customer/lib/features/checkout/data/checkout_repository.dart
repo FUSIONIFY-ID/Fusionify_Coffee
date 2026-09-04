@@ -12,6 +12,9 @@ class CheckoutRepository {
     required String outletId,
     required List<CartItem> items,
     required String idempotencyKey,
+    String fulfillmentType = 'PICKUP',
+    DateTime? scheduledFor,
+    String? savedAddressId,
     String? customerVoucherId,
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
@@ -19,7 +22,10 @@ class CheckoutRepository {
       options: Options(headers: {'Idempotency-Key': idempotencyKey}),
       data: <String, dynamic>{
         'outletId': outletId,
-        'customerVoucherId': ?customerVoucherId,
+        'fulfillmentType': fulfillmentType,
+        'scheduledFor': scheduledFor?.toUtc().toIso8601String(),
+        'savedAddressId': savedAddressId,
+        'customerVoucherId': customerVoucherId,
         'items': [
           for (final item in items)
             {
