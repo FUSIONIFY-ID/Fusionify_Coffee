@@ -20,14 +20,9 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Format reward extras
+      - name: Format customer Dart source
         working-directory: apps/customer
-        run: dart format \
-          lib/features/rewards/domain/reward_extras_models.dart \
-          lib/features/rewards/presentation/benefits_screen.dart \
-          lib/features/rewards/presentation/rewards_hub_screen.dart \
-          lib/features/rewards/presentation/vouchers_screen.dart \
-          lib/l10n/reward_extras_strings.dart
+        run: dart format lib test
 
       - name: Commit formatting
         run: |
