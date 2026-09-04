@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { DatabaseModule } from './database/database.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { OperationsModule } from './operations/operations.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { RewardsModule } from './rewards/rewards.module';
@@ -18,6 +19,7 @@ import { VouchersModule } from './vouchers/vouchers.module';
     AddressesModule,
     CatalogModule,
     FavoritesModule,
+    OperationsModule,
     OrdersModule,
     PaymentsModule,
     RewardsModule,
