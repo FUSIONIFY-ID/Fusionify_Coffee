@@ -3,7 +3,7 @@ import { FavoritesService } from './favorites.service';
 
 describe('FavoritesService', () => {
   it('scopes favorite listing to the authenticated customer', async () => {
-    const findMany = jest.fn(async (_args: unknown) => []);
+    const findMany = jest.fn().mockResolvedValue([]);
     const prisma = {
       favoriteProduct: { findMany },
     } as unknown as PrismaService;
