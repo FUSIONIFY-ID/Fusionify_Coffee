@@ -56,8 +56,7 @@ export class RewardsService {
       throw new NotFoundException('Customer account not found.');
     }
 
-    const currency =
-      user.phoneCountry === PhoneCountry.MY ? 'MYR' : 'IDR';
+    const currency = user.phoneCountry === PhoneCountry.MY ? 'MYR' : 'IDR';
     const account = user.loyaltyAccount;
     const qualifyingSpend =
       account?.membershipProgresses.find(
@@ -84,9 +83,7 @@ export class RewardsService {
         currency,
         qualifyingSpend,
         pointsMultiplierBps: currentTier?.pointsMultiplierBps ?? 10000,
-        currentTier: currentTier
-          ? this.tierView(currentTier, language)
-          : null,
+        currentTier: currentTier ? this.tierView(currentTier, language) : null,
         nextTier: nextTier ? this.tierView(nextTier, language) : null,
         remainingToNextTier: nextTier
           ? Math.max(0, nextTier.minimumQualifyingSpend - qualifyingSpend)
@@ -288,10 +285,7 @@ export class RewardsService {
           lte: progress?.qualifyingSpend ?? 0,
         },
       },
-      orderBy: [
-        { minimumQualifyingSpend: 'desc' },
-        { rank: 'desc' },
-      ],
+      orderBy: [{ minimumQualifyingSpend: 'desc' }, { rank: 'desc' }],
     });
     const program = await tx.loyaltyProgram.findUnique({
       where: { currency: order.currency },
@@ -386,11 +380,15 @@ export class RewardsService {
     input: ConfigureMembershipTierInput,
   ) {
     if (!Number.isInteger(rank) || rank < 0 || rank > 100) {
-      throw new BadRequestException('Tier rank must be an integer from 0 to 100.');
+      throw new BadRequestException(
+        'Tier rank must be an integer from 0 to 100.',
+      );
     }
     const name = input.name?.trim();
     if (!name || name.length < 2 || name.length > 40) {
-      throw new BadRequestException('Tier name must contain 2 to 40 characters.');
+      throw new BadRequestException(
+        'Tier name must contain 2 to 40 characters.',
+      );
     }
     if (
       !Number.isInteger(input.minimumQualifyingSpend) ||
@@ -416,7 +414,10 @@ export class RewardsService {
 
     const translations = input.translations ?? {};
     for (const value of Object.values(translations)) {
-      if (value !== undefined && (value.trim().length < 2 || value.trim().length > 40)) {
+      if (
+        value !== undefined &&
+        (value.trim().length < 2 || value.trim().length > 40)
+      ) {
         throw new BadRequestException(
           'Translated tier names must contain 2 to 40 characters.',
         );
