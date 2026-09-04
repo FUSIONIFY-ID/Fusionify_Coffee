@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
 import '../../../l10n/app_strings.dart';
+import '../../../l10n/receipt_strings.dart';
 import '../application/orders_provider.dart';
 import '../domain/order_history_models.dart';
 import 'order_status_labels.dart';
@@ -19,7 +21,16 @@ class OrderDetailScreen extends ConsumerWidget {
     final order = ref.watch(orderDetailProvider(orderId));
 
     return Scaffold(
-      appBar: AppBar(title: Text(strings.orderDetail)),
+      appBar: AppBar(
+        title: Text(strings.orderDetail),
+        actions: [
+          IconButton(
+            tooltip: strings.digitalReceipt,
+            onPressed: () => context.push('/orders/$orderId/receipt'),
+            icon: const Icon(Icons.receipt_long_outlined),
+          ),
+        ],
+      ),
       body: order.when(
         data: (value) => RefreshIndicator(
           onRefresh: () async {
