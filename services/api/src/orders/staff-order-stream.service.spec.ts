@@ -1,4 +1,4 @@
-import { firstValueFrom, filter, take } from 'rxjs';
+import { filter, firstValueFrom, take } from 'rxjs';
 import { PrismaService } from '../database/prisma.service';
 import { OrderStatus } from '../generated/prisma/enums';
 import { StaffOrderStreamService } from './staff-order-stream.service';
@@ -6,6 +6,12 @@ import { StaffOrderStreamService } from './staff-order-stream.service';
 type OrdersStreamData = {
   orders: Array<{ id: string; status: string }>;
   generatedAt: string;
+};
+
+type FindManyCall = {
+  where?: {
+    outletId?: string;
+  };
 };
 
 describe('StaffOrderStreamService', () => {
@@ -26,11 +32,13 @@ describe('StaffOrderStreamService', () => {
     const service = new StaffOrderStreamService(prisma);
 
     const event = await firstValueFrom(
-      service
-        .stream('outlet-1')
-        .pipe(filter((entry) => entry.type === 'orders'), take(1)),
+      service.stream('outlet-1').pipe(
+        filter((entry) => entry.type === 'orders'),
+        take(1),
+      ),
     );
     const data = event.data as OrdersStreamData;
+    const calls = findMany.mock.calls as unknown as Array<[FindManyCall]>;
 
     expect(data.orders).toHaveLength(1);
     expect(data.orders[0]).toMatchObject({
@@ -38,10 +46,6 @@ describe('StaffOrderStreamService', () => {
       status: OrderStatus.CONFIRMED,
     });
     expect(data.generatedAt).toBeTruthy();
-    expect(findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({ outletId: 'outlet-1' }),
-      }),
-    );
+    expect(calls[0]?.[0].where?.outletId).toBe('outlet-1');
   });
 });
