@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
 import '../../../l10n/app_strings.dart';
+import '../../../l10n/delivery_strings.dart';
 import '../../../l10n/rewards_strings.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/auth_models.dart';
@@ -31,6 +32,7 @@ class AccountScreen extends ConsumerWidget {
             onRewards: () => context.go('/rewards'),
             onOrders: () => context.go('/orders'),
             onFavorites: () => context.push('/favorites'),
+            onAddresses: () => context.push('/account/addresses'),
             onPersonalInfo: () => context.push('/account/personal'),
             onLanguage: () => context.push('/account/language'),
             onSecurity: () => context.push('/account/security'),
@@ -54,6 +56,7 @@ class AccountHubView extends StatelessWidget {
     this.onRewards,
     this.onOrders,
     this.onFavorites,
+    this.onAddresses,
     this.onPersonalInfo,
     this.onLanguage,
     this.onSecurity,
@@ -65,6 +68,7 @@ class AccountHubView extends StatelessWidget {
   final VoidCallback? onRewards;
   final VoidCallback? onOrders;
   final VoidCallback? onFavorites;
+  final VoidCallback? onAddresses;
   final VoidCallback? onPersonalInfo;
   final VoidCallback? onLanguage;
   final VoidCallback? onSecurity;
@@ -105,6 +109,11 @@ class AccountHubView extends StatelessWidget {
           icon: Icons.person_outline,
           title: strings.personalInformation,
           onTap: onPersonalInfo,
+        ),
+        _AccountTile(
+          icon: Icons.location_on_outlined,
+          title: strings.savedAddresses,
+          onTap: onAddresses,
         ),
         _AccountTile(
           icon: Icons.language_outlined,
