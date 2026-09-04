@@ -85,27 +85,35 @@ enum StaffStatus {
   SUSPENDED
 }
 
+enum LoyaltyEntryType {
+  ORDER_REWARD
+  CAMPAIGN_BONUS
+  REDEEM_REWARD
+  REFUND_REVERSAL
+  MANUAL_ADJUSTMENT
+}
+
 model Outlet {
-  id              String   @id
+  id              String      @id
   name            String
-  note            String   @default("")
+  note            String      @default("")
   translations    Json?
-  pickupEnabled   Boolean  @default(true)
-  deliveryEnabled Boolean  @default(false)
+  pickupEnabled   Boolean     @default(true)
+  deliveryEnabled Boolean     @default(false)
   orders          Order[]
   staffUsers      StaffUser[]
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 }
 
 model Category {
-  id        String    @id
-  name      String
+  id           String    @id
+  name         String
   translations Json?
-  sortOrder Int       @default(0)
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  sortOrder    Int       @default(0)
+  products     Product[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model Product {
@@ -153,21 +161,22 @@ model ModifierOption {
 }
 
 model Order {
-  id             String        @id @default(cuid())
-  checkoutKey    String        @unique
+  id             String               @id @default(cuid())
+  checkoutKey    String               @unique
   userId         String?
-  user           CustomerUser? @relation(fields: [userId], references: [id])
+  user           CustomerUser?        @relation(fields: [userId], references: [id])
   outletId       String
-  outlet         Outlet        @relation(fields: [outletId], references: [id])
-  status         OrderStatus @default(AWAITING_PAYMENT)
-  currency       String      @default("IDR")
+  outlet         Outlet               @relation(fields: [outletId], references: [id])
+  status         OrderStatus          @default(AWAITING_PAYMENT)
+  currency       String               @default("IDR")
   subtotal       Int
   totalAmount    Int
   items          OrderItem[]
   payments       Payment[]
   statusEvents   OrderStatusEvent[]
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  loyaltyEntry   LoyaltyLedgerEntry?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
 
   @@index([outletId, status])
   @@index([userId, createdAt])
@@ -218,23 +227,23 @@ model Payment {
   @@index([orderId, status])
 }
 
-
 model CustomerUser {
-  id                String         @id @default(cuid())
+  id                String          @id @default(cuid())
   fullName          String
   phoneCountry      PhoneCountry
-  phoneE164         String         @unique
+  phoneE164         String          @unique
   phoneVerifiedAt   DateTime
-  email             String?        @unique
+  email             String?         @unique
   passwordHash      String
-  preferredLanguage AppLanguage    @default(ID_ID)
+  preferredLanguage AppLanguage     @default(ID_ID)
   birthDate         DateTime?
   avatarUrl         String?
-  status            CustomerStatus @default(ACTIVE)
+  status            CustomerStatus  @default(ACTIVE)
   orders            Order[]
   sessions          UserSession[]
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  loyaltyAccount    LoyaltyAccount?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   @@index([phoneCountry, status])
 }
@@ -257,26 +266,25 @@ model UserSession {
 }
 
 model OtpChallenge {
-  id                      String       @id @default(cuid())
-  phoneCountry            PhoneCountry
-  phoneE164               String
-  channel                 OtpChannel
-  purpose                 OtpPurpose
-  language                AppLanguage
-  codeHash                String
-  expiresAt               DateTime
-  attempts                Int          @default(0)
-  maxAttempts             Int          @default(5)
-  verifiedAt              DateTime?
-  verificationTokenHash   String?
-  verificationExpiresAt   DateTime?
-  consumedAt              DateTime?
-  createdAt               DateTime     @default(now())
-  updatedAt               DateTime     @updatedAt
+  id                    String       @id @default(cuid())
+  phoneCountry          PhoneCountry
+  phoneE164             String
+  channel               OtpChannel
+  purpose               OtpPurpose
+  language              AppLanguage
+  codeHash              String
+  expiresAt             DateTime
+  attempts              Int          @default(0)
+  maxAttempts           Int          @default(5)
+  verifiedAt            DateTime?
+  verificationTokenHash String?
+  verificationExpiresAt DateTime?
+  consumedAt            DateTime?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
 
   @@index([phoneE164, purpose, createdAt])
 }
-
 
 model StaffUser {
   id                  String                @id @default(cuid())
@@ -343,7 +351,6 @@ model StaffAuditLog {
   @@index([action, createdAt])
 }
 
-
 model OrderStatusEvent {
   id          String      @id @default(cuid())
   orderId     String
@@ -357,4 +364,42 @@ model OrderStatusEvent {
 
   @@index([orderId, createdAt])
   @@index([staffUserId, createdAt])
+}
+
+model LoyaltyProgram {
+  id            String   @id @default(cuid())
+  currency      String   @unique
+  spendUnit     Int
+  pointsPerUnit Int
+  active        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model LoyaltyAccount {
+  id               String               @id @default(cuid())
+  userId           String               @unique
+  user             CustomerUser         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance          Int                  @default(0)
+  lifetimeEarned   Int                  @default(0)
+  lifetimeRedeemed Int                  @default(0)
+  entries          LoyaltyLedgerEntry[]
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+}
+
+model LoyaltyLedgerEntry {
+  id           String           @id @default(cuid())
+  accountId    String
+  account      LoyaltyAccount   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  type         LoyaltyEntryType
+  points       Int
+  balanceAfter Int
+  orderId      String?          @unique
+  order        Order?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  note         String?
+  createdAt    DateTime         @default(now())
+
+  @@index([accountId, createdAt])
+  @@index([type, createdAt])
 }
