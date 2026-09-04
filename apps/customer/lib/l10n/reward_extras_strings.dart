@@ -90,8 +90,7 @@ extension RewardExtrasStrings on AppStrings {
   String get wifiPassword =>
       _extrasPick('Password Wi-Fi', 'Kata laluan Wi-Fi', 'Wi-Fi password');
   String get showPassword => _extrasPick('Tampilkan', 'Tunjukkan', 'Show');
-  String get hidePassword =>
-      _extrasPick('Sembunyikan', 'Sembunyikan', 'Hide');
+  String get hidePassword => _extrasPick('Sembunyikan', 'Sembunyikan', 'Hide');
   String quotaRemaining(int remaining, int total) => _extrasPick(
     '$remaining dari $total request tersisa',
     '$remaining daripada $total permintaan berbaki',

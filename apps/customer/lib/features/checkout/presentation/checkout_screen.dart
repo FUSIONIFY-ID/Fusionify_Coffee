@@ -370,9 +370,7 @@ class _VoucherSelector extends StatelessWidget {
           ListTile(
             onTap: () => onSelected(null),
             leading: Icon(
-              selectedId == null
-                  ? Icons.check_circle
-                  : Icons.circle_outlined,
+              selectedId == null ? Icons.check_circle : Icons.circle_outlined,
               color: selectedId == null
                   ? CoffeeColors.primary
                   : CoffeeColors.textSecondary,
