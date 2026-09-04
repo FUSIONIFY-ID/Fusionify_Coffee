@@ -68,9 +68,8 @@ describe('Customer favorites (e2e)', () => {
       .send({ challengeId, code: '123456' })
       .expect(201);
 
-    const verificationToken = (
-      verified.body as unknown as OtpVerifyResponse
-    ).verificationToken;
+    const verificationToken = (verified.body as unknown as OtpVerifyResponse)
+      .verificationToken;
 
     const registered = await request(app.getHttpServer())
       .post('/v1/auth/register')
@@ -87,9 +86,7 @@ describe('Customer favorites (e2e)', () => {
   }
 
   it('requires customer authentication', async () => {
-    await request(app.getHttpServer())
-      .get('/v1/account/favorites')
-      .expect(401);
+    await request(app.getHttpServer()).get('/v1/account/favorites').expect(401);
   });
 
   it('adds, lists, and removes favorites idempotently', async () => {

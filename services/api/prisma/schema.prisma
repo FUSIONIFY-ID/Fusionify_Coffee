@@ -117,20 +117,20 @@ model Category {
 }
 
 model Product {
-  id             String          @id
+  id             String            @id
   name           String
   description    String
   translations   Json?
   basePrice      Int
-  active         Boolean         @default(true)
-  isBestseller   Boolean         @default(false)
+  active         Boolean           @default(true)
+  isBestseller   Boolean           @default(false)
   categoryId     String
-  category       Category        @relation(fields: [categoryId], references: [id])
+  category       Category          @relation(fields: [categoryId], references: [id])
   modifierGroups ModifierGroup[]
   orderItems     OrderItem[]
   favoritedBy    FavoriteProduct[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
 }
 
 model ModifierGroup {
@@ -162,23 +162,23 @@ model ModifierOption {
 }
 
 model Order {
-  id                String              @id @default(cuid())
-  checkoutKey       String              @unique
-  userId            String?
-  user              CustomerUser?       @relation(fields: [userId], references: [id])
-  outletId          String
-  outlet            Outlet              @relation(fields: [outletId], references: [id])
-  status            OrderStatus         @default(AWAITING_PAYMENT)
-  currency          String              @default("IDR")
-  subtotal          Int
-  totalAmount       Int
-  items             OrderItem[]
-  payments          Payment[]
-  statusEvents      OrderStatusEvent[]
-  loyaltyEntry      LoyaltyLedgerEntry?
+  id                 String              @id @default(cuid())
+  checkoutKey        String              @unique
+  userId             String?
+  user               CustomerUser?       @relation(fields: [userId], references: [id])
+  outletId           String
+  outlet             Outlet              @relation(fields: [outletId], references: [id])
+  status             OrderStatus         @default(AWAITING_PAYMENT)
+  currency           String              @default("IDR")
+  subtotal           Int
+  totalAmount        Int
+  items              OrderItem[]
+  payments           Payment[]
+  statusEvents       OrderStatusEvent[]
+  loyaltyEntry       LoyaltyLedgerEntry?
   loyaltyProcessedAt DateTime?
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 
   @@index([outletId, status])
   @@index([userId, createdAt])
@@ -230,23 +230,23 @@ model Payment {
 }
 
 model CustomerUser {
-  id                String          @id @default(cuid())
+  id                String            @id @default(cuid())
   fullName          String
   phoneCountry      PhoneCountry
-  phoneE164         String          @unique
+  phoneE164         String            @unique
   phoneVerifiedAt   DateTime
-  email             String?         @unique
+  email             String?           @unique
   passwordHash      String
-  preferredLanguage AppLanguage     @default(ID_ID)
+  preferredLanguage AppLanguage       @default(ID_ID)
   birthDate         DateTime?
   avatarUrl         String?
-  status            CustomerStatus  @default(ACTIVE)
+  status            CustomerStatus    @default(ACTIVE)
   orders            Order[]
   sessions          UserSession[]
   loyaltyAccount    LoyaltyAccount?
   favoriteProducts  FavoriteProduct[]
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@index([phoneCountry, status])
 }
@@ -368,15 +368,15 @@ model StaffAuditLog {
 }
 
 model OrderStatusEvent {
-  id          String      @id @default(cuid())
+  id          String       @id @default(cuid())
   orderId     String
-  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
   fromStatus  OrderStatus?
   toStatus    OrderStatus
   staffUserId String?
-  staffUser   StaffUser?  @relation(fields: [staffUserId], references: [id], onDelete: SetNull)
+  staffUser   StaffUser?   @relation(fields: [staffUserId], references: [id], onDelete: SetNull)
   note        String?
-  createdAt   DateTime    @default(now())
+  createdAt   DateTime     @default(now())
 
   @@index([orderId, createdAt])
   @@index([staffUserId, createdAt])
@@ -422,16 +422,16 @@ model MembershipProgress {
 }
 
 model LoyaltyAccount {
-  id                   String                 @id @default(cuid())
-  userId               String                 @unique
-  user                 CustomerUser           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  balance              Int                    @default(0)
-  lifetimeEarned       Int                    @default(0)
-  lifetimeRedeemed     Int                    @default(0)
+  id                   String               @id @default(cuid())
+  userId               String               @unique
+  user                 CustomerUser         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance              Int                  @default(0)
+  lifetimeEarned       Int                  @default(0)
+  lifetimeRedeemed     Int                  @default(0)
   entries              LoyaltyLedgerEntry[]
   membershipProgresses MembershipProgress[]
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @updatedAt
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
 }
 
 model LoyaltyLedgerEntry {

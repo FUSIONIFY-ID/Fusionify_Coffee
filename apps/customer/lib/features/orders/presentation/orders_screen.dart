@@ -136,10 +136,7 @@ class OrdersScreen extends ConsumerWidget {
     required CustomerOrderSummary order,
     required CatalogSnapshot catalog,
   }) {
-    final result = buildReorderCart(
-      orderItems: order.items,
-      catalog: catalog,
-    );
+    final result = buildReorderCart(orderItems: order.items, catalog: catalog);
 
     if (!result.canReorder) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -152,19 +149,15 @@ class OrdersScreen extends ConsumerWidget {
       ref.read(cartProvider.notifier).add(item);
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.reorderStrings.addedToCart)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(context.reorderStrings.addedToCart)));
     context.push('/cart');
   }
 }
 
 class _OrderCard extends StatelessWidget {
-  const _OrderCard({
-    required this.order,
-    required this.onTap,
-    this.onBuyAgain,
-  });
+  const _OrderCard({required this.order, required this.onTap, this.onBuyAgain});
 
   final CustomerOrderSummary order;
   final VoidCallback onTap;
