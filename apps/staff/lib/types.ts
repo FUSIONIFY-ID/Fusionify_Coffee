@@ -136,3 +136,75 @@ export type MembershipTier = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type InventoryItem = {
+  id: string;
+  sku: string;
+  name: string;
+  type: 'INGREDIENT' | 'PACKAGING' | 'SUPPLY';
+  baseUnit: string;
+  costPerBaseUnit: number;
+  active: boolean;
+};
+
+export type OutletInventoryLevel = {
+  id: string;
+  outletId: string;
+  inventoryItemId: string;
+  onHandBaseUnit: number;
+  inventoryItem: InventoryItem;
+};
+
+export type Supplier = {
+  id: string;
+  name: string;
+  contactName: string | null;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  active: boolean;
+};
+
+export type PurchaseOrderItem = {
+  id: string;
+  inventoryItemId: string;
+  quantityBaseUnit: number;
+  receivedBaseUnit: number;
+  unitCost: number;
+  inventoryItem?: InventoryItem;
+};
+
+export type PurchaseOrder = {
+  id: string;
+  supplierId: string;
+  outletId: string;
+  currency: string;
+  status: 'DRAFT' | 'ORDERED' | 'PARTIALLY_RECEIVED' | 'RECEIVED' | 'CANCELLED';
+  notes: string | null;
+  orderedAt: string | null;
+  receivedAt: string | null;
+  createdAt: string;
+  supplier: Supplier;
+  items: PurchaseOrderItem[];
+};
+
+export type AssetMaintenance = {
+  id: string;
+  description: string;
+  cost: number | null;
+  performedAt: string;
+};
+
+export type StaffAsset = {
+  id: string;
+  outletId: string;
+  assetTag: string;
+  name: string;
+  category: string;
+  status: 'ACTIVE' | 'MAINTENANCE' | 'RETIRED' | 'LOST';
+  purchaseDate: string | null;
+  purchaseCost: number | null;
+  serialNumber: string | null;
+  notes: string | null;
+  maintenances: AssetMaintenance[];
+};
