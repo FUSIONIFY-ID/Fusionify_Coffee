@@ -16,18 +16,19 @@ extension ReceiptStrings on AppStrings {
     'Resit digital belum dapat dimuatkan.',
     'Digital receipt could not be loaded.',
   );
-  String get receiptOrderSummary =>
-      _receiptPick('Ringkasan transaksi', 'Ringkasan transaksi', 'Transaction summary');
+  String get receiptOrderSummary => _receiptPick(
+    'Ringkasan transaksi',
+    'Ringkasan transaksi',
+    'Transaction summary',
+  );
   String get receiptSubtotal =>
       _receiptPick('Subtotal', 'Jumlah kecil', 'Subtotal');
-  String get receiptDiscount =>
-      _receiptPick('Diskon', 'Diskaun', 'Discount');
+  String get receiptDiscount => _receiptPick('Diskon', 'Diskaun', 'Discount');
   String get receiptDeliveryFee =>
       _receiptPick('Biaya pengantaran', 'Caj penghantaran', 'Delivery fee');
   String get receiptPayment =>
       _receiptPick('Pembayaran', 'Pembayaran', 'Payment');
-  String get receiptVoucher =>
-      _receiptPick('Voucher', 'Baucar', 'Voucher');
+  String get receiptVoucher => _receiptPick('Voucher', 'Baucar', 'Voucher');
   String get receiptBenefitsIssued => _receiptPick(
     'Benefit digital diterbitkan',
     'Manfaat digital dikeluarkan',
@@ -40,6 +41,9 @@ extension ReceiptStrings on AppStrings {
     'Resit ini berasal daripada data pesanan yang disimpan pada pelayan Fusionify Coffee.',
     'This receipt is rendered from order data stored by the Fusionify Coffee server.',
   );
-  String get openDigitalReceipt =>
-      _receiptPick('Buka Struk Digital', 'Buka Resit Digital', 'Open Digital Receipt');
+  String get openDigitalReceipt => _receiptPick(
+    'Buka Struk Digital',
+    'Buka Resit Digital',
+    'Open Digital Receipt',
+  );
 }

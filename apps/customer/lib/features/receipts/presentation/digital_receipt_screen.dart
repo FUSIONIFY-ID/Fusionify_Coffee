@@ -139,7 +139,10 @@ class _ItemsCard extends StatelessWidget {
         child: Column(
           children: [
             for (var index = 0; index < receipt.items.length; index++) ...[
-              _ReceiptItemRow(item: receipt.items[index], currency: receipt.currency),
+              _ReceiptItemRow(
+                item: receipt.items[index],
+                currency: receipt.currency,
+              ),
               if (index < receipt.items.length - 1) const Divider(),
             ],
           ],
@@ -166,13 +169,19 @@ class _ReceiptItemRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('${item.quantity}×', style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(
+            '${item.quantity}×',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
           const SizedBox(width: CoffeeSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.productName, style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(
+                  item.productName,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
                 if (modifiers.isNotEmpty) ...[
                   const SizedBox(height: CoffeeSpacing.xxs),
                   Text(modifiers, style: Theme.of(context).textTheme.bodySmall),
@@ -200,11 +209,20 @@ class _SummaryCard extends StatelessWidget {
         padding: const EdgeInsets.all(CoffeeSpacing.md),
         child: Column(
           children: [
-            _MoneyRow(label: strings.receiptSubtotal, value: _money(receipt.currency, receipt.subtotal)),
+            _MoneyRow(
+              label: strings.receiptSubtotal,
+              value: _money(receipt.currency, receipt.subtotal),
+            ),
             if (receipt.discountAmount > 0)
-              _MoneyRow(label: strings.receiptDiscount, value: '-${_money(receipt.currency, receipt.discountAmount)}'),
+              _MoneyRow(
+                label: strings.receiptDiscount,
+                value: '-${_money(receipt.currency, receipt.discountAmount)}',
+              ),
             if (receipt.deliveryFee > 0)
-              _MoneyRow(label: strings.receiptDeliveryFee, value: _money(receipt.currency, receipt.deliveryFee)),
+              _MoneyRow(
+                label: strings.receiptDeliveryFee,
+                value: _money(receipt.currency, receipt.deliveryFee),
+              ),
             const Divider(),
             _MoneyRow(
               label: strings.total,
@@ -255,7 +273,11 @@ class _PaymentCard extends StatelessWidget {
 }
 
 class _MoneyRow extends StatelessWidget {
-  const _MoneyRow({required this.label, required this.value, this.strong = false});
+  const _MoneyRow({
+    required this.label,
+    required this.value,
+    this.strong = false,
+  });
 
   final String label;
   final String value;
@@ -264,7 +286,8 @@ class _MoneyRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = strong
-        ? Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)
+        ? Theme.of(context).textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.w800)
         : Theme.of(context).textTheme.bodyMedium;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: CoffeeSpacing.xxs),

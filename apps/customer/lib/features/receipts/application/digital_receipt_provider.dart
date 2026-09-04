@@ -8,7 +8,7 @@ final digitalReceiptRepositoryProvider = Provider<DigitalReceiptRepository>(
   (ref) => DigitalReceiptRepository(ref.watch(dioProvider)),
 );
 
-final digitalReceiptProvider =
-    FutureProvider.autoDispose.family<DigitalReceipt, String>((ref, orderId) {
+final digitalReceiptProvider = FutureProvider.autoDispose
+    .family<DigitalReceipt, String>((ref, orderId) {
       return ref.watch(digitalReceiptRepositoryProvider).getReceipt(orderId);
     });

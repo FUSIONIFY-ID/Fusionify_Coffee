@@ -28,13 +28,15 @@ class DigitalReceipt {
         ? Map<String, dynamic>.from(rawVoucher)
         : const <String, dynamic>{};
     final rawItems = json['items'] is List ? json['items'] as List : const [];
-    final rawBenefitIds =
-        json['benefitIds'] is List ? json['benefitIds'] as List : const [];
+    final rawBenefitIds = json['benefitIds'] is List
+        ? json['benefitIds'] as List
+        : const [];
 
     return DigitalReceipt(
       orderId: json['orderId'] as String? ?? '',
       createdAt:
-          DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime(2026),
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime(2026),
       status: json['status'] as String? ?? '',
       fulfillmentType: json['fulfillmentType'] as String? ?? 'PICKUP',
       scheduledFor: DateTime.tryParse(json['scheduledFor'] as String? ?? ''),
@@ -46,9 +48,7 @@ class DigitalReceipt {
       totalAmount: json['totalAmount'] as int? ?? 0,
       items: rawItems
           .whereType<Map>()
-          .map(
-            (item) => ReceiptItem.fromJson(Map<String, dynamic>.from(item)),
-          )
+          .map((item) => ReceiptItem.fromJson(Map<String, dynamic>.from(item)))
           .toList(),
       payment: rawPayment is Map
           ? ReceiptPayment.fromJson(Map<String, dynamic>.from(rawPayment))
@@ -85,10 +85,9 @@ class ReceiptItem {
   });
 
   factory ReceiptItem.fromJson(Map<String, dynamic> json) {
-    final rawModifiers =
-        json['selectedModifiers'] is List
-            ? json['selectedModifiers'] as List
-            : const [];
+    final rawModifiers = json['selectedModifiers'] is List
+        ? json['selectedModifiers'] as List
+        : const [];
     return ReceiptItem(
       productName: json['productName'] as String? ?? '',
       quantity: json['quantity'] as int? ?? 0,
@@ -97,9 +96,8 @@ class ReceiptItem {
       modifiers: rawModifiers
           .whereType<Map>()
           .map(
-            (value) => ReceiptModifier.fromJson(
-              Map<String, dynamic>.from(value),
-            ),
+            (value) =>
+                ReceiptModifier.fromJson(Map<String, dynamic>.from(value)),
           )
           .toList(),
     );
