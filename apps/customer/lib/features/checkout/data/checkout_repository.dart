@@ -14,23 +14,28 @@ class CheckoutRepository {
     required String idempotencyKey,
     String? customerVoucherId,
   }) async {
+    final payload = <String, dynamic>{
+      'outletId': outletId,
+      'items': [
+        for (final item in items)
+          {
+            'productId': item.productId,
+            'quantity': item.quantity,
+            'modifierOptionIds': [
+              for (final option in item.selectedOptions) option.id,
+            ],
+          },
+      ],
+    };
+
+    if (customerVoucherId != null) {
+      payload['customerVoucherId'] = customerVoucherId;
+    }
+
     final response = await _dio.post<Map<String, dynamic>>(
       '/v1/orders',
       options: Options(headers: {'Idempotency-Key': idempotencyKey}),
-      data: {
-        'outletId': outletId,
-        if (customerVoucherId != null) 'customerVoucherId': customerVoucherId,
-        'items': [
-          for (final item in items)
-            {
-              'productId': item.productId,
-              'quantity': item.quantity,
-              'modifierOptionIds': [
-                for (final option in item.selectedOptions) option.id,
-              ],
-            },
-        ],
-      },
+      data: payload,
     );
 
     final data = response.data;
