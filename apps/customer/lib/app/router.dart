@@ -7,6 +7,9 @@ import '../features/account/presentation/delete_account_screen.dart';
 import '../features/account/presentation/language_screen.dart';
 import '../features/account/presentation/personal_information_screen.dart';
 import '../features/account/presentation/security_screen.dart';
+import '../features/addresses/domain/address_models.dart';
+import '../features/addresses/presentation/address_editor_screen.dart';
+import '../features/addresses/presentation/saved_addresses_screen.dart';
 import '../features/auth/presentation/complete_profile_screen.dart';
 import '../features/auth/presentation/forgot_password_screen.dart';
 import '../features/auth/presentation/login_screen.dart';
@@ -99,6 +102,22 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/account/sessions',
       builder: (_, _) => const ActiveSessionsScreen(),
+    ),
+    GoRoute(
+      path: '/account/addresses',
+      builder: (_, _) => const SavedAddressesScreen(),
+    ),
+    GoRoute(
+      path: '/account/addresses/new',
+      builder: (_, _) => const AddressEditorScreen(),
+    ),
+    GoRoute(
+      path: '/account/addresses/:addressId',
+      builder: (context, state) => AddressEditorScreen(
+        initialAddress: state.extra is SavedAddress
+            ? state.extra! as SavedAddress
+            : null,
+      ),
     ),
     GoRoute(
       path: '/account/delete',
