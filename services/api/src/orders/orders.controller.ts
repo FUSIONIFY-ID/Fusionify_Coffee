@@ -43,4 +43,12 @@ export class OrdersController {
   ) {
     return this.ordersService.getById(orderId, request.auth!.userId);
   }
+
+  @Post(':orderId/cancel')
+  cancel(
+    @Req() request: AuthenticatedRequest,
+    @Param('orderId') orderId: string,
+  ) {
+    return this.ordersService.cancel(orderId, request.auth!.userId);
+  }
 }
