@@ -5,10 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
 import '../../../l10n/app_strings.dart';
+import '../../auth/application/auth_controller.dart';
 import '../../cart/application/cart_controller.dart';
 import '../../cart/domain/cart_item.dart';
 import '../../catalog/application/catalog_provider.dart';
 import '../../catalog/domain/catalog_models.dart';
+import '../../favorites/application/favorites_provider.dart';
+import '../../favorites/presentation/favorites_strings.dart';
 import '../../shared/presentation/catalog_states.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
@@ -156,13 +159,46 @@ class _ProductDetailContentState extends ConsumerState<_ProductDetailContent> {
     );
   }
 
+  Future<void> _toggleFavorite() async {
+    final profile = ref.read(authControllerProvider).value;
+    if (profile == null) {
+      context.push('/auth/login');
+      return;
+    }
+
+    try {
+      await ref
+          .read(favoriteProductIdsProvider.notifier)
+          .toggle(widget.product.id);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.favoriteStrings.updateFailed)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
     final product = widget.product;
+    final favorites = ref.watch(favoriteProductIdsProvider).value ?? <String>{};
+    final isFavorite = favorites.contains(product.id);
 
     return Scaffold(
-      appBar: AppBar(title: Text(product.name)),
+      appBar: AppBar(
+        title: Text(product.name),
+        actions: [
+          IconButton(
+            onPressed: _toggleFavorite,
+            tooltip: strings.favorites,
+            icon: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: isFavorite ? CoffeeColors.error : null,
+            ),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           CoffeeSpacing.md,
