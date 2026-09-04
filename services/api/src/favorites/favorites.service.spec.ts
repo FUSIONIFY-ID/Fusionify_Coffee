@@ -3,7 +3,7 @@ import { FavoritesService } from './favorites.service';
 
 describe('FavoritesService', () => {
   it('scopes favorite listing to the authenticated customer', async () => {
-    const findMany = jest.fn().mockResolvedValue([]);
+    const findMany = jest.fn(async (_args: unknown) => []);
     const prisma = {
       favoriteProduct: { findMany },
     } as unknown as PrismaService;
@@ -11,11 +11,10 @@ describe('FavoritesService', () => {
 
     await service.list('customer-a');
 
-    expect(findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({ userId: 'customer-a' }),
-      }),
-    );
+    expect(findMany).toHaveBeenCalledTimes(1);
+    expect(findMany.mock.calls[0]?.[0]).toMatchObject({
+      where: { userId: 'customer-a' },
+    });
   });
 
   it('uses the customer and product pair as the idempotent favorite key', async () => {
