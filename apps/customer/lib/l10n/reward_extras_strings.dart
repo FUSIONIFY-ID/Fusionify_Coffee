@@ -9,6 +9,11 @@ extension RewardExtrasStrings on AppStrings {
     };
   }
 
+  String get signInToSeeRewards => _extrasPick(
+    'Masuk untuk melihat reward, voucher, dan benefit akun kamu.',
+    'Log masuk untuk melihat ganjaran, baucar dan manfaat akaun anda.',
+    'Log in to see your rewards, vouchers, and account benefits.',
+  );
   String get pointsTab => _extrasPick('Poin', 'Mata', 'Points');
   String get voucherTab => _extrasPick('Voucher', 'Baucar', 'Vouchers');
   String get benefitsTab => _extrasPick('Benefit', 'Manfaat', 'Benefits');
