@@ -10,6 +10,7 @@ Flutter Customer App
 NestJS API
   |
   +-- Customer Auth / Staff Auth / Accounts / Catalog / Orders / Payments
+  +-- Rewards / Retention / Delivery / Operations / Benefits
   |
   v
 Prisma 7 + @prisma/adapter-pg
@@ -17,7 +18,20 @@ Prisma 7 + @prisma/adapter-pg
   v
 PostgreSQL
 
+Staff Browser
+  |
+  | same-origin /api/*
+  v
+Next.js 16 Staff BFF
+  |
+  | HTTP-only access/refresh cookies
+  v
+Fusionify Coffee API
+```
+
 Payments:
+
+```text
 NestJS
   |
   v
@@ -32,47 +46,16 @@ Payment Provider Adapter
 
 ## Customer Architecture
 
-Feature-oriented Flutter structure:
-
-```text
-lib/
-  app/
-  core/
-    network/
-    utils/
-  features/
-    catalog/
-    home/
-    menu/
-    product/
-    cart/
-    checkout/
-    payment/
-    orders/
-    rewards/
-    account/
-```
+Feature-oriented Flutter structure includes customer authentication, catalog, menu/product, cart, checkout/payment, orders, rewards, account, delivery, retention, and benefit surfaces.
 
 Rules:
 - presentation does not own provider credentials
 - local UI totals are not checkout authority
 - network errors do not silently fall back to fake runtime data
 - tests may use fixtures/provider overrides
+- customer bearer/session secrets remain in secure storage rather than ordinary preferences
 
-## Catalog Path
-
-```text
-Flutter Screen
- -> Riverpod
- -> CatalogRepository
- -> Dio
- -> GET /v1/catalog/preview
- -> CatalogService
- -> PrismaService
- -> PostgreSQL
-```
-
-## Localization Path
+## Catalog + Localization Path
 
 ```text
 Language setting
@@ -84,18 +67,24 @@ Language setting
  -> localized Flutter models/UI
 ```
 
-The catalog endpoint also accepts an explicit `lang` query parameter for compatibility. The backend normalizes both API enum values and standard HTTP language tags, then safely falls back to default stored text when a translation is missing.
+The catalog endpoint also accepts an explicit `lang` query parameter for compatibility. Backend translation falls back to stored default text when a localized value is unavailable.
 
-## Authentication Boundary
+Dynamic customer-facing catalog content such as outlet notes, category names, product descriptions, modifier-group labels, and modifier-option labels is localized at the data/API layer rather than hardcoded independently in Flutter.
+
+## Customer Authentication Boundary
 
 ```text
 Flutter
- -> OTP request/verify
+ -> phone +62/+60
+ -> OTP request (WhatsApp or SMS adapter)
+ -> OTP verify
  -> register/login
  -> secure local token storage
- -> Bearer access session
+ -> access + refresh rotation
  -> authenticated account/order/payment APIs
 ```
+
+Customer OTP uses a numeric code rather than verification links.
 
 Orders and payments are customer-owned resources. Knowing an order or payment ID is not sufficient authorization.
 
@@ -111,7 +100,7 @@ Cart
  -> persist Order + snapshot OrderItems
 ```
 
-Client sends identifiers and quantities only.
+Client sends identifiers and quantities only. The backend owns final pricing.
 
 ## Payment Creation Path
 
@@ -127,11 +116,11 @@ Checkout
  -> Flutter renders qrString
 ```
 
-A database constraint prevents more than one local PENDING payment per order.
+A database constraint prevents more than one local `PENDING` payment per order.
 
 ## Payment Detection
 
-Automatic user-facing loop:
+Automatic customer-facing loop currently remains authoritative-state polling:
 
 ```text
 AutoGoPay webhook
@@ -142,11 +131,11 @@ AutoGoPay webhook
  -> Order CONFIRMED
 
 Flutter payment screen
- -> GET local Fusionify Payment every ~3 sec
- -> sees webhook-updated state
+ -> GET local Fusionify Payment
+ -> observes webhook-updated state
 ```
 
-Flutter does not poll AutoGoPay every three seconds.
+Flutter does not repeatedly call AutoGoPay directly.
 
 Manual fallback:
 
@@ -158,30 +147,30 @@ Check Status
  -> return local state
 ```
 
-App resume also performs provider reconciliation while a payment remains pending.
+Push delivery may be added later, but it must not replace authoritative GET/reconciliation APIs.
 
 ## Payment Security Boundary
 
-- AutoGoPay key server-side only
-- production callback uses HTTPS
-- webhook signature checked against raw body
+- AutoGoPay key is server-side only
+- production callback must use HTTPS
+- webhook signature is checked against raw body
 - HMAC-SHA256
 - constant-time comparison
-- provider amount checked against local payment
+- provider amount is checked against local payment
 - client cannot assert payment completion
 - client cannot assert final order amount
-- provider raw status stored separately
-- checkout/payment idempotency keys are local Fusionify controls
+- provider raw status is stored separately
+- checkout/payment idempotency keys are Fusionify controls
 
 ## Provider Create Ambiguity
 
 The reviewed GoPay create contract does not show a caller-supplied external idempotency key.
 
-Therefore a timeout after provider acceptance but before response receipt can be ambiguous.
+A timeout after provider acceptance but before response receipt can therefore be ambiguous. Do not blindly auto-retry provider QR creation until a safe reconciliation strategy is validated.
 
-Do not blindly auto-retry provider QR creation until a safe reconciliation strategy is validated.
+## Order + Fulfillment State
 
-## Order and Payment States
+Payment and fulfillment state remain separate.
 
 Payment:
 - PENDING
@@ -200,9 +189,9 @@ Order:
 - COMPLETED
 - CANCELLED
 
-Payment and fulfillment state remain separate.
+Customer order detail uses persisted `OrderStatusEvent` history rather than inferring a timeline from timestamps.
 
-## Staff Operations Boundary
+## Staff Authentication + Operations Boundary
 
 ```text
 Staff Interface
@@ -218,13 +207,30 @@ Staff Interface
 
 Customer and staff identities are separate silos. Outlet-scoped roles cannot read or mutate another outlet's orders.
 
-Fulfillment status is persisted as an event history rather than inferred from `Order.updatedAt`.
+## Staff Web BFF Boundary
 
-## Realtime
+```text
+Staff Browser
+  |
+  | same-origin /api/*
+  v
+Next.js Staff BFF
+  |
+  | HTTP-only access/refresh cookies
+  | server-side token refresh
+  v
+Fusionify Coffee API
+  |
+  | StaffAuthGuard + RBAC + outlet scope
+  v
+Orders / Payments / Staff Management / Operations / Audit
+```
 
-Current payment UI polls local Fusionify state.
-
-Future realtime/socket/push updates are an optimization and must not replace authoritative GET/reconciliation APIs.
+Rules:
+- staff bearer tokens are never persisted in browser localStorage/sessionStorage
+- `FUSIONIFY_API_BASE_URL` is server-only
+- browser requests use same-origin BFF route handlers
+- backend RBAC and outlet scope remain authoritative
 
 ## Cashier POS Path
 
@@ -245,49 +251,100 @@ Staff POS Browser
 
 Rules:
 - POS browser totals are estimates only
-- staff cannot assert the final amount
+- staff cannot assert final amount
 - staff cannot assert PAID/CONFIRMED
 - guest POS orders use `userId = null`
-- Idempotency-Key is required for both order and payment creation
+- Idempotency-Key is required for order/payment creation
 - outlet scope is enforced by the backend
 - failed provider initialization does not advance fulfillment
-- staff browser bearer tokens remain inside HTTP-only BFF cookies
 
-## Staff Web BFF Boundary
+## Staff Realtime KDS Queue
+
+Validated staff realtime transport uses Server-Sent Events.
 
 ```text
-Staff Browser
+KDS Browser EventSource
   |
-  | same-origin /api/*
+  | GET /api/events/orders
   v
 Next.js Staff BFF
   |
-  | HTTP-only access/refresh cookies
-  | server-side token refresh
+  | HTTP-only staff cookies
+  | server-side bearer token
   v
-Fusionify Coffee API
+GET /v1/staff/orders/events
   |
-  | StaffAuthGuard + RBAC + outlet scope
+  | StaffAuthGuard
+  | StaffPermissionsGuard: orders.read
+  | outlet scope
   v
-Orders / Staff Management / Audit
+StaffOrderStreamService
+  |
+  | active queue snapshot
+  v
+PostgreSQL
 ```
 
-Rules:
-- staff bearer tokens are never persisted in browser localStorage/sessionStorage
-- `FUSIONIFY_API_BASE_URL` is server-only
-- browser requests use same-origin BFF route handlers
-- backend RBAC and outlet scope remain authoritative
-- KDS polling currently runs every 10 seconds
-- realtime transport is a future optimization, not a replacement for authoritative APIs
+Current behavior:
+- KDS browser opens a same-origin `EventSource`
+- server checks the active fulfillment queue approximately every 2 seconds
+- queue statuses streamed: CONFIRMED, PREPARING, READY, PICKED_UP
+- a signature derived from order `id/status/updatedAt` suppresses duplicate snapshots
+- changed snapshots emit an SSE event named `orders`
+- heartbeat event approximately every 15 seconds
+- SSE retry hint is 3 seconds
+- browser maintains a 30-second fallback refresh
+- manual refresh remains available
+- UI exposes human-readable `connecting`, `live`, and `fallback` descriptions
 
-## Operations / Future Modules
+This keeps bearer tokens out of browser JavaScript while providing near-realtime KDS updates.
 
-Create modules only when implementation begins:
-- rewards
+### Scaling boundary
+
+The browser transport is SSE, but the current trigger layer detects changes using a lightweight database query every ~2 seconds. This is acceptable for the current foundation/single-simple deployment.
+
+For multiple API instances or materially higher order volume, replace the trigger layer with PostgreSQL LISTEN/NOTIFY, Redis/pub-sub, or equivalent. The SSE browser transport can remain if appropriate.
+
+Authoritative GET and status-transition APIs remain the source of truth regardless of realtime transport.
+
+## Retention + Loyalty Boundary
+
+The repository already contains foundations for:
+- Fusion Points ledger/rewards
+- membership tiers
 - vouchers
-- inventory/procurement/assets
-- delivery/maps
-- digital benefits
+- favorites
+- reorder/buy-again
+
+Final point rates, redemption rules, and membership thresholds remain business configuration rather than architectural constants.
+
+## Operations Boundary
+
+The repository already contains foundations for inventory, suppliers, purchase orders, assets, and staff operations surfaces.
+
+Deeper recipes/BOM, automatic ingredient consumption, COGS, and accounting workflows should be added only when requirements are explicit.
+
+## Delivery Boundary
+
+Saved addresses and delivery/serviceability foundations exist. External maps/geocoding/routing and courier providers should stay behind replaceable adapters rather than leak into customer UI/domain logic.
+
+Manual address/outlet selection should remain available when precise location permission is unnecessary.
+
+## Digital Benefits Boundary
+
+Digital receipt and Wi-Fi/AI entitlement foundations exist. Real outlet Wi-Fi/network operations and AI gateway quota enforcement remain server-side integration concerns.
+
+## Realtime Summary
+
+Implemented:
+- staff KDS SSE transport
+
+Still polling/reconciliation based:
+- customer payment state
+- customer order detail refresh
+- staff POS pending payment state
+
+Future push optimization must not remove authoritative state/reconciliation endpoints.
 
 ## Architectural Change
 
