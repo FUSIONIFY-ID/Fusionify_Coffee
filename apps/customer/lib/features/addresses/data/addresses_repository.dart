@@ -11,9 +11,7 @@ class AddressesRepository {
     final response = await _dio.get<List<dynamic>>('/v1/addresses');
     return (response.data ?? const <dynamic>[])
         .whereType<Map>()
-        .map(
-          (entry) => SavedAddress.fromJson(Map<String, dynamic>.from(entry)),
-        )
+        .map((entry) => SavedAddress.fromJson(Map<String, dynamic>.from(entry)))
         .toList();
   }
 

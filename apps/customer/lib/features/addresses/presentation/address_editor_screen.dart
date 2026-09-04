@@ -140,7 +140,9 @@ class _AddressEditorScreenState extends ConsumerState<AddressEditorScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.initialAddress == null ? strings.addAddress : strings.editAddress,
+          widget.initialAddress == null
+              ? strings.addAddress
+              : strings.editAddress,
         ),
       ),
       body: ListView(

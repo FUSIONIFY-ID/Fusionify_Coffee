@@ -25,8 +25,7 @@ extension DeliveryStrings on AppStrings {
       _deliveryPick('Detail tambahan', 'Butiran tambahan', 'Address line 2');
   String get city => _deliveryPick('Kota', 'Bandar', 'City');
   String get region => _deliveryPick('Provinsi', 'Negeri', 'Region');
-  String get postalCode =>
-      _deliveryPick('Kode pos', 'Poskod', 'Postal code');
+  String get postalCode => _deliveryPick('Kode pos', 'Poskod', 'Postal code');
   String get deliveryNotes =>
       _deliveryPick('Catatan kurir', 'Nota penghantar', 'Delivery notes');
   String get latitude => _deliveryPick('Latitude', 'Latitud', 'Latitude');

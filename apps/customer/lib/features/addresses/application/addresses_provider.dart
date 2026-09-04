@@ -8,19 +8,17 @@ final addressesRepositoryProvider = Provider<AddressesRepository>((ref) {
   return AddressesRepository(ref.watch(dioProvider));
 });
 
-final savedAddressesProvider =
-    FutureProvider.autoDispose<List<SavedAddress>>((ref) {
+final savedAddressesProvider = FutureProvider.autoDispose<List<SavedAddress>>((
+  ref,
+) {
   return ref.watch(addressesRepositoryProvider).list();
 });
 
 typedef DeliveryQuoteRequest = ({String addressId, String outletId});
 
-final deliveryQuoteProvider =
-    FutureProvider.autoDispose.family<DeliveryQuote, DeliveryQuoteRequest>(
-  (ref, request) {
-    return ref.watch(addressesRepositoryProvider).quote(
-          addressId: request.addressId,
-          outletId: request.outletId,
-        );
-  },
-);
+final deliveryQuoteProvider = FutureProvider.autoDispose
+    .family<DeliveryQuote, DeliveryQuoteRequest>((ref, request) {
+      return ref
+          .watch(addressesRepositoryProvider)
+          .quote(addressId: request.addressId, outletId: request.outletId);
+    });

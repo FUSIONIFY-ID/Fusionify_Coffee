@@ -95,8 +95,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         idempotencyKey: _checkoutKey,
         fulfillmentType: _fulfillmentType,
         scheduledFor: _fulfillmentType == 'PICKUP' ? _scheduledFor : null,
-        savedAddressId:
-            _fulfillmentType == 'DELIVERY' ? _selectedAddressId : null,
+        savedAddressId: _fulfillmentType == 'DELIVERY'
+            ? _selectedAddressId
+            : null,
         customerVoucherId: _selectedVoucherId,
       );
 
@@ -551,7 +552,8 @@ class _DeliveryOptions extends ConsumerWidget {
               data: (items) {
                 if (items.isEmpty) return Text(strings.addressesEmpty);
                 if (selectedAddressId == null) {
-                  final preferred = items.where((item) => item.isDefault).firstOrNull ??
+                  final preferred =
+                      items.where((item) => item.isDefault).firstOrNull ??
                       items.first;
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     onSelected(preferred.id);
@@ -587,10 +589,7 @@ class _DeliveryOptions extends ConsumerWidget {
 }
 
 class _DeliveryQuoteView extends ConsumerWidget {
-  const _DeliveryQuoteView({
-    required this.addressId,
-    required this.outletId,
-  });
+  const _DeliveryQuoteView({required this.addressId, required this.outletId});
 
   final String addressId;
   final String outletId;
@@ -612,8 +611,8 @@ class _DeliveryQuoteView extends ConsumerWidget {
           value.serviceable
               ? strings.deliveryAvailable
               : value.reason == 'delivery_not_configured'
-                  ? strings.deliveryNotConfigured
-                  : strings.deliveryOutsideArea,
+              ? strings.deliveryNotConfigured
+              : strings.deliveryOutsideArea,
         ),
         subtitle: value.serviceable && value.fee != null
             ? Text(
@@ -653,7 +652,9 @@ class _CheckoutTotals extends ConsumerWidget {
           outletId: outletId,
         )),
       );
-      deliveryFee = quote.value?.serviceable == true ? quote.value?.fee ?? 0 : 0;
+      deliveryFee = quote.value?.serviceable == true
+          ? quote.value?.fee ?? 0
+          : 0;
     }
 
     return Column(
@@ -698,7 +699,9 @@ class _TotalRow extends StatelessWidget {
           Expanded(child: Text(label)),
           Text(
             value,
-            style: TextStyle(fontWeight: strong ? FontWeight.w800 : FontWeight.w600),
+            style: TextStyle(
+              fontWeight: strong ? FontWeight.w800 : FontWeight.w600,
+            ),
           ),
         ],
       ),
