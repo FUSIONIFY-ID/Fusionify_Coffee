@@ -18,9 +18,8 @@ class RewardsSummary {
       recentActivity: rawActivity
           .whereType<Map>()
           .map(
-            (entry) => RewardsLedgerEntry.fromJson(
-              Map<String, dynamic>.from(entry),
-            ),
+            (entry) =>
+                RewardsLedgerEntry.fromJson(Map<String, dynamic>.from(entry)),
           )
           .toList(),
     );
@@ -52,7 +51,8 @@ class RewardsLedgerEntry {
       orderId: json['orderId'] as String?,
       note: json['note'] as String?,
       createdAt:
-          DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime(2026),
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime(2026),
     );
   }
 

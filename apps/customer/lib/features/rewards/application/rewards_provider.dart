@@ -8,6 +8,8 @@ final rewardsRepositoryProvider = Provider<RewardsRepository>((ref) {
   return RewardsRepository(ref.watch(dioProvider));
 });
 
-final rewardsSummaryProvider = FutureProvider.autoDispose<RewardsSummary>((ref) {
+final rewardsSummaryProvider = FutureProvider.autoDispose<RewardsSummary>((
+  ref,
+) {
   return ref.watch(rewardsRepositoryProvider).getSummary();
 });

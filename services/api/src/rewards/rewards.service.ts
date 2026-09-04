@@ -60,20 +60,16 @@ export class RewardsService {
       },
     });
 
-    await this.staffAuthService.audit(
-      staffUserId,
-      'LOYALTY_PROGRAM_UPDATED',
-      {
-        targetType: 'LoyaltyProgram',
-        targetId: program.id,
-        metadata: {
-          currency: program.currency,
-          spendUnit: program.spendUnit,
-          pointsPerUnit: program.pointsPerUnit,
-          active: program.active,
-        },
+    await this.staffAuthService.audit(staffUserId, 'LOYALTY_PROGRAM_UPDATED', {
+      targetType: 'LoyaltyProgram',
+      targetId: program.id,
+      metadata: {
+        currency: program.currency,
+        spendUnit: program.spendUnit,
+        pointsPerUnit: program.pointsPerUnit,
+        active: program.active,
       },
-    );
+    });
 
     return program;
   }
@@ -90,11 +86,7 @@ export class RewardsService {
       },
     });
 
-    if (
-      !order ||
-      !order.userId ||
-      order.status !== OrderStatus.COMPLETED
-    ) {
+    if (!order || !order.userId || order.status !== OrderStatus.COMPLETED) {
       return null;
     }
 

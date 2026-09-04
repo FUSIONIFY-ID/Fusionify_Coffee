@@ -9,35 +9,20 @@ extension RewardsStrings on AppStrings {
     };
   }
 
-  String get fusionPoints => _rewardPick(
-    'Fusion Points',
-    'Fusion Points',
-    'Fusion Points',
-  );
+  String get fusionPoints =>
+      _rewardPick('Fusion Points', 'Fusion Points', 'Fusion Points');
 
-  String get pointsBalance => _rewardPick(
-    'Saldo poin',
-    'Baki mata',
-    'Points balance',
-  );
+  String get pointsBalance =>
+      _rewardPick('Saldo poin', 'Baki mata', 'Points balance');
 
-  String get lifetimeEarned => _rewardPick(
-    'Total diperoleh',
-    'Jumlah diperoleh',
-    'Lifetime earned',
-  );
+  String get lifetimeEarned =>
+      _rewardPick('Total diperoleh', 'Jumlah diperoleh', 'Lifetime earned');
 
-  String get lifetimeRedeemed => _rewardPick(
-    'Total digunakan',
-    'Jumlah digunakan',
-    'Lifetime redeemed',
-  );
+  String get lifetimeRedeemed =>
+      _rewardPick('Total digunakan', 'Jumlah digunakan', 'Lifetime redeemed');
 
-  String get recentPointsActivity => _rewardPick(
-    'Aktivitas terbaru',
-    'Aktiviti terkini',
-    'Recent activity',
-  );
+  String get recentPointsActivity =>
+      _rewardPick('Aktivitas terbaru', 'Aktiviti terkini', 'Recent activity');
 
   String get noPointsActivity => _rewardPick(
     'Belum ada aktivitas Fusion Points.',
@@ -63,11 +48,8 @@ extension RewardsStrings on AppStrings {
     'Completed order reward',
   );
 
-  String get campaignBonus => _rewardPick(
-    'Bonus kampanye',
-    'Bonus kempen',
-    'Campaign bonus',
-  );
+  String get campaignBonus =>
+      _rewardPick('Bonus kampanye', 'Bonus kempen', 'Campaign bonus');
 
   String get rewardRedemption => _rewardPick(
     'Penukaran reward',
@@ -81,15 +63,9 @@ extension RewardsStrings on AppStrings {
     'Refund adjustment',
   );
 
-  String get manualAdjustment => _rewardPick(
-    'Penyesuaian poin',
-    'Pelarasan mata',
-    'Points adjustment',
-  );
+  String get manualAdjustment =>
+      _rewardPick('Penyesuaian poin', 'Pelarasan mata', 'Points adjustment');
 
-  String pointsAmount(int points) => _rewardPick(
-    '$points poin',
-    '$points mata',
-    '$points points',
-  );
+  String pointsAmount(int points) =>
+      _rewardPick('$points poin', '$points mata', '$points points');
 }

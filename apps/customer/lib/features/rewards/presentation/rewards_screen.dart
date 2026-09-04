@@ -31,10 +31,7 @@ class RewardsScreen extends ConsumerWidget {
                   color: CoffeeColors.primary,
                 ),
                 const SizedBox(height: CoffeeSpacing.md),
-                Text(
-                  strings.signInToSeeRewards,
-                  textAlign: TextAlign.center,
-                ),
+                Text(strings.signInToSeeRewards, textAlign: TextAlign.center),
                 const SizedBox(height: CoffeeSpacing.md),
                 FilledButton(
                   onPressed: () => context.push('/auth/login'),
@@ -102,9 +99,9 @@ class _RewardsContent extends StatelessWidget {
                     Text(
                       summary.balance.toString(),
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            color: CoffeeColors.deep,
-                            fontWeight: FontWeight.w800,
-                          ),
+                        color: CoffeeColors.deep,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     const SizedBox(width: CoffeeSpacing.xs),
                     Padding(
@@ -151,8 +148,7 @@ class _RewardsContent extends StatelessWidget {
             ),
           )
         else
-          for (final entry in summary.recentActivity)
-            _LedgerTile(entry: entry),
+          for (final entry in summary.recentActivity) _LedgerTile(entry: entry),
       ],
     );
   }
@@ -179,9 +175,8 @@ class _Metric extends StatelessWidget {
           const SizedBox(height: CoffeeSpacing.xs),
           Text(
             value.toString(),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: Theme.of(context).textTheme.titleLarge
+                ?.copyWith(fontWeight: FontWeight.w800),
           ),
         ],
       ),
@@ -199,7 +194,8 @@ class _LedgerTile extends StatelessWidget {
     final strings = context.strings;
     final positive = entry.points >= 0;
     final local = entry.createdAt.toLocal();
-    final date = '${local.day.toString().padLeft(2, '0')}/'
+    final date =
+        '${local.day.toString().padLeft(2, '0')}/'
         '${local.month.toString().padLeft(2, '0')}/${local.year}';
 
     return ListTile(
@@ -260,16 +256,10 @@ class _RewardsError extends StatelessWidget {
       padding: const EdgeInsets.all(CoffeeSpacing.xl),
       children: [
         const SizedBox(height: 180),
-        Text(
-          strings.pointsLoadFailed,
-          textAlign: TextAlign.center,
-        ),
+        Text(strings.pointsLoadFailed, textAlign: TextAlign.center),
         const SizedBox(height: CoffeeSpacing.md),
         Center(
-          child: FilledButton(
-            onPressed: onRetry,
-            child: Text(strings.retry),
-          ),
+          child: FilledButton(onPressed: onRetry, child: Text(strings.retry)),
         ),
       ],
     );
