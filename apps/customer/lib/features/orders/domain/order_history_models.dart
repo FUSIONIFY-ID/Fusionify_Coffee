@@ -8,6 +8,9 @@ class CustomerOrderSummary {
     required this.outletName,
     required this.items,
     this.paymentStatus,
+    this.fulfillmentType = 'PICKUP',
+    this.scheduledFor,
+    this.deliveryFee = 0,
   });
 
   factory CustomerOrderSummary.fromJson(Map<String, dynamic> json) {
@@ -32,6 +35,9 @@ class CustomerOrderSummary {
       paymentStatus: rawPayments.isEmpty
           ? null
           : _map(rawPayments.first)['status'] as String?,
+      fulfillmentType: json['fulfillmentType'] as String? ?? 'PICKUP',
+      scheduledFor: _nullableDate(json['scheduledFor']),
+      deliveryFee: json['deliveryFee'] as int? ?? 0,
     );
   }
 
@@ -43,6 +49,9 @@ class CustomerOrderSummary {
   final String outletName;
   final List<CustomerOrderItem> items;
   final String? paymentStatus;
+  final String fulfillmentType;
+  final DateTime? scheduledFor;
+  final int deliveryFee;
 }
 
 class CustomerOrderDetail {
@@ -56,6 +65,13 @@ class CustomerOrderDetail {
     required this.items,
     required this.statusEvents,
     this.paymentStatus,
+    this.fulfillmentType = 'PICKUP',
+    this.scheduledFor,
+    this.deliveryFee = 0,
+    this.deliveryDistanceMeters,
+    this.deliveryAddress,
+    this.subtotal = 0,
+    this.discountAmount = 0,
   });
 
   factory CustomerOrderDetail.fromJson(Map<String, dynamic> json) {
@@ -63,6 +79,7 @@ class CustomerOrderDetail {
     final rawItems = _list(json['items']);
     final rawPayments = _list(json['payments']);
     final rawEvents = _list(json['statusEvents']);
+    final rawAddress = _map(json['deliveryAddressSnapshot']);
 
     return CustomerOrderDetail(
       id: json['id'] as String? ?? '',
@@ -89,6 +106,15 @@ class CustomerOrderDetail {
       paymentStatus: rawPayments.isEmpty
           ? null
           : _map(rawPayments.first)['status'] as String?,
+      fulfillmentType: json['fulfillmentType'] as String? ?? 'PICKUP',
+      scheduledFor: _nullableDate(json['scheduledFor']),
+      deliveryFee: json['deliveryFee'] as int? ?? 0,
+      deliveryDistanceMeters: json['deliveryDistanceMeters'] as int?,
+      deliveryAddress: rawAddress.isEmpty
+          ? null
+          : CustomerDeliveryAddressSnapshot.fromJson(rawAddress),
+      subtotal: json['subtotal'] as int? ?? 0,
+      discountAmount: json['discountAmount'] as int? ?? 0,
     );
   }
 
@@ -101,6 +127,61 @@ class CustomerOrderDetail {
   final List<CustomerOrderItem> items;
   final List<CustomerOrderStatusEvent> statusEvents;
   final String? paymentStatus;
+  final String fulfillmentType;
+  final DateTime? scheduledFor;
+  final int deliveryFee;
+  final int? deliveryDistanceMeters;
+  final CustomerDeliveryAddressSnapshot? deliveryAddress;
+  final int subtotal;
+  final int discountAmount;
+}
+
+class CustomerDeliveryAddressSnapshot {
+  const CustomerDeliveryAddressSnapshot({
+    required this.label,
+    required this.recipientName,
+    required this.phoneE164,
+    required this.line1,
+    required this.city,
+    required this.country,
+    this.line2,
+    this.region,
+    this.postalCode,
+    this.deliveryNotes,
+  });
+
+  factory CustomerDeliveryAddressSnapshot.fromJson(Map<String, dynamic> json) {
+    return CustomerDeliveryAddressSnapshot(
+      label: json['label'] as String? ?? '',
+      recipientName: json['recipientName'] as String? ?? '',
+      phoneE164: json['phoneE164'] as String? ?? '',
+      line1: json['line1'] as String? ?? '',
+      line2: json['line2'] as String?,
+      city: json['city'] as String? ?? '',
+      region: json['region'] as String?,
+      postalCode: json['postalCode'] as String?,
+      country: json['country'] as String? ?? '',
+      deliveryNotes: json['deliveryNotes'] as String?,
+    );
+  }
+
+  final String label;
+  final String recipientName;
+  final String phoneE164;
+  final String line1;
+  final String? line2;
+  final String city;
+  final String? region;
+  final String? postalCode;
+  final String country;
+  final String? deliveryNotes;
+
+  String get compactAddress {
+    return [line1, line2, city, region, postalCode]
+        .whereType<String>()
+        .where((value) => value.trim().isNotEmpty)
+        .join(', ');
+  }
 }
 
 class CustomerOrderItem {
@@ -196,4 +277,9 @@ List<dynamic> _list(Object? value) {
 
 DateTime _date(Object? value) {
   return DateTime.tryParse(value as String? ?? '') ?? DateTime(2026);
+}
+
+DateTime? _nullableDate(Object? value) {
+  if (value is! String || value.isEmpty) return null;
+  return DateTime.tryParse(value);
 }
