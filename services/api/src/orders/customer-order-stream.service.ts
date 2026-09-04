@@ -89,23 +89,8 @@ export class CustomerOrderStreamService {
       take: 50,
     });
 
-    const signature = JSON.stringify(
-      orders.map((order) => ({
-        id: order.id,
-        status: order.status,
-        updatedAt: order.updatedAt.toISOString(),
-        payment: order.payments[0]
-          ? {
-              id: order.payments[0].id,
-              status: order.payments[0].status,
-              updatedAt: order.payments[0].updatedAt.toISOString(),
-            }
-          : null,
-      })),
-    );
-
     return {
-      signature,
+      signature: JSON.stringify(orders),
       orders,
       generatedAt: new Date().toISOString(),
     };
