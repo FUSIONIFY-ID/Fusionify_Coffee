@@ -341,10 +341,8 @@ export class OperationsService {
     if (!purchaseOrder)
       throw new NotFoundException('Purchase order not found.');
     if (
-      ![
-        PurchaseOrderStatus.ORDERED,
-        PurchaseOrderStatus.PARTIALLY_RECEIVED,
-      ].includes(purchaseOrder.status)
+      purchaseOrder.status !== PurchaseOrderStatus.ORDERED &&
+      purchaseOrder.status !== PurchaseOrderStatus.PARTIALLY_RECEIVED
     ) {
       throw new ConflictException('Purchase order cannot receive stock now.');
     }

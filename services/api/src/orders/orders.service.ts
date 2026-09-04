@@ -13,6 +13,7 @@ import {
   VoucherRedemptionStatus,
 } from '../generated/prisma/enums';
 import { PrismaService } from '../database/prisma.service';
+import type { Prisma } from '../generated/prisma/client';
 import type {
   CreateOrderInput,
   CreateOrderItemInput,
@@ -61,7 +62,7 @@ export class OrdersService {
     const fulfillmentType = input.fulfillmentType ?? FulfillmentType.PICKUP;
     const scheduledFor = this.resolveSchedule(input.scheduledFor);
     let savedAddressId: string | null = null;
-    let deliveryAddressSnapshot: Record<string, unknown> | null = null;
+    let deliveryAddressSnapshot: Prisma.InputJsonValue | undefined;
     let deliveryDistanceMeters: number | null = null;
     let deliveryFee = 0;
 
