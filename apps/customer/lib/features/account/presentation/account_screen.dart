@@ -16,7 +16,6 @@ class AccountScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authControllerProvider);
-    final rewards = ref.watch(rewardsSummaryProvider);
 
     return SafeArea(
       child: auth.when(
@@ -25,6 +24,7 @@ class AccountScreen extends ConsumerWidget {
             return const _GuestAccount();
           }
 
+          final rewards = ref.watch(rewardsSummaryProvider);
           return AccountHubView(
             profile: profile,
             membership: rewards.value?.membership,
