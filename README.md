@@ -50,6 +50,31 @@ The product direction is inspired by the usability level of major coffee-chain a
 - Background location: prohibited unless a future approved product requirement exists
 - Broad photo/media access: prohibited unless a future approved product requirement exists
 
+## Automated Distribution
+
+### GitHub Packages
+
+The NestJS API is published to GitHub Container Registry after `CI` succeeds on `main`.
+
+```text
+ghcr.io/FUSIONIFY-ID/fusionify-coffee-api:latest
+ghcr.io/FUSIONIFY-ID/fusionify-coffee-api:sha-<commit>
+```
+
+Package publication is handled by `.github/workflows/package-api.yml` and uses the repository `GITHUB_TOKEN`.
+
+### GitHub Releases
+
+Pushing an explicit `v*` tag, for example:
+
+```text
+v0.3.0-preview.1
+```
+
+runs `.github/workflows/release-preview.yml`. The workflow validates the Flutter app, builds a debug-signed preview APK, creates a GitHub **prerelease**, and attaches the APK.
+
+Preview releases are intentionally not presented as production Google Play builds. Production release signing remains a separate future step.
+
 ## Non-Negotiable Engineering Rules
 
 - No AI slop
