@@ -129,7 +129,6 @@ Read:
 
 No gradients. No AI slop. No fake functionality.
 
-
 ## Order Detail + Fulfillment Timeline
 
 The authenticated Orders tab now opens a dedicated order-detail route.
@@ -143,3 +142,7 @@ Implemented customer behavior:
 - localized status labels for Indonesian, Malay, and English
 
 Fulfillment status events are authoritative backend data. The customer app does not synthesize fake progress from timestamps.
+
+## Rewards + Digital Benefits UI
+
+Customer rewards, voucher, and digital-benefit presentation code is kept `dart format` clean and validated by the standard customer CI before changes are considered complete.
