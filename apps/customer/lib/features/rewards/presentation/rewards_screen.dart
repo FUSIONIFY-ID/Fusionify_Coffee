@@ -237,9 +237,9 @@ class _RewardsLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ListView(
-      physics: AlwaysScrollableScrollPhysics(),
-      children: [
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: const [
         SizedBox(height: 240),
         Center(child: CircularProgressIndicator()),
       ],
