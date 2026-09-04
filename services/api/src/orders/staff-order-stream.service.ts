@@ -57,13 +57,11 @@ export class StaffOrderStreamService {
     );
 
     const heartbeat = interval(heartbeatIntervalMs).pipe(
-      map(
-        (): MessageEvent => ({
-          type: 'heartbeat',
-          retry: 3_000,
-          data: { generatedAt: new Date().toISOString() },
-        }),
-      ),
+      map((): MessageEvent => ({
+        type: 'heartbeat',
+        retry: 3_000,
+        data: { generatedAt: new Date().toISOString() },
+      })),
     );
 
     return merge(updates, heartbeat);
