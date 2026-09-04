@@ -5,10 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  CustomerVoucherStatus,
   OrderStatus,
   PaymentChannel,
   PaymentProvider,
   PaymentStatus,
+  VoucherRedemptionStatus,
 } from '../generated/prisma/enums';
 import { PrismaService } from '../database/prisma.service';
 import { AutoGoPayGoPayProvider } from './providers/autogopay-gopay.provider';
@@ -89,36 +91,30 @@ export class PaymentsService {
       include: {
         payments: {
           where: {
-            status: {
-              in: [PaymentStatus.PENDING, PaymentStatus.PAID],
-            },
+            status: { in: [PaymentStatus.PENDING, PaymentStatus.PAID] },
           },
           orderBy: { createdAt: 'desc' },
         },
       },
     });
-
     if (!order || !authorize(order)) {
       throw new NotFoundException('Order not found.');
     }
-
     if (order.status !== OrderStatus.AWAITING_PAYMENT) {
       throw new ConflictException('Order is not awaiting payment.');
+    }
+    if (order.totalAmount <= 0) {
+      throw new ConflictException('Order does not require external payment.');
     }
 
     const paid = order.payments.find(
       (payment) => payment.status === PaymentStatus.PAID,
     );
-    if (paid) {
-      throw new ConflictException('Order is already paid.');
-    }
-
+    if (paid) throw new ConflictException('Order is already paid.');
     const pending = order.payments.find(
       (payment) => payment.status === PaymentStatus.PENDING,
     );
-    if (pending?.providerTransactionId) {
-      return this.toView(pending);
-    }
+    if (pending?.providerTransactionId) return this.toView(pending);
 
     let reservedPaymentId: string;
     try {
@@ -136,20 +132,15 @@ export class PaymentsService {
       reservedPaymentId = reserved.id;
     } catch (error: unknown) {
       const concurrentPending = await this.prisma.payment.findFirst({
-        where: {
-          orderId,
-          status: PaymentStatus.PENDING,
-        },
+        where: { orderId, status: PaymentStatus.PENDING },
         orderBy: { createdAt: 'desc' },
       });
-
       if (concurrentPending) {
         if (!concurrentPending.providerTransactionId) {
           throw new ConflictException('Payment attempt is still initializing.');
         }
         return this.toView(concurrentPending);
       }
-
       throw error;
     }
 
@@ -157,7 +148,6 @@ export class PaymentsService {
       const providerResult = await this.autoGoPay.createPayment({
         amount: order.totalAmount,
       });
-
       return this.applyProviderResult(reservedPaymentId, providerResult);
     } catch (error: unknown) {
       await this.prisma.payment.update({
@@ -173,21 +163,16 @@ export class PaymentsService {
 
   async checkForStaff(paymentId: string, outletId: string | null) {
     const payment = await this.getPaymentForStaff(paymentId, outletId);
-    if (payment.status !== PaymentStatus.PENDING) {
-      return this.toView(payment);
-    }
-
+    if (payment.status !== PaymentStatus.PENDING) return this.toView(payment);
     const result = await this.autoGoPay.getStatus(this.referenceFor(payment));
     return this.applyProviderResult(payment.id, result);
   }
 
   async cancelForStaff(paymentId: string, outletId: string | null) {
     const payment = await this.getPaymentForStaff(paymentId, outletId);
-
     if (payment.status !== PaymentStatus.PENDING) {
       throw new ConflictException('Only pending payments can be cancelled.');
     }
-
     if (
       !this.autoGoPay.capabilities().supportsPendingCancel ||
       !this.autoGoPay.cancelPendingPayment
@@ -196,7 +181,6 @@ export class PaymentsService {
         'This payment channel does not support cancellation.',
       );
     }
-
     const result = await this.autoGoPay.cancelPendingPayment(
       this.referenceFor(payment),
     );
@@ -209,34 +193,24 @@ export class PaymentsService {
 
   async check(paymentId: string, userId: string) {
     const payment = await this.getPayment(paymentId, userId);
-
-    if (payment.status !== PaymentStatus.PENDING) {
-      return this.toView(payment);
-    }
-
+    if (payment.status !== PaymentStatus.PENDING) return this.toView(payment);
     const result = await this.autoGoPay.getStatus(this.referenceFor(payment));
     return this.applyProviderResult(payment.id, result);
   }
 
   async cancel(paymentId: string, userId: string) {
     const payment = await this.getPayment(paymentId, userId);
-
     if (payment.status !== PaymentStatus.PENDING) {
       throw new ConflictException('Only pending payments can be cancelled.');
     }
-
-    if (!this.autoGoPay.capabilities().supportsPendingCancel) {
+    if (
+      !this.autoGoPay.capabilities().supportsPendingCancel ||
+      !this.autoGoPay.cancelPendingPayment
+    ) {
       throw new ConflictException(
         'This payment channel does not support cancellation.',
       );
     }
-
-    if (!this.autoGoPay.cancelPendingPayment) {
-      throw new ConflictException(
-        'This payment channel does not support cancellation.',
-      );
-    }
-
     const result = await this.autoGoPay.cancelPendingPayment(
       this.referenceFor(payment),
     );
@@ -245,23 +219,18 @@ export class PaymentsService {
 
   async handleAutoGoPayWebhook(rawBody: Buffer, signature: string) {
     const webhook = this.autoGoPay.verifyWebhook(rawBody, signature);
-
     if (webhook.paymentMethod !== 'QRIS') {
       return { success: true, ignored: true, reason: 'unsupported_channel' };
     }
-
     const payment = await this.prisma.payment.findUnique({
       where: { providerTransactionId: webhook.transactionId },
     });
-
     if (!payment) {
       return { success: true, ignored: true, reason: 'payment_not_found' };
     }
-
     if (payment.amount !== webhook.amount) {
       throw new BadRequestException('Webhook amount mismatch.');
     }
-
     await this.applyProviderResult(payment.id, {
       state: webhook.state,
       rawStatus: webhook.rawStatus,
@@ -270,7 +239,6 @@ export class PaymentsService {
       orderId: webhook.orderId,
       paidAt: webhook.paidAt,
     });
-
     return { success: true };
   }
 
@@ -279,7 +247,6 @@ export class PaymentsService {
     result: ProviderPaymentResult,
   ) {
     const payment = await this.getPayment(paymentId);
-
     if (result.amount !== undefined && result.amount !== payment.amount) {
       throw new BadRequestException('Payment provider amount mismatch.');
     }
@@ -324,7 +291,6 @@ export class PaymentsService {
           },
           data: { status: OrderStatus.CONFIRMED },
         });
-
         if (confirmed.count === 1) {
           await tx.orderStatusEvent.create({
             data: {
@@ -335,11 +301,29 @@ export class PaymentsService {
             },
           });
         }
+
+        const voucherRedemption = await tx.voucherRedemption.findUnique({
+          where: { orderId: payment.orderId },
+        });
+        if (
+          voucherRedemption?.status === VoucherRedemptionStatus.RESERVED
+        ) {
+          await tx.voucherRedemption.update({
+            where: { id: voucherRedemption.id },
+            data: {
+              status: VoucherRedemptionStatus.APPLIED,
+              appliedAt: paidAt ?? new Date(),
+            },
+          });
+          await tx.customerVoucher.update({
+            where: { id: voucherRedemption.customerVoucherId },
+            data: { status: CustomerVoucherStatus.REDEEMED },
+          });
+        }
       }
 
       return nextPayment;
     });
-
     return this.toView(updated);
   }
 
@@ -350,11 +334,7 @@ export class PaymentsService {
         ...(outletId ? { order: { outletId } } : {}),
       },
     });
-
-    if (!payment) {
-      throw new NotFoundException('Payment not found.');
-    }
-
+    if (!payment) throw new NotFoundException('Payment not found.');
     return payment;
   }
 
@@ -365,11 +345,7 @@ export class PaymentsService {
         ...(userId ? { order: { userId } } : {}),
       },
     });
-
-    if (!payment) {
-      throw new NotFoundException('Payment not found.');
-    }
-
+    if (!payment) throw new NotFoundException('Payment not found.');
     return payment;
   }
 
@@ -393,7 +369,6 @@ export class PaymentsService {
     if (!requestedChannel || requestedChannel === PaymentChannel.GOPAY_QRIS) {
       return PaymentChannel.GOPAY_QRIS;
     }
-
     throw new BadRequestException(
       'Only GOPAY_QRIS is enabled for the initial payment milestone.',
     );
