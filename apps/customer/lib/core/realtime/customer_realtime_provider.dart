@@ -8,6 +8,7 @@ final customerRealtimeRepositoryProvider = Provider<CustomerRealtimeRepository>(
   (ref) => CustomerRealtimeRepository(ref.watch(dioProvider)),
 );
 
+// SSE accelerates UI updates; authoritative REST endpoints remain the fallback.
 final customerRealtimeProvider =
     StreamProvider.autoDispose<CustomerRealtimeSnapshot>((ref) async* {
       var disposed = false;
