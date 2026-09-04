@@ -40,6 +40,30 @@ extension RewardExtrasStrings on AppStrings {
     'Sah sehingga $date',
     'Valid until $date',
   );
+  String get chooseVoucher =>
+      _extrasPick('Pilih voucher', 'Pilih baucar', 'Choose voucher');
+  String get noVoucher =>
+      _extrasPick('Tanpa voucher', 'Tanpa baucar', 'No voucher');
+  String get noEligibleVoucher => _extrasPick(
+    'Belum ada voucher yang cocok untuk pesanan ini.',
+    'Belum ada baucar yang sesuai untuk pesanan ini.',
+    'No voucher is eligible for this order yet.',
+  );
+  String get voucherServerValidation => _extrasPick(
+    'Voucher akan diverifikasi lagi oleh server saat pesanan dibuat.',
+    'Baucar akan disahkan semula oleh pelayan semasa pesanan dibuat.',
+    'The server validates the voucher again when the order is created.',
+  );
+  String get voucherRejected => _extrasPick(
+    'Voucher tidak dapat digunakan untuk pesanan ini. Pilih voucher lain atau lanjut tanpa voucher.',
+    'Baucar tidak dapat digunakan untuk pesanan ini. Pilih baucar lain atau teruskan tanpa baucar.',
+    'This voucher cannot be used for the order. Choose another voucher or continue without one.',
+  );
+  String get freeOrderConfirmed => _extrasPick(
+    'Pesanan sudah dikonfirmasi tanpa pembayaran tambahan.',
+    'Pesanan telah disahkan tanpa pembayaran tambahan.',
+    'The order was confirmed without an additional payment.',
+  );
   String get fusionifyBenefits => _extrasPick(
     'Benefit Fusionify',
     'Manfaat Fusionify',
@@ -66,7 +90,8 @@ extension RewardExtrasStrings on AppStrings {
   String get wifiPassword =>
       _extrasPick('Password Wi-Fi', 'Kata laluan Wi-Fi', 'Wi-Fi password');
   String get showPassword => _extrasPick('Tampilkan', 'Tunjukkan', 'Show');
-  String get hidePassword => _extrasPick('Sembunyikan', 'Sembunyikan', 'Hide');
+  String get hidePassword =>
+      _extrasPick('Sembunyikan', 'Sembunyikan', 'Hide');
   String quotaRemaining(int remaining, int total) => _extrasPick(
     '$remaining dari $total request tersisa',
     '$remaining daripada $total permintaan berbaki',

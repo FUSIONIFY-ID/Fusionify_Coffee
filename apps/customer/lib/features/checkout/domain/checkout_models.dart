@@ -4,6 +4,8 @@ class CheckoutOrder {
     required this.status,
     required this.currency,
     required this.subtotal,
+    required this.discountAmount,
+    required this.deliveryFee,
     required this.totalAmount,
   });
 
@@ -13,6 +15,8 @@ class CheckoutOrder {
       status: json['status'] as String? ?? '',
       currency: json['currency'] as String? ?? 'IDR',
       subtotal: json['subtotal'] as int? ?? 0,
+      discountAmount: json['discountAmount'] as int? ?? 0,
+      deliveryFee: json['deliveryFee'] as int? ?? 0,
       totalAmount: json['totalAmount'] as int? ?? 0,
     );
   }
@@ -21,7 +25,11 @@ class CheckoutOrder {
   final String status;
   final String currency;
   final int subtotal;
+  final int discountAmount;
+  final int deliveryFee;
   final int totalAmount;
+
+  bool get requiresPayment => status == 'AWAITING_PAYMENT' && totalAmount > 0;
 }
 
 class PaymentView {

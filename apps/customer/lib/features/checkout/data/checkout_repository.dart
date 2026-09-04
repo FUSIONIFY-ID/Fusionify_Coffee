@@ -12,12 +12,14 @@ class CheckoutRepository {
     required String outletId,
     required List<CartItem> items,
     required String idempotencyKey,
+    String? customerVoucherId,
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       '/v1/orders',
       options: Options(headers: {'Idempotency-Key': idempotencyKey}),
       data: {
         'outletId': outletId,
+        if (customerVoucherId != null) 'customerVoucherId': customerVoucherId,
         'items': [
           for (final item in items)
             {
