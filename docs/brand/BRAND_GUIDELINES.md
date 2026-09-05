@@ -42,9 +42,9 @@ When official assets are provided:
 - Do not add effects without approval
 - Keep symbol/wordmark variants documented
 
-### Provisional Fusion Bean Concept
+### Provisional Fusion F-Bean Concept
 
-The current development build may use the clearly labeled `fusion-bean-mark-concept` asset for app-icon and splash evaluation. It is a flat, solid-color design exploration commissioned for this preview, not the approved official Fusionify Coffee logo.
+The current development build may use the clearly labeled `fusion-f-bean` assets for app-icon and splash evaluation. It is a flat, solid-color design exploration commissioned for this preview, not the approved official Fusionify Coffee logo.
 
 Do not present it as final in marketing, store listings, or production releases. Once identity approval is complete, replace the source master and regenerate platform icon sizes from that approved source.
 

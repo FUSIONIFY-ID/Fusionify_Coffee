@@ -160,24 +160,43 @@ class _MenuContent extends StatelessWidget {
             ),
           ),
         ),
-        SliverPadding(
-          padding: const EdgeInsets.all(CoffeeSpacing.md),
-          sliver: SliverGrid(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final product = visibleProducts[index];
-              return ProductCard(
-                product: product,
-                onTap: () => context.push('/product/${product.id}'),
-              );
-            }, childCount: visibleProducts.length),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 220,
-              mainAxisSpacing: CoffeeSpacing.sm,
-              crossAxisSpacing: CoffeeSpacing.sm,
-              childAspectRatio: 0.64,
+        if (visibleProducts.isEmpty)
+          SliverPadding(
+            padding: const EdgeInsets.all(CoffeeSpacing.xl),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  Image.asset(
+                    'assets/illustrations/empty-cup.webp',
+                    height: 180,
+                    fit: BoxFit.contain,
+                    excludeFromSemantics: true,
+                  ),
+                  const SizedBox(height: CoffeeSpacing.md),
+                  Text(strings.noMenuAvailable, textAlign: TextAlign.center),
+                ],
+              ),
+            ),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.all(CoffeeSpacing.md),
+            sliver: SliverGrid(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final product = visibleProducts[index];
+                return ProductCard(
+                  product: product,
+                  onTap: () => context.push('/product/${product.id}'),
+                );
+              }, childCount: visibleProducts.length),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 220,
+                mainAxisSpacing: CoffeeSpacing.sm,
+                crossAxisSpacing: CoffeeSpacing.sm,
+                childAspectRatio: 0.64,
+              ),
             ),
           ),
-        ),
       ],
     );
   }

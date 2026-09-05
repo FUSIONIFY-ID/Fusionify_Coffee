@@ -157,6 +157,8 @@ Target hierarchy:
 
 Avoid stacking multiple promotional banners before ordering actions.
 
+The home campaign area may page through active backend campaigns, but only one campaign is visible at a time. Campaign actions are limited to known in-app destinations, and campaign copy stays live/localized rather than baked into imagery.
+
 ## Product Cards
 
 Product cards should prioritize:
@@ -210,6 +212,7 @@ Prefer skeleton/loading placeholders for content lists when they improve perceiv
 
 Current catalog flow includes:
 - Skeleton loading
+- Lightweight in-app brand animation while catalog data is first loading
 - Explicit error state
 - Retry action
 - Pull-to-refresh on Home

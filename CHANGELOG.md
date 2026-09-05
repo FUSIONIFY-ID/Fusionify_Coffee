@@ -62,6 +62,14 @@ All notable project changes are documented by meaningful product and engineering
 - product-image fallback when preview artwork is unavailable
 - visual asset mapping tests
 
+#### Expanded Demo Media
+- provisional Fusion F-Bean adaptive Android icon, monochrome themed icon, iOS icon set, and native splash artwork
+- three additional original demo product photographs: Buttercream Latte, Pandan Coconut Latte, and Chocolate Malt Cloud
+- Morning Pickup and Fusion Black Rewards campaign artwork
+- original outlet preview, digital-benefit, empty-state, and lightweight loading-animation assets
+- backend-driven product, campaign, and outlet media references with bundled offline fallbacks
+- localized campaign carousel populated by active backend campaign records
+
 ### Changed
 
 - Runtime catalog uses PostgreSQL through NestJS/Prisma

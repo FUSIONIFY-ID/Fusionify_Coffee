@@ -224,7 +224,7 @@ Before production:
 - production WhatsApp OTP validation
 - production SMS OTP validation
 - production API/TLS deployment
-- backend/CDN-driven production catalog/campaign media
+- production CDN upload/content-management workflow and approved catalog/campaign media (runtime media URL contract complete)
 - official logo, app icon, and splash approval
 - Android Play policy re-check
 - iOS App Store policy re-check
@@ -242,5 +242,5 @@ Before production:
 2. Configure and validate real WhatsApp/SMS OTP providers.
 3. Deploy the API behind production HTTPS.
 4. Run controlled live AutoGoPay create/webhook/status/cancel tests.
-5. Complete production catalog/media and release signing.
+5. Approve production catalog/media, connect its CDN workflow, and complete release signing.
 6. Introduce a pub/sub trigger layer for customer/KDS only when deployment scale requires it.

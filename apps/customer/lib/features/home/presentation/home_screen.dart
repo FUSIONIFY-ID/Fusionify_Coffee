@@ -8,6 +8,7 @@ import '../../cart/application/cart_controller.dart';
 import '../../catalog/application/catalog_provider.dart';
 import '../../catalog/domain/catalog_models.dart';
 import '../../shared/presentation/catalog_states.dart';
+import '../../shared/presentation/media_image.dart';
 import '../../shared/presentation/product_card.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -35,7 +36,7 @@ class HomeScreen extends ConsumerWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(CoffeeRadius.small),
                   child: Image.asset(
-                    'assets/brand/fusion-bean-mark-concept.png',
+                    'assets/brand/fusion-f-bean-app-icon.png',
                     width: 36,
                     height: 36,
                     excludeFromSemantics: true,
@@ -102,7 +103,7 @@ class _CatalogHome extends StatelessWidget {
         ],
         _OutletCard(outlet: data.outlet),
         const SizedBox(height: CoffeeSpacing.md),
-        _SignatureBanner(onTap: () => context.go('/menu')),
+        _CampaignCarousel(campaigns: data.campaigns),
         const SizedBox(height: CoffeeSpacing.lg),
         Row(
           children: [
@@ -171,107 +172,179 @@ class _CatalogHome extends StatelessWidget {
   }
 }
 
-class _SignatureBanner extends StatelessWidget {
-  const _SignatureBanner({required this.onTap});
+class _CampaignCarousel extends StatefulWidget {
+  const _CampaignCarousel({required this.campaigns});
 
-  final VoidCallback onTap;
+  final List<Campaign> campaigns;
+
+  @override
+  State<_CampaignCarousel> createState() => _CampaignCarouselState();
+}
+
+class _CampaignCarouselState extends State<_CampaignCarousel> {
+  var _activeIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
+    final campaigns = widget.campaigns.isEmpty
+        ? [
+            Campaign(
+              id: 'bundled-signature-lineup',
+              title: strings.signatureCollection,
+              body: strings.signatureCollectionBody,
+              ctaLabel: strings.seeMenu,
+              imageUrl: 'asset://campaigns/signature-lineup.webp',
+              actionPath: '/menu',
+            ),
+          ]
+        : widget.campaigns;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 360;
         final height = (constraints.maxWidth / 2).clamp(168.0, 240.0);
 
-        return Semantics(
-          button: true,
-          label: '${strings.signatureCollection}. ${strings.seeMenu}',
-          child: SizedBox(
-            height: height,
-            child: Material(
-              borderRadius: BorderRadius.circular(CoffeeRadius.card),
-              clipBehavior: Clip.antiAlias,
-              color: CoffeeColors.surfaceWarm,
-              child: InkWell(
-                onTap: onTap,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.asset(
-                      'assets/campaigns/signature-lineup.webp',
-                      fit: BoxFit.cover,
-                      excludeFromSemantics: true,
-                    ),
-                    FractionallySizedBox(
-                      widthFactor: 0.48,
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.all(CoffeeSpacing.md),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              strings.signatureCollection,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(
-                                    color: CoffeeColors.textPrimary,
-                                    fontWeight: FontWeight.w800,
-                                    height: 1.08,
-                                  ),
-                            ),
-                            if (!compact) ...[
-                              const SizedBox(height: CoffeeSpacing.xs),
-                              Text(
-                                strings.signatureCollectionBody,
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: CoffeeColors.textSecondary,
-                                    ),
-                              ),
-                            ],
-                            const SizedBox(height: CoffeeSpacing.sm),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    strings.seeMenu,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: CoffeeColors.deep,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: CoffeeSpacing.xxs),
-                                const Icon(
-                                  Icons.arrow_forward,
-                                  size: 18,
-                                  color: CoffeeColors.deep,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+        return Column(
+          children: [
+            SizedBox(
+              height: height,
+              child: PageView.builder(
+                itemCount: campaigns.length,
+                onPageChanged: (index) => setState(() => _activeIndex = index),
+                itemBuilder: (context, index) => _CampaignBanner(
+                  campaign: campaigns[index],
                 ),
               ),
             ),
-          ),
+            if (campaigns.length > 1) ...[
+              const SizedBox(height: CoffeeSpacing.xs),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  campaigns.length,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    width: index == _activeIndex ? 18 : 6,
+                    height: 6,
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: CoffeeSpacing.xxs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: index == _activeIndex
+                          ? CoffeeColors.primary
+                          : CoffeeColors.border,
+                      borderRadius: BorderRadius.circular(CoffeeRadius.small),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
         );
       },
     );
   }
+}
+
+class _CampaignBanner extends StatelessWidget {
+  const _CampaignBanner({required this.campaign});
+
+  final Campaign campaign;
+
+  @override
+  Widget build(BuildContext context) {
+    final actionPath = _safeCampaignPath(campaign.actionPath);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: CoffeeSpacing.xxs),
+      child: Semantics(
+        button: actionPath != null,
+        label: '${campaign.title}. ${campaign.ctaLabel}',
+        child: Material(
+          borderRadius: BorderRadius.circular(CoffeeRadius.card),
+          clipBehavior: Clip.antiAlias,
+          color: CoffeeColors.surfaceWarm,
+          child: InkWell(
+            onTap: actionPath == null ? null : () => context.go(actionPath),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(CoffeeSpacing.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          campaign.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                color: CoffeeColors.textPrimary,
+                                fontWeight: FontWeight.w800,
+                                height: 1.08,
+                              ),
+                        ),
+                        const SizedBox(height: CoffeeSpacing.xs),
+                        Text(
+                          campaign.body,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: CoffeeColors.textSecondary),
+                        ),
+                        if (campaign.ctaLabel.isNotEmpty) ...[
+                          const SizedBox(height: CoffeeSpacing.sm),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  campaign.ctaLabel,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: CoffeeColors.deep,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: CoffeeSpacing.xxs),
+                              const Icon(
+                                Icons.arrow_forward,
+                                size: 18,
+                                color: CoffeeColors.deep,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: MediaImage(
+                    mediaUrl: campaign.imageUrl,
+                    bundledFallback:
+                        'assets/campaigns/signature-lineup.webp',
+                    fit: BoxFit.cover,
+                    semanticLabel: campaign.title,
+                    placeholderIcon: Icons.campaign_outlined,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+String? _safeCampaignPath(String path) {
+  const allowedPaths = {'/menu', '/rewards'};
+  return allowedPaths.contains(path) ? path : null;
 }
 
 class _PreviewNotice extends StatelessWidget {
@@ -321,7 +394,20 @@ class _OutletCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.store_outlined, color: CoffeeColors.primary),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(CoffeeRadius.control),
+              child: SizedBox(
+                width: 88,
+                height: 72,
+                child: MediaImage(
+                  mediaUrl: outlet.imageUrl,
+                  bundledFallback: 'assets/outlets/preview-store.webp',
+                  fit: BoxFit.cover,
+                  semanticLabel: outlet.name,
+                  placeholderIcon: Icons.store_outlined,
+                ),
+              ),
+            ),
             const SizedBox(width: CoffeeSpacing.sm),
             Expanded(
               child: Column(

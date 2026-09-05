@@ -26,9 +26,12 @@ The current customer app contains a small, documented preview set for visual rev
 
 ```text
 assets/
+  animations/
   brand/
   campaigns/
+  illustrations/
   membership/
+  outlets/
   products/
   fonts/
 ```
@@ -53,7 +56,7 @@ Recommended source aspect ratio:
 
 Do not bundle the entire live menu catalog into the mobile binary.
 
-The three current product images are preview fallbacks for the seeded development products. A production catalog must provide media through backend-managed HTTPS URLs and a defined placeholder/failure state.
+The six current product images are preview fallbacks for the seeded development products. The catalog API now carries product, campaign, and outlet media references. Production records should provide backend-managed HTTPS URLs, while `asset://` references are reserved for known bundled demo assets. The app includes explicit fallback and failure states.
 
 ## Membership Backgrounds
 
@@ -84,7 +87,7 @@ Do not shrink a long wordmark into the app icon.
 
 Use an approved recognizable mark designed for small sizes.
 
-The current `fusion-bean-mark-concept` is provisional development artwork. It must not be described as the official Fusionify Coffee logo before approval.
+The current `fusion-f-bean` mark and platform icon set are provisional development artwork. They must not be described as the official Fusionify Coffee logo before approval.
 
 ## Accessibility
 

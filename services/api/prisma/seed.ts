@@ -58,6 +58,30 @@ function contentTranslations(input: {
   };
 }
 
+function campaignTranslations(input: {
+  titles: LocalizedName;
+  bodies: LocalizedName;
+  ctaLabels: LocalizedName;
+}) {
+  return {
+    ID_ID: {
+      title: input.titles.ID_ID,
+      body: input.bodies.ID_ID,
+      ctaLabel: input.ctaLabels.ID_ID,
+    },
+    MS_MY: {
+      title: input.titles.MS_MY,
+      body: input.bodies.MS_MY,
+      ctaLabel: input.ctaLabels.MS_MY,
+    },
+    EN: {
+      title: input.titles.EN,
+      body: input.bodies.EN,
+      ctaLabel: input.ctaLabels.EN,
+    },
+  };
+}
+
 const modifierGroups: SeedGroup[] = [
   {
     id: 'size',
@@ -223,6 +247,7 @@ async function seedProduct(input: {
   descriptions: LocalizedName;
   basePrice: number;
   categoryId: string;
+  imageUrl: string;
   isBestseller?: boolean;
 }) {
   const translations = contentTranslations({
@@ -235,6 +260,7 @@ async function seedProduct(input: {
     update: {
       name: input.names.EN,
       description: input.descriptions.EN,
+      imageUrl: input.imageUrl,
       translations,
       basePrice: input.basePrice,
       categoryId: input.categoryId,
@@ -245,6 +271,7 @@ async function seedProduct(input: {
       id: input.id,
       name: input.names.EN,
       description: input.descriptions.EN,
+      imageUrl: input.imageUrl,
       translations,
       basePrice: input.basePrice,
       categoryId: input.categoryId,
@@ -304,6 +331,7 @@ async function main() {
     update: {
       name: 'Fusionify Coffee Preview Store',
       note: 'Database-backed development fixture.',
+      imageUrl: 'asset://outlets/preview-store.webp',
       translations: outletTranslations,
       pickupEnabled: true,
       deliveryEnabled: true,
@@ -317,6 +345,7 @@ async function main() {
       id: 'preview-outlet',
       name: 'Fusionify Coffee Preview Store',
       note: 'Database-backed development fixture.',
+      imageUrl: 'asset://outlets/preview-store.webp',
       translations: outletTranslations,
       pickupEnabled: true,
       deliveryEnabled: true,
@@ -380,6 +409,7 @@ async function main() {
     },
     basePrice: 28000,
     categoryId: 'coffee',
+    imageUrl: 'asset://products/aren-latte.webp',
     isBestseller: true,
   });
 
@@ -397,6 +427,7 @@ async function main() {
     },
     basePrice: 32000,
     categoryId: 'coffee',
+    imageUrl: 'asset://products/sea-salt-latte.webp',
   });
 
   await seedProduct({
@@ -413,7 +444,162 @@ async function main() {
     },
     basePrice: 30000,
     categoryId: 'non-coffee',
+    imageUrl: 'asset://products/matcha-cloud.webp',
   });
+
+  await seedProduct({
+    id: 'buttercream-latte',
+    names: {
+      ID_ID: 'Buttercream Latte',
+      MS_MY: 'Buttercream Latte',
+      EN: 'Buttercream Latte',
+    },
+    descriptions: {
+      ID_ID: 'Espresso creamy dengan lapisan buttercream lembut.',
+      MS_MY: 'Espresso berkrim dengan lapisan buttercream lembut.',
+      EN: 'Creamy espresso finished with a smooth buttercream layer.',
+    },
+    basePrice: 33000,
+    categoryId: 'coffee',
+    imageUrl: 'asset://products/buttercream-latte.webp',
+    isBestseller: true,
+  });
+
+  await seedProduct({
+    id: 'pandan-coconut-latte',
+    names: {
+      ID_ID: 'Pandan Coconut Latte',
+      MS_MY: 'Pandan Coconut Latte',
+      EN: 'Pandan Coconut Latte',
+    },
+    descriptions: {
+      ID_ID: 'Pandan harum dan kelapa creamy dalam satu gelas.',
+      MS_MY: 'Pandan harum dan kelapa berkrim dalam satu gelas.',
+      EN: 'Fragrant pandan and creamy coconut in one refreshing cup.',
+    },
+    basePrice: 31000,
+    categoryId: 'non-coffee',
+    imageUrl: 'asset://products/pandan-coconut-latte.webp',
+  });
+
+  await seedProduct({
+    id: 'chocolate-malt-cloud',
+    names: {
+      ID_ID: 'Chocolate Malt Cloud',
+      MS_MY: 'Chocolate Malt Cloud',
+      EN: 'Chocolate Malt Cloud',
+    },
+    descriptions: {
+      ID_ID: 'Cokelat malt dingin dengan foam cokelat yang ringan.',
+      MS_MY: 'Coklat malt sejuk dengan buih coklat yang ringan.',
+      EN: 'Iced chocolate malt with a light chocolate cloud foam.',
+    },
+    basePrice: 32000,
+    categoryId: 'non-coffee',
+    imageUrl: 'asset://products/chocolate-malt-cloud.webp',
+  });
+
+  const campaigns = [
+    {
+      id: 'signature-lineup',
+      titles: {
+        ID_ID: 'Signature Fusion',
+        MS_MY: 'Signature Fusion',
+        EN: 'Fusion Signatures',
+      },
+      bodies: {
+        ID_ID: 'Tiga rasa andalan untuk nemenin harimu.',
+        MS_MY: 'Tiga rasa pilihan untuk menemani hari anda.',
+        EN: 'Three house favorites for every kind of day.',
+      },
+      ctaLabels: {
+        ID_ID: 'Lihat Menu',
+        MS_MY: 'Lihat Menu',
+        EN: 'Explore Menu',
+      },
+      imageUrl: 'asset://campaigns/signature-lineup.webp',
+      actionPath: '/menu',
+      sortOrder: 0,
+    },
+    {
+      id: 'morning-pickup',
+      titles: {
+        ID_ID: 'Pagi Tanpa Antre',
+        MS_MY: 'Pagi Tanpa Beratur',
+        EN: 'Skip the Morning Line',
+      },
+      bodies: {
+        ID_ID: 'Pesan dulu, ambil saat kopi dan sarapanmu siap.',
+        MS_MY: 'Pesan dahulu, ambil apabila kopi dan sarapan siap.',
+        EN: 'Order ahead and pick up coffee and breakfast when ready.',
+      },
+      ctaLabels: {
+        ID_ID: 'Pesan Sekarang',
+        MS_MY: 'Pesan Sekarang',
+        EN: 'Order Now',
+      },
+      imageUrl: 'asset://campaigns/morning-pickup.webp',
+      actionPath: '/menu',
+      sortOrder: 1,
+    },
+    {
+      id: 'fusion-black-rewards',
+      titles: {
+        ID_ID: 'Menuju Fusion Black',
+        MS_MY: 'Menuju Fusion Black',
+        EN: 'Your Path to Fusion Black',
+      },
+      bodies: {
+        ID_ID: 'Naik tier lewat transaksi yang tercatat di akunmu.',
+        MS_MY: 'Naik tahap melalui transaksi dalam akaun anda.',
+        EN: 'Move up through eligible purchases recorded to your account.',
+      },
+      ctaLabels: {
+        ID_ID: 'Lihat Membership',
+        MS_MY: 'Lihat Keahlian',
+        EN: 'View Membership',
+      },
+      imageUrl: 'asset://campaigns/fusion-black-rewards.webp',
+      actionPath: '/rewards',
+      sortOrder: 2,
+    },
+  ] satisfies Array<{
+    id: string;
+    titles: LocalizedName;
+    bodies: LocalizedName;
+    ctaLabels: LocalizedName;
+    imageUrl: string;
+    actionPath: string;
+    sortOrder: number;
+  }>;
+
+  for (const campaign of campaigns) {
+    const translations = campaignTranslations(campaign);
+    await prisma.campaign.upsert({
+      where: { id: campaign.id },
+      update: {
+        title: campaign.titles.EN,
+        body: campaign.bodies.EN,
+        ctaLabel: campaign.ctaLabels.EN,
+        translations,
+        imageUrl: campaign.imageUrl,
+        actionPath: campaign.actionPath,
+        active: true,
+        sortOrder: campaign.sortOrder,
+      },
+      create: {
+        id: campaign.id,
+        title: campaign.titles.EN,
+        body: campaign.bodies.EN,
+        ctaLabel: campaign.ctaLabels.EN,
+        translations,
+        imageUrl: campaign.imageUrl,
+        actionPath: campaign.actionPath,
+        active: true,
+        sortOrder: campaign.sortOrder,
+      },
+    });
+  }
 }
 
 main()

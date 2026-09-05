@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="fusionify_primary">#0D6CD7</color>
+    <color name="ic_launcher_background">#0D6CD7</color>
 </resources>

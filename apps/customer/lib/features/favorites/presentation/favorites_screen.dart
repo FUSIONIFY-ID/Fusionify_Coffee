@@ -69,10 +69,11 @@ class FavoritesScreen extends ConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.favorite_border,
-                        size: 56,
-                        color: CoffeeColors.primary,
+                      Image.asset(
+                        'assets/illustrations/empty-cup.webp',
+                        height: 160,
+                        fit: BoxFit.contain,
+                        excludeFromSemantics: true,
                       ),
                       const SizedBox(height: CoffeeSpacing.md),
                       Text(

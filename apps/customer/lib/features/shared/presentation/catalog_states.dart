@@ -13,6 +13,15 @@ class CatalogLoading extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Center(
+          child: Image.asset(
+            'assets/animations/fusion-f-bean-loading.gif',
+            width: 64,
+            height: 64,
+            excludeFromSemantics: true,
+          ),
+        ),
+        const SizedBox(height: CoffeeSpacing.sm),
         Container(
           height: 18,
           width: 180,

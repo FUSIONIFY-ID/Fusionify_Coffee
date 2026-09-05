@@ -28,8 +28,12 @@ class _BenefitsScreenState extends ConsumerState<BenefitsScreen> {
       return ListView(
         padding: const EdgeInsets.all(CoffeeSpacing.xl),
         children: [
-          const SizedBox(height: 160),
-          const Icon(Icons.card_giftcard_outlined, size: 56),
+          Image.asset(
+            'assets/illustrations/digital-benefits.webp',
+            height: 180,
+            fit: BoxFit.contain,
+            excludeFromSemantics: true,
+          ),
           const SizedBox(height: CoffeeSpacing.md),
           Text(strings.signInToSeeRewards, textAlign: TextAlign.center),
           const SizedBox(height: CoffeeSpacing.md),
@@ -57,24 +61,49 @@ class _BenefitsScreenState extends ConsumerState<BenefitsScreen> {
           return ListView.separated(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(CoffeeSpacing.md),
-            itemCount: items.length,
+            itemCount: items.length + 1,
             separatorBuilder: (_, _) =>
                 const SizedBox(height: CoffeeSpacing.sm),
-            itemBuilder: (context, index) => _BenefitCard(
-              benefit: items[index],
-              revealed: _revealed.contains(items[index].id),
-              onToggleReveal: () {
-                setState(() {
-                  if (!_revealed.add(items[index].id)) {
-                    _revealed.remove(items[index].id);
-                  }
-                });
-              },
-            ),
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return const _BenefitsHero();
+              }
+              final benefit = items[index - 1];
+              return _BenefitCard(
+                benefit: benefit,
+                revealed: _revealed.contains(benefit.id),
+                onToggleReveal: () {
+                  setState(() {
+                    if (!_revealed.add(benefit.id)) {
+                      _revealed.remove(benefit.id);
+                    }
+                  });
+                },
+              );
+            },
           );
         },
         loading: () => const _BenefitLoading(),
         error: (_, _) => _BenefitMessage(message: strings.benefitsLoadFailed),
+      ),
+    );
+  }
+}
+
+class _BenefitsHero extends StatelessWidget {
+  const _BenefitsHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(CoffeeRadius.card),
+      child: AspectRatio(
+        aspectRatio: 2,
+        child: Image.asset(
+          'assets/illustrations/digital-benefits.webp',
+          fit: BoxFit.cover,
+          excludeFromSemantics: true,
+        ),
       ),
     );
   }
@@ -213,7 +242,13 @@ class _BenefitMessage extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(CoffeeSpacing.xl),
       children: [
-        const SizedBox(height: 160),
+        Image.asset(
+          'assets/illustrations/digital-benefits.webp',
+          height: 180,
+          fit: BoxFit.contain,
+          excludeFromSemantics: true,
+        ),
+        const SizedBox(height: CoffeeSpacing.md),
         Text(message, textAlign: TextAlign.center),
       ],
     );

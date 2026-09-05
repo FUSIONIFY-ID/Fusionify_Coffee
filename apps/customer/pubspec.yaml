@@ -59,7 +59,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/animations/
     - assets/brand/
     - assets/campaigns/
+    - assets/illustrations/
     - assets/membership/
+    - assets/outlets/
     - assets/products/

@@ -69,7 +69,7 @@ Language setting
 
 The catalog endpoint also accepts an explicit `lang` query parameter for compatibility. Backend translation falls back to stored default text when a localized value is unavailable.
 
-Dynamic customer-facing catalog content such as outlet notes, category names, product descriptions, modifier-group labels, and modifier-option labels is localized at the data/API layer rather than hardcoded independently in Flutter.
+Dynamic customer-facing catalog content such as outlet notes, category names, product descriptions, modifier-group labels, modifier-option labels, and campaigns is localized at the data/API layer rather than hardcoded independently in Flutter. Product, campaign, and outlet records also carry media references. Production uses HTTP(S) CDN URLs; development seeds can select allowlisted bundled fallbacks with the `asset://` scheme.
 
 ## Customer Authentication Boundary
 

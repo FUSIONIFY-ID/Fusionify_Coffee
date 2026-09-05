@@ -9,7 +9,7 @@ export class CatalogService {
 
   async getPreviewCatalog(requestedLanguage?: string) {
     const language = this.normalizeLanguage(requestedLanguage);
-    const [outlet, products] = await Promise.all([
+    const [outlet, products, campaigns] = await Promise.all([
       this.prisma.outlet.findFirst({
         where: { pickupEnabled: true },
         orderBy: { createdAt: 'asc' },
@@ -30,6 +30,10 @@ export class CatalogService {
         },
         orderBy: [{ categoryId: 'asc' }, { name: 'asc' }],
       }),
+      this.prisma.campaign.findMany({
+        where: { active: true },
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+      }),
     ]);
 
     if (!outlet) {
@@ -43,6 +47,7 @@ export class CatalogService {
         id: outlet.id,
         name: this.text(outlet.translations, language, 'name', outlet.name),
         note: this.text(outlet.translations, language, 'note', outlet.note),
+        imageUrl: outlet.imageUrl,
         currency: outlet.currency,
         pickupEnabled: outlet.pickupEnabled,
         deliveryEnabled: outlet.deliveryEnabled,
@@ -56,6 +61,7 @@ export class CatalogService {
           'description',
           product.description,
         ),
+        imageUrl: product.imageUrl,
         categoryId: product.categoryId,
         category: this.text(
           product.category.translations,
@@ -82,6 +88,24 @@ export class CatalogService {
             isDefault: option.isDefault,
           })),
         })),
+      })),
+      campaigns: campaigns.map((campaign) => ({
+        id: campaign.id,
+        title: this.text(
+          campaign.translations,
+          language,
+          'title',
+          campaign.title,
+        ),
+        body: this.text(campaign.translations, language, 'body', campaign.body),
+        ctaLabel: this.text(
+          campaign.translations,
+          language,
+          'ctaLabel',
+          campaign.ctaLabel,
+        ),
+        imageUrl: campaign.imageUrl,
+        actionPath: campaign.actionPath,
       })),
     };
   }

@@ -112,14 +112,16 @@ Implemented foundations include:
 - Fusion Points ledger/rewards foundations
 - membership-tier foundations
 - rewards configuration in staff operations
-- original preview product artwork for the three seeded development products
-- original preview Signature Collection banner with localized Flutter copy
+- original preview product artwork for six seeded development products
+- three original preview campaign banners with localized backend copy
+- original outlet, digital-benefit, empty-state, and loading-animation assets
+- backend-driven product/campaign/outlet media references with bundled demo fallbacks
 - backend-rank-driven Fusion Blue, Silver, Gold, and Black loyalty credentials
-- a provisional Fusion Bean icon/splash concept for development review
+- a provisional Fusion F-Bean adaptive/themed Android icon, iOS icon, and splash concept for development review
 
 Business values such as final membership thresholds and Fusion Points earning/redeem rates remain product configuration decisions and must not be described as final unless explicitly approved.
 
-The visual assets above are provisional preview media. Production product/campaign imagery remains a backend/CDN content task, and the Fusion Bean concept is not an approved official logo.
+The visual assets above are provisional preview media. The delivery contract for backend/CDN product, campaign, and outlet URLs is implemented, but production content and content-management operations remain release tasks. The Fusion F-Bean concept is not an approved official logo.
 
 ## Checkout + Payment
 
@@ -371,7 +373,7 @@ Current validation includes:
 - chunked UTF-8 SSE parser and inactivity-timeout coverage
 - capped reconnect-backoff coverage
 - customer localization, analyze, tests, and Android debug APK validation
-- preview product and membership-rank asset mapping coverage
+- preview product/media URL and membership-rank asset mapping coverage
 - Android/iOS native visual assets included in the successful customer build
 
 ## Explicitly Provisional / Not Final
@@ -398,7 +400,7 @@ External/live validation:
 - real webhook/cancel/status/settlement validation
 
 Production content/release:
-- backend/CDN-driven production catalog and campaign media completion
+- production CDN upload/content-management workflow and approved catalog/campaign media
 - official identity approval and platform-icon regeneration
 - production API deployment/hostname/TLS
 - Android production signing and Play readiness

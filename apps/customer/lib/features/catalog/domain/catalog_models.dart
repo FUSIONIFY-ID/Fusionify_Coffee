@@ -3,6 +3,7 @@ class CatalogSnapshot {
     required this.preview,
     required this.outlet,
     required this.products,
+    this.campaigns = const [],
   });
 
   factory CatalogSnapshot.fromJson(Map<String, dynamic> json) {
@@ -14,12 +15,49 @@ class CatalogSnapshot {
             (item) => Product.fromJson(Map<String, dynamic>.from(item as Map)),
           )
           .toList(growable: false),
+      campaigns: (json['campaigns'] as List<dynamic>? ?? const [])
+          .map(
+            (item) => Campaign.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
+          .toList(growable: false),
     );
   }
 
   final bool preview;
   final Outlet outlet;
   final List<Product> products;
+  final List<Campaign> campaigns;
+}
+
+class Campaign {
+  const Campaign({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.ctaLabel,
+    required this.imageUrl,
+    required this.actionPath,
+  });
+
+  factory Campaign.fromJson(Map<String, dynamic> json) {
+    return Campaign(
+      id: json['id'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      body: json['body'] as String? ?? '',
+      ctaLabel: json['ctaLabel'] as String? ?? '',
+      imageUrl: json['imageUrl'] as String? ?? '',
+      actionPath: json['actionPath'] as String? ?? '',
+    );
+  }
+
+  final String id;
+  final String title;
+  final String body;
+  final String ctaLabel;
+  final String imageUrl;
+  final String actionPath;
 }
 
 class Outlet {
@@ -30,6 +68,7 @@ class Outlet {
     required this.currency,
     required this.pickupEnabled,
     required this.deliveryEnabled,
+    this.imageUrl,
   });
 
   factory Outlet.fromJson(Map<String, dynamic> json) {
@@ -37,6 +76,7 @@ class Outlet {
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? 'Unknown outlet',
       note: json['note'] as String? ?? '',
+      imageUrl: json['imageUrl'] as String?,
       currency: json['currency'] as String? ?? 'IDR',
       pickupEnabled: json['pickupEnabled'] as bool? ?? false,
       deliveryEnabled: json['deliveryEnabled'] as bool? ?? false,
@@ -46,6 +86,7 @@ class Outlet {
   final String id;
   final String name;
   final String note;
+  final String? imageUrl;
   final String currency;
   final bool pickupEnabled;
   final bool deliveryEnabled;
@@ -115,6 +156,7 @@ class Product {
     required this.basePrice,
     required this.modifierGroups,
     this.isBestseller = false,
+    this.imageUrl,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -123,6 +165,7 @@ class Product {
       name: json['name'] as String? ?? '',
       categoryId: json['categoryId'] as String? ?? '',
       description: json['description'] as String? ?? '',
+      imageUrl: json['imageUrl'] as String?,
       category: json['category'] as String? ?? '',
       basePrice: json['basePrice'] as int? ?? 0,
       isBestseller: json['isBestseller'] as bool? ?? false,
@@ -139,6 +182,7 @@ class Product {
   final String name;
   final String categoryId;
   final String description;
+  final String? imageUrl;
   final String category;
   final int basePrice;
   final List<ModifierGroup> modifierGroups;
