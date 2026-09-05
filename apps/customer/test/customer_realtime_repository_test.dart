@@ -11,9 +11,7 @@ void main() {
       utf8.encode(
         'event: account\ndata: {"signature":"sig-1","generatedAt":',
       ),
-      utf8.encode(
-        '"2026-09-05T12:00:00.000Z","orders":[]}\n\n',
-      ),
+      utf8.encode('"2026-09-05T12:00:00.000Z","orders":[]}\n\n'),
     ];
 
     final snapshots = await decodeCustomerRealtimeEvents(
@@ -27,9 +25,7 @@ void main() {
 
   test('dispatches a complete trailing account event', () async {
     final chunks = [
-      utf8.encode(
-        'event: account\ndata: {"signature":"sig-2","orders":[]}',
-      ),
+      utf8.encode('event: account\ndata: {"signature":"sig-2","orders":[]}'),
     ];
 
     final snapshots = await decodeCustomerRealtimeEvents(

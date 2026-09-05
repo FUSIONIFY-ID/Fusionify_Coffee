@@ -63,7 +63,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen>
   @override
   Widget build(BuildContext context) {
     ref.listen(customerRealtimeProvider, (previous, next) {
-      final previousOrder = previous?.value?.snapshot?.orderById(widget.orderId);
+      final previousOrder = previous?.value?.snapshot?.orderById(
+        widget.orderId,
+      );
       final nextOrder = next.value?.snapshot?.orderById(widget.orderId);
       if (nextOrder != null &&
           (previousOrder?.status != nextOrder.status ||
