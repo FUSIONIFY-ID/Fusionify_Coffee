@@ -7,9 +7,9 @@ Last updated: 2026-09-05
 - Repository: `FUSIONIFY-ID/Fusionify_Coffee`
 - Default branch: `main`
 - Visibility: public
-- Latest fully validated implementation head before this documentation checkpoint: `cc559d52ff252577e4f53d7b1f38e90bc35e4c99`
-- CI validation run: `33965505918`
-- Repository Policy run: `33965505891`
+- Latest fully validated implementation head before this documentation checkpoint: `f3929eaf0cc6d2b489602e3dbbf4b4cfdfa2a8cd`
+- CI validation run: `33980793485`
+- Repository Policy run: `33980793625`
 
 ## Current Product State
 
@@ -335,9 +335,9 @@ These should not be listed as wholly unimplemented anymore. External provider in
 
 ## Validation Evidence
 
-Validated implementation head: `cc559d52ff252577e4f53d7b1f38e90bc35e4c99`
+Validated implementation head: `f3929eaf0cc6d2b489602e3dbbf4b4cfdfa2a8cd`
 
-GitHub Actions CI run `33965505918`: **PASS**
+GitHub Actions CI run `33980793485`: **PASS**
 
 Customer:
 - Flutter pub get: PASS
@@ -361,9 +361,9 @@ API:
 - e2e tests: PASS
 - NestJS build: PASS
 
-Repository Policy run `33965505891`: **PASS**
+Repository Policy run `33980793625`: **PASS**
 
-New realtime validation includes:
+Current validation includes:
 - unit coverage for outlet-scoped staff SSE queue snapshots
 - staff application typecheck/build with EventSource KDS
 - API lint/unit/e2e/build after SSE integration
@@ -371,6 +371,8 @@ New realtime validation includes:
 - chunked UTF-8 SSE parser and inactivity-timeout coverage
 - capped reconnect-backoff coverage
 - customer localization, analyze, tests, and Android debug APK validation
+- preview product and membership-rank asset mapping coverage
+- Android/iOS native visual assets included in the successful customer build
 
 ## Explicitly Provisional / Not Final
 
