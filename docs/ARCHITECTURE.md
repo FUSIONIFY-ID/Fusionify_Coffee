@@ -120,7 +120,7 @@ A database constraint prevents more than one local `PENDING` payment per order.
 
 ## Payment Detection
 
-Automatic customer-facing loop currently remains authoritative-state polling:
+Automatic customer-facing delivery uses authenticated account-scoped SSE:
 
 ```text
 AutoGoPay webhook
@@ -130,12 +130,25 @@ AutoGoPay webhook
  -> Payment PAID
  -> Order CONFIRMED
 
-Flutter payment screen
- -> GET local Fusionify Payment
- -> observes webhook-updated state
+CustomerOrderStreamService
+ -> customer-owned orders + latest payment snapshot
+ -> changed snapshot only
+ -> GET /v1/orders/events
+ -> Flutter customer realtime provider
+ -> payment, order history, and order detail refresh
 ```
 
-Flutter does not repeatedly call AutoGoPay directly.
+The current server trigger checks the customer snapshot approximately every 2 seconds. It emits an `account` event only when the order/payment signature changes and sends a heartbeat approximately every 15 seconds.
+
+Flutter treats SSE as an update accelerator rather than payment authority:
+- a 45-second inactivity timeout detects a silent connection
+- reconnect delay backs off from 1 to 30 seconds
+- pending payment screens show localized connecting/live/recovering state
+- order history and detail retain a 30-second authoritative GET fallback
+- app resume restarts SSE and performs authoritative reconciliation
+- pull-to-refresh and manual Check Status remain available
+
+Flutter never calls AutoGoPay directly.
 
 Manual fallback:
 
@@ -147,7 +160,7 @@ Check Status
  -> return local state
 ```
 
-Push delivery may be added later, but it must not replace authoritative GET/reconciliation APIs.
+SSE must not replace authoritative GET/reconciliation APIs.
 
 ## Payment Security Boundary
 
@@ -338,13 +351,16 @@ Digital receipt and Wi-Fi/AI entitlement foundations exist. Real outlet Wi-Fi/ne
 
 Implemented:
 - staff KDS SSE transport
+- authenticated customer order/payment SSE transport
+- customer inactivity detection and capped reconnect backoff
+- localized customer connection-state UX
+- 30-second authoritative customer GET fallback and app-resume reconciliation
 
-Still polling/reconciliation based:
-- customer payment state
-- customer order detail refresh
+Still provider-reconciliation based:
 - staff POS pending payment state
+- manual customer Check Status
 
-Future push optimization must not remove authoritative state/reconciliation endpoints.
+Both staff and customer SSE currently detect changes through lightweight database snapshot polling. A multi-instance/high-throughput deployment can replace that trigger layer with PostgreSQL LISTEN/NOTIFY, Redis Pub/Sub, or an equivalent event bus without removing authoritative state/reconciliation endpoints.
 
 ## Architectural Change
 

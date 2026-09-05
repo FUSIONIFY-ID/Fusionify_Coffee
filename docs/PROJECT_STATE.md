@@ -1,15 +1,15 @@
 # Project State
 
-Last updated: 2026-09-04
+Last updated: 2026-09-05
 
 ## Repository
 
 - Repository: `FUSIONIFY-ID/Fusionify_Coffee`
 - Default branch: `main`
 - Visibility: public
-- Latest fully validated implementation head before this documentation checkpoint: `c8ce731e0deeb00354a5b5c57c825ecfda4ea2a6`
-- CI validation run: `33881335913`
-- Repository Policy run: `33881335909`
+- Latest fully validated implementation head before this documentation checkpoint: `cc559d52ff252577e4f53d7b1f38e90bc35e4c99`
+- CI validation run: `33965505918`
+- Repository Policy run: `33965505891`
 
 ## Current Product State
 
@@ -130,7 +130,8 @@ Implemented:
 - QRIS create/status/cancel integration code
 - raw-body HMAC-SHA256 webhook verification
 - native Flutter QR rendering
-- local payment-state polling
+- authenticated customer order/payment SSE updates
+- 30-second authoritative local payment-state fallback
 - manual provider reconciliation
 - pending cancel
 - payment expiry/status UI
@@ -191,6 +192,32 @@ Implemented staff order APIs include:
 - `GET /v1/staff/orders/events`
 - `GET /v1/staff/orders/:orderId`
 - `POST /v1/staff/orders/:orderId/status`
+
+## Customer Realtime Order + Payment Delivery
+
+Implemented and validated:
+- authenticated `GET /v1/orders/events` SSE endpoint
+- customer ownership scope on the server-side snapshot query
+- latest payment state normalized into safe customer fields
+- changed-snapshot suppression through order/payment signatures
+- heartbeat approximately every 15 seconds
+- Flutter UTF-8 decoding across arbitrary Dio byte chunks
+- 45-second client inactivity timeout for silent connections
+- reconnect backoff of 1, 2, 4, 8, 16, then at most 30 seconds
+- localized connecting/live/recovering customer status
+- realtime payment-screen updates
+- realtime order-history invalidation
+- realtime order-detail/timeline invalidation
+- 30-second authoritative GET fallback for payment, history, and detail
+- SSE restart plus authoritative reconciliation when the app resumes
+- pull-to-refresh and manual payment Check Status remain available
+
+SSE is a delivery optimization, not the source of truth. Authoritative order/payment GET APIs and provider reconciliation remain required.
+
+Current scale boundary:
+- the API checks each connected customer's scoped snapshot approximately every 2 seconds
+- only changed signatures are emitted
+- move the trigger layer to PostgreSQL LISTEN/NOTIFY, Redis Pub/Sub, or an equivalent event bus only when multi-instance/high-throughput deployment requires it
 
 ## Staff Authentication + Administration
 
@@ -302,9 +329,9 @@ These should not be listed as wholly unimplemented anymore. External provider in
 
 ## Validation Evidence
 
-Validated implementation head: `c8ce731e0deeb00354a5b5c57c825ecfda4ea2a6`
+Validated implementation head: `cc559d52ff252577e4f53d7b1f38e90bc35e4c99`
 
-GitHub Actions CI run `33881335913`: **PASS**
+GitHub Actions CI run `33965505918`: **PASS**
 
 Customer:
 - Flutter pub get: PASS
@@ -328,13 +355,16 @@ API:
 - e2e tests: PASS
 - NestJS build: PASS
 
-Repository Policy run `33881335909`: **PASS**
+Repository Policy run `33965505891`: **PASS**
 
 New realtime validation includes:
 - unit coverage for outlet-scoped staff SSE queue snapshots
 - staff application typecheck/build with EventSource KDS
 - API lint/unit/e2e/build after SSE integration
-- unchanged customer test/analyze/APK validation
+- customer SSE model normalization coverage
+- chunked UTF-8 SSE parser and inactivity-timeout coverage
+- capped reconnect-backoff coverage
+- customer localization, analyze, tests, and Android debug APK validation
 
 ## Explicitly Provisional / Not Final
 
@@ -368,8 +398,8 @@ Production content/release:
 - accessibility review
 
 Realtime/scale improvements:
-- realtime customer payment/order push instead of customer-side polling where useful
-- multi-instance event trigger/pub-sub layer for KDS scale
+- customer realtime load/connection testing under production-like traffic
+- multi-instance event trigger/pub-sub layer for customer and KDS scale
 
 External operations integrations:
 - production maps/geocoding/routing provider where required
@@ -382,6 +412,5 @@ External operations integrations:
 2. Configure real OTP providers in a secure deployment environment.
 3. Deploy API behind production HTTPS.
 4. Perform a controlled low-value AutoGoPay live transaction and webhook validation.
-5. Add customer realtime payment/order updates without removing authoritative reconciliation APIs.
-6. Replace the KDS 2-second DB trigger with pub/sub when deployment scale actually requires multiple API instances.
-7. Complete release signing, store-policy, privacy, accessibility, and monitoring work before production release.
+5. Replace snapshot polling with pub/sub only when deployment scale actually requires multiple API instances.
+6. Complete release signing, store-policy, privacy, accessibility, and monitoring work before production release.

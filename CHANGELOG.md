@@ -42,6 +42,17 @@ All notable project changes are documented by meaningful product and engineering
 - payment expiry/status UI
 - app-resume reconciliation
 
+#### Customer Realtime Hardening
+- authenticated customer order/payment updates through SSE
+- customer-scoped server snapshots with duplicate suppression
+- safe UTF-8 decoding across Dio byte chunks
+- silent-connection detection from missed heartbeats
+- capped exponential reconnect backoff
+- localized connecting/live/recovering state
+- 30-second authoritative GET fallback for payment and order screens
+- app-resume SSE restart and state reconciliation
+- actionable Dart-format diff output in CI
+
 ### Changed
 
 - Runtime catalog uses PostgreSQL through NestJS/Prisma

@@ -50,7 +50,10 @@ Implemented:
 - QRIS create/status/cancel integration code
 - raw-body HMAC webhook verification
 - native Flutter QR rendering
-- local payment polling
+- authenticated customer order/payment SSE delivery
+- SSE inactivity detection and capped reconnect backoff
+- localized connecting/live/recovering state
+- 30-second authoritative local payment fallback
 - manual provider reconciliation
 - pending cancel UI
 - payment expiry/status UI
@@ -101,7 +104,6 @@ Validated fulfillment progression:
 Remaining production/scale work:
 - live AutoGoPay POS validation
 - multi-instance realtime trigger/pub-sub layer when scale requires it
-- optional customer realtime order updates
 
 ## Milestone 0.4: Retention + Loyalty
 
@@ -195,9 +197,23 @@ Future scaling option:
 
 ### Customer order/payment updates
 
-Status: **Authoritative polling/reconciliation implemented; push optimization remains**
+Status: **Implemented with SSE plus authoritative reconciliation fallback**
 
-Do not remove authoritative GET/provider-reconciliation APIs when adding push delivery.
+Current behavior:
+- authenticated Flutter clients use `GET /v1/orders/events`
+- the server emits only changed customer-owned order/payment snapshots
+- heartbeat is approximately every 15 seconds
+- the client treats 45 seconds without data as a silent connection
+- reconnect delay backs off from 1 to at most 30 seconds
+- payment screens expose localized connecting/live/recovering state
+- payment, order history, and order detail retain a 30-second GET fallback
+- app resume restarts SSE and reconciles authoritative state
+- manual Check Status and pull-to-refresh remain available
+
+Do not remove authoritative GET/provider-reconciliation APIs.
+
+Future scaling option:
+- replace the 2-second database snapshot trigger with PostgreSQL LISTEN/NOTIFY, Redis Pub/Sub, or equivalent only when deployment scale requires it
 
 ## Release Readiness
 
@@ -224,5 +240,4 @@ Before production:
 3. Deploy the API behind production HTTPS.
 4. Run controlled live AutoGoPay create/webhook/status/cancel tests.
 5. Complete production catalog/media and release signing.
-6. Add customer realtime order/payment delivery if it materially improves UX.
-7. Introduce a pub/sub trigger layer for KDS only when deployment scale requires it.
+6. Introduce a pub/sub trigger layer for customer/KDS only when deployment scale requires it.

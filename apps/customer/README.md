@@ -42,7 +42,8 @@ Home
  -> server-authoritative Order
  -> GoPay QRIS Payment
  -> native QR display
- -> payment status/reconciliation
+ -> realtime payment/order status
+ -> authoritative reconciliation fallback
 ```
 
 ## Material 3
@@ -90,7 +91,10 @@ Flutter does not contain an AutoGoPay API key and does not call AutoGoPay direct
 
 The payment screen:
 - renders backend `qrString` using qr_flutter
-- polls local Fusionify payment state
+- receives authenticated customer order/payment updates through SSE
+- detects silent realtime connections and reconnects with capped backoff
+- shows localized connecting/live/recovering state
+- retains a 30-second local Fusionify payment fallback
 - provides Check Status through Fusionify API
 - provides pending Cancel through Fusionify API
 - reconciles pending state on app resume
@@ -170,6 +174,9 @@ Implemented customer behavior:
 - current order status
 - persisted fulfillment timeline from backend status events
 - pull-to-refresh reconciliation
+- realtime order/history updates through authenticated SSE
+- 30-second authoritative GET fallback
+- authoritative refresh and SSE restart on app resume
 - localized status labels for Indonesian, Malay, and English
 
 Fulfillment status events are authoritative backend data. The customer app does not synthesize fake progress from timestamps.
