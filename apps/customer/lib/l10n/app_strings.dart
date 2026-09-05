@@ -50,6 +50,16 @@ class AppStrings {
     'Mulakan dengan ambil sendiri. Penghantaran akan menyusul selepas aliran pickup stabil.',
     'Start with pickup. Delivery will follow after the pickup flow is stable.',
   );
+  String get signatureCollection => _pick(
+    'Tiga rasa khas Fusionify',
+    'Tiga rasa istimewa Fusionify',
+    'Three Fusionify signatures',
+  );
+  String get signatureCollectionBody => _pick(
+    'Aren Latte, Sea Salt Latte, dan Matcha Cloud siap kamu pilih.',
+    'Aren Latte, Sea Salt Latte dan Matcha Cloud sedia untuk dipilih.',
+    'Aren Latte, Sea Salt Latte, and Matcha Cloud are ready for you.',
+  );
   String get orderFromThisOutlet => _pick(
     'Pesan dari outlet ini',
     'Pesan dari cawangan ini',

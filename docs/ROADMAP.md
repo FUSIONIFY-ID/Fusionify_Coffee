@@ -116,6 +116,7 @@ Implemented repository foundations:
 - favorites
 - reorder/buy-again
 - staff rewards configuration
+- rank-driven Fusion Blue, Silver, Gold, and Black membership credential visuals
 
 Still product-dependent:
 - final point earning rate
@@ -123,6 +124,7 @@ Still product-dependent:
 - final membership thresholds
 - campaign/mission strategy
 - production abuse/fraud controls
+- final approval of membership artwork and tier naming
 
 ## Milestone 0.5: Operations
 
@@ -222,7 +224,8 @@ Before production:
 - production WhatsApp OTP validation
 - production SMS OTP validation
 - production API/TLS deployment
-- official production catalog/media
+- backend/CDN-driven production catalog/campaign media
+- official logo, app icon, and splash approval
 - Android Play policy re-check
 - iOS App Store policy re-check
 - privacy policy/Data Safety

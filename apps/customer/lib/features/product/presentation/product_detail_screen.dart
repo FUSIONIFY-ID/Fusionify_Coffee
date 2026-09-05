@@ -13,6 +13,7 @@ import '../../catalog/domain/catalog_models.dart';
 import '../../favorites/application/favorites_provider.dart';
 import '../../favorites/presentation/favorites_strings.dart';
 import '../../shared/presentation/catalog_states.dart';
+import '../../shared/presentation/product_image.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   const ProductDetailScreen({super.key, required this.productId});
@@ -209,18 +210,9 @@ class _ProductDetailContentState extends ConsumerState<_ProductDetailContent> {
         children: [
           AspectRatio(
             aspectRatio: 1.35,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: CoffeeColors.surfaceWarm,
-                borderRadius: BorderRadius.circular(CoffeeRadius.card),
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.local_cafe_outlined,
-                  size: 72,
-                  color: CoffeeColors.textSecondary,
-                ),
-              ),
+            child: ProductImage(
+              product: product,
+              padding: const EdgeInsets.all(CoffeeSpacing.md),
             ),
           ),
           const SizedBox(height: CoffeeSpacing.lg),

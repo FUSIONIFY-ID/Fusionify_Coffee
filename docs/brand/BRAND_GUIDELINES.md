@@ -42,6 +42,12 @@ When official assets are provided:
 - Do not add effects without approval
 - Keep symbol/wordmark variants documented
 
+### Provisional Fusion Bean Concept
+
+The current development build may use the clearly labeled `fusion-bean-mark-concept` asset for app-icon and splash evaluation. It is a flat, solid-color design exploration commissioned for this preview, not the approved official Fusionify Coffee logo.
+
+Do not present it as final in marketing, store listings, or production releases. Once identity approval is complete, replace the source master and regenerate platform icon sizes from that approved source.
+
 ## Tone
 
 Customer copy should be:
@@ -72,3 +78,5 @@ Do not copy their:
 - Copy
 - Exact layout
 - Proprietary assets
+
+Premium payment-card products may be studied only for broad material cues such as restraint, hierarchy, and perceived quality. Fusionify membership artwork must not reproduce issuer logos, network marks, portraits, card details, or distinctive trade dress.

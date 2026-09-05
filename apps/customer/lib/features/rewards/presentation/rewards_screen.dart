@@ -9,6 +9,7 @@ import '../../../l10n/rewards_strings.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/rewards_provider.dart';
 import '../domain/rewards_models.dart';
+import 'membership_visual_card.dart';
 
 class RewardsScreen extends ConsumerWidget {
   const RewardsScreen({super.key});
@@ -54,7 +55,10 @@ class RewardsScreen extends ConsumerWidget {
           await ref.read(rewardsSummaryProvider.future);
         },
         child: summary.when(
-          data: (value) => _RewardsContent(summary: value),
+          data: (value) => _RewardsContent(
+            summary: value,
+            memberName: profile.fullName,
+          ),
           loading: () => const _RewardsLoading(),
           error: (_, _) => _RewardsError(
             onRetry: () => ref.invalidate(rewardsSummaryProvider),
@@ -66,9 +70,10 @@ class RewardsScreen extends ConsumerWidget {
 }
 
 class _RewardsContent extends StatelessWidget {
-  const _RewardsContent({required this.summary});
+  const _RewardsContent({required this.summary, required this.memberName});
 
   final RewardsSummary summary;
+  final String memberName;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +88,10 @@ class _RewardsContent extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: CoffeeSpacing.md),
-        _MembershipCard(membership: summary.membership),
+        _MembershipCard(
+          membership: summary.membership,
+          memberName: memberName,
+        ),
         const SizedBox(height: CoffeeSpacing.xl),
         Text(
           strings.fusionPoints,
@@ -163,9 +171,10 @@ class _RewardsContent extends StatelessWidget {
 }
 
 class _MembershipCard extends StatelessWidget {
-  const _MembershipCard({required this.membership});
+  const _MembershipCard({required this.membership, required this.memberName});
 
   final MembershipSummary membership;
+  final String memberName;
 
   @override
   Widget build(BuildContext context) {
@@ -173,82 +182,64 @@ class _MembershipCard extends StatelessWidget {
     final current = membership.currentTier;
     final next = membership.nextTier;
     final multiplier = membership.pointsMultiplierBps / 10000;
+    final progressText = current == null && next == null
+        ? strings.membershipNotConfigured
+        : next == null
+        ? strings.topTierReached
+        : strings.nextTierProgress(
+            _formatSpend(
+              membership.currency,
+              membership.remainingToNextTier,
+            ),
+            next.name,
+          );
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(CoffeeSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        MembershipVisualCard(
+          tierName: current?.name ?? strings.baseMember,
+          rank: current?.rank ?? 1,
+          memberName: memberName,
+          supportingText: current != null && multiplier > 1
+              ? strings.pointsMultiplier(
+                  multiplier.toStringAsFixed(
+                    multiplier == multiplier.roundToDouble() ? 0 : 2,
+                  ),
+                )
+              : progressText,
+        ),
+        const SizedBox(height: CoffeeSpacing.md),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(CoffeeSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: CoffeeColors.surfaceBlue,
+                if (current == null && next == null)
+                  Text(strings.membershipNotConfigured)
+                else ...[
+                  Text(
+                    strings.membershipProgress,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  const SizedBox(height: CoffeeSpacing.xs),
+                  LinearProgressIndicator(
+                    value: membership.progressToNextTier,
+                    minHeight: 8,
                     borderRadius: BorderRadius.circular(CoffeeRadius.control),
                   ),
-                  child: const Icon(
-                    Icons.workspace_premium_outlined,
-                    color: CoffeeColors.deep,
+                  const SizedBox(height: CoffeeSpacing.sm),
+                  Text(
+                    progressText,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                ),
-                const SizedBox(width: CoffeeSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        current?.name ?? strings.baseMember,
-                        style: Theme.of(context).textTheme.titleLarge
-                            ?.copyWith(fontWeight: FontWeight.w800),
-                      ),
-                      if (current != null && multiplier > 1)
-                        Text(
-                          strings.pointsMultiplier(
-                            multiplier.toStringAsFixed(
-                              multiplier == multiplier.roundToDouble() ? 0 : 2,
-                            ),
-                          ),
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                    ],
-                  ),
-                ),
+                ],
               ],
             ),
-            const SizedBox(height: CoffeeSpacing.lg),
-            if (current == null && next == null)
-              Text(strings.membershipNotConfigured)
-            else ...[
-              Text(
-                strings.membershipProgress,
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              const SizedBox(height: CoffeeSpacing.xs),
-              LinearProgressIndicator(
-                value: membership.progressToNextTier,
-                minHeight: 8,
-                borderRadius: BorderRadius.circular(CoffeeRadius.control),
-              ),
-              const SizedBox(height: CoffeeSpacing.sm),
-              Text(
-                next == null
-                    ? strings.topTierReached
-                    : strings.nextTierProgress(
-                        _formatSpend(
-                          membership.currency,
-                          membership.remainingToNextTier,
-                        ),
-                        next.name,
-                      ),
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 

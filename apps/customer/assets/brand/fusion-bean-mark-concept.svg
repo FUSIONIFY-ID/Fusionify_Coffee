@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Fusionify Coffee fusion bean concept</title>
+  <desc id="desc">An ivory coffee bean crossed by two blue fusion ribbons on a solid Fusionify blue field.</desc>
+  <rect width="1024" height="1024" fill="#0D6CD7"/>
+  <defs>
+    <clipPath id="bean-clip">
+      <path d="M512 176C324 176 216 326 216 512s108 336 296 336 296-150 296-336S700 176 512 176Z"/>
+    </clipPath>
+  </defs>
+  <path fill="#F8F8F6" d="M512 176C324 176 216 326 216 512s108 336 296 336 296-150 296-336S700 176 512 176Z"/>
+  <g clip-path="url(#bean-clip)" fill="none" stroke-linecap="round">
+    <path d="M588 112c-28 136-170 190-144 318 24 119 172 139 130 276-20 66-70 126-134 206" stroke="#0261CC" stroke-width="88"/>
+    <path d="M566 120c-20 122-144 188-126 300" stroke="#539DE9" stroke-width="16"/>
+  </g>
+</svg>

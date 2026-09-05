@@ -4,6 +4,7 @@ import '../../../app/theme.dart';
 import '../../../core/formatters/currency.dart';
 import '../../../l10n/app_strings.dart';
 import '../../catalog/domain/catalog_models.dart';
+import 'product_image.dart';
 
 class ProductCard extends StatelessWidget {
   const ProductCard({super.key, required this.product, required this.onTap});
@@ -32,19 +33,7 @@ class ProductCard extends StatelessWidget {
             children: [
               AspectRatio(
                 aspectRatio: 1,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: CoffeeColors.surfaceWarm,
-                    borderRadius: BorderRadius.circular(CoffeeRadius.control),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.local_cafe_outlined,
-                      size: 42,
-                      color: CoffeeColors.textSecondary,
-                    ),
-                  ),
-                ),
+                child: ProductImage(product: product),
               ),
               const SizedBox(height: CoffeeSpacing.sm),
               if (product.isBestseller) ...[

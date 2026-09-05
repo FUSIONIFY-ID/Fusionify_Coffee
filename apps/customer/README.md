@@ -56,6 +56,18 @@ Home
 - no gradients
 - no dynamic recoloring that overrides Fusionify brand
 
+## Preview Visual Assets
+
+The customer preview build includes original Fusionify artwork for:
+- Aren Latte, Sea Salt Latte, and Matcha Cloud
+- one 2:1 Signature Collection campaign
+- Fusion Blue, Silver, Gold, and Black membership backgrounds
+- a provisional Fusion Bean app-icon and native-splash concept
+
+Product and campaign assets are bundled only to make the current development catalog reviewable. Production catalog and campaign media must move to backend/CDN-managed URLs rather than expanding a hardcoded asset map.
+
+The provisional Fusion Bean mark is not an approved official logo. Replace the icon and splash masters when official Fusionify Coffee identity assets are approved.
+
 ## Account Lifecycle
 
 Implemented customer account features:
@@ -203,3 +215,7 @@ Rewards is a customer hub for:
 - digital benefits from eligible completed orders
 
 Voucher wallet and digital-benefit data come from authenticated backend APIs. Wi-Fi passwords are masked by default in the customer UI, and AI benefits display backend quota state.
+
+The membership credential changes from Fusion Blue to Silver, Gold, and Fusion Black according to the backend tier rank. Its tier, member name, and progress remain live Flutter text rather than being baked into artwork.
+
+This credential is a loyalty identity surface, not a payment instrument. It intentionally has no PAN, expiry, CVV, payment chip, Visa/Mastercard/AmEx marks, or imitation Centurion artwork.

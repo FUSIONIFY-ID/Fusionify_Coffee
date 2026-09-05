@@ -112,8 +112,14 @@ Implemented foundations include:
 - Fusion Points ledger/rewards foundations
 - membership-tier foundations
 - rewards configuration in staff operations
+- original preview product artwork for the three seeded development products
+- original preview Signature Collection banner with localized Flutter copy
+- backend-rank-driven Fusion Blue, Silver, Gold, and Black loyalty credentials
+- a provisional Fusion Bean icon/splash concept for development review
 
 Business values such as final membership thresholds and Fusion Points earning/redeem rates remain product configuration decisions and must not be described as final unless explicitly approved.
+
+The visual assets above are provisional preview media. Production product/campaign imagery remains a backend/CDN content task, and the Fusion Bean concept is not an approved official logo.
 
 ## Checkout + Payment
 
@@ -370,6 +376,7 @@ New realtime validation includes:
 
 - Android application ID `id.fusionify.coffee`
 - official production Fusionify Coffee logo/media set
+- final approval or replacement of the provisional Fusion Bean icon/splash concept
 - production API hostname
 - AutoGoPay as long-term production provider
 - ShopeePay/Interactive runtime enablement
@@ -389,7 +396,8 @@ External/live validation:
 - real webhook/cancel/status/settlement validation
 
 Production content/release:
-- official production catalog/media completion
+- backend/CDN-driven production catalog and campaign media completion
+- official identity approval and platform-icon regeneration
 - production API deployment/hostname/TLS
 - Android production signing and Play readiness
 - iOS deployment/release configuration and App Store readiness

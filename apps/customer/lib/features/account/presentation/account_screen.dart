@@ -10,6 +10,7 @@ import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/auth_models.dart';
 import '../../rewards/application/rewards_provider.dart';
 import '../../rewards/domain/rewards_models.dart';
+import '../../rewards/presentation/membership_visual_card.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -258,62 +259,73 @@ class _MemberCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = context.strings;
     final year = profile.memberSince.year;
-    final tier = membership?.currentTier;
+    final summary = membership;
+    final tier = summary?.currentTier;
 
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(CoffeeRadius.card),
-        child: Padding(
-          padding: const EdgeInsets.all(CoffeeSpacing.md),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: CoffeeColors.primary,
-                  borderRadius: BorderRadius.circular(CoffeeRadius.control),
+    if (summary == null) {
+      return Card(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(CoffeeRadius.card),
+          child: Padding(
+            padding: const EdgeInsets.all(CoffeeSpacing.md),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: CoffeeColors.primary,
+                    borderRadius: BorderRadius.circular(CoffeeRadius.control),
+                  ),
+                  child: const Icon(
+                    Icons.local_cafe_outlined,
+                    color: Colors.white,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.local_cafe_outlined,
-                  color: Colors.white,
+                const SizedBox(width: CoffeeSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        strings.baseMember,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: CoffeeSpacing.xxs),
+                      Text(
+                        '${strings.memberSince} $year',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: CoffeeSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      tier?.name ?? strings.baseMember,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: CoffeeSpacing.xxs),
-                    Text(
-                      membership?.nextTier == null
-                          ? '${strings.memberSince} $year'
-                          : strings.nextTierProgress(
-                              _formatSpend(
-                                membership!.currency,
-                                membership!.remainingToNextTier,
-                              ),
-                              membership!.nextTier!.name,
-                            ),
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-              if (onTap != null)
-                const Icon(
-                  Icons.chevron_right,
-                  color: CoffeeColors.textSecondary,
-                ),
-            ],
+                if (onTap != null)
+                  const Icon(
+                    Icons.chevron_right,
+                    color: CoffeeColors.textSecondary,
+                  ),
+              ],
+            ),
           ),
         ),
-      ),
+      );
+    }
+
+    return MembershipVisualCard(
+      tierName: tier?.name ?? strings.baseMember,
+      rank: tier?.rank ?? 1,
+      memberName: profile.fullName,
+      supportingText: summary.nextTier == null
+          ? '${strings.memberSince} $year'
+          : strings.nextTierProgress(
+              _formatSpend(
+                summary.currency,
+                summary.remainingToNextTier,
+              ),
+              summary.nextTier!.name,
+            ),
+      onTap: onTap,
     );
   }
 

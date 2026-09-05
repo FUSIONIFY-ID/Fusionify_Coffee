@@ -183,6 +183,27 @@ Expected groups may include:
 
 Use a persistent bottom action for quantity and final add-to-cart price where appropriate.
 
+## Membership Credential
+
+Membership is presented as a digital loyalty credential with an approximately 1.586:1 card proportion.
+
+Visual rank mapping:
+- rank 1 or an unconfigured base member: Fusion Blue
+- rank 2: Fusion Silver
+- rank 3: Fusion Gold
+- rank 4 and above: Fusion Black
+
+Tier name, customer name, membership/progress copy, and accessibility semantics must be rendered by Flutter. Background artwork must not contain variable member data.
+
+The visual may communicate the weight and restraint of a premium physical card, but it must remain unmistakably Fusionify. Do not add:
+- payment-network logos
+- a payment chip
+- PAN, expiry, or CVV fields
+- American Express Centurion portrait or trade dress
+- copied patterns, composition, or proprietary artwork from existing card issuers
+
+Tier identity must differ through label and material treatment, not color alone. Fusion Black is the highest visual treatment, not a claim that the credential is a bank card.
+
 ## Loading
 
 Prefer skeleton/loading placeholders for content lists when they improve perceived performance.

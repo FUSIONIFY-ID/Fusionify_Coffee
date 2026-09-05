@@ -20,25 +20,20 @@ Dynamic backend/CDN assets:
 - Outlet photos
 - Seasonal content
 
+The current customer app contains a small, documented preview set for visual review before a production media pipeline is available. This is an explicit development exception, not permission to bundle future live catalog or campaign libraries.
+
 ## Recommended Customer App Structure
 
 ```text
 assets/
   brand/
-    logo/
-    mascot/
-  app/
-    icon/
-    splash/
-    onboarding/
-    empty_states/
-    illustrations/
-  ui/
-    icons/
-    badges/
-    placeholders/
+  campaigns/
+  membership/
+  products/
   fonts/
 ```
+
+Current preview files and their generation notes are recorded in `apps/customer/assets/ASSET_PROVENANCE.md`.
 
 ## Formats
 
@@ -58,6 +53,20 @@ Recommended source aspect ratio:
 
 Do not bundle the entire live menu catalog into the mobile binary.
 
+The three current product images are preview fallbacks for the seeded development products. A production catalog must provide media through backend-managed HTTPS URLs and a defined placeholder/failure state.
+
+## Membership Backgrounds
+
+Membership artwork is decorative background material only. Render tier, customer, progress, and accessibility text in the application.
+
+Do not include:
+- payment-network or card-issuer logos
+- payment chips
+- card numbers, expiry, security codes, or magnetic-stripe cues
+- copied portraits or distinctive third-party card artwork
+
+The highest visual tier may use a dark premium finish under the Fusion Black name while remaining an original Fusionify loyalty credential.
+
 ## Splash
 
 Native splash:
@@ -74,6 +83,8 @@ In-app loading may use a subtle brand animation after the framework is running.
 Do not shrink a long wordmark into the app icon.
 
 Use an approved recognizable mark designed for small sizes.
+
+The current `fusion-bean-mark-concept` is provisional development artwork. It must not be described as the official Fusionify Coffee logo before approval.
 
 ## Accessibility
 

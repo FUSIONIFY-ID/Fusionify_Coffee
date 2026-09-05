@@ -53,6 +53,15 @@ All notable project changes are documented by meaningful product and engineering
 - app-resume SSE restart and state reconciliation
 - actionable Dart-format diff output in CI
 
+#### Customer Visual Foundation
+- original Fusionify preview artwork for Aren Latte, Sea Salt Latte, and Matcha Cloud
+- original 2:1 Signature Collection campaign artwork with localized text rendered by Flutter
+- rank-driven Fusion Blue, Silver, Gold, and Black membership credentials
+- premium Fusion Black top-tier treatment without payment-network branding or card-payment details
+- provisional Fusion Bean app-icon and native-splash concept
+- product-image fallback when preview artwork is unavailable
+- visual asset mapping tests
+
 ### Changed
 
 - Runtime catalog uses PostgreSQL through NestJS/Prisma
@@ -61,6 +70,7 @@ All notable project changes are documented by meaningful product and engineering
 - AutoGoPay is modeled as provider + channel, not one uniform QRIS contract
 - GoPay QRIS is the first enabled channel
 - repository docs now distinguish implemented integration code from live provider validation
+- customer rewards and account surfaces now present membership as a digital loyalty credential rather than a payment card
 
 ### Fixed
 

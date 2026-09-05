@@ -32,6 +32,16 @@ class HomeScreen extends ConsumerWidget {
           children: [
             Row(
               children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(CoffeeRadius.small),
+                  child: Image.asset(
+                    'assets/brand/fusion-bean-mark-concept.png',
+                    width: 36,
+                    height: 36,
+                    excludeFromSemantics: true,
+                  ),
+                ),
+                const SizedBox(width: CoffeeSpacing.sm),
                 Expanded(
                   child: Text(
                     'Fusionify Coffee',
@@ -91,6 +101,8 @@ class _CatalogHome extends StatelessWidget {
           const SizedBox(height: CoffeeSpacing.md),
         ],
         _OutletCard(outlet: data.outlet),
+        const SizedBox(height: CoffeeSpacing.md),
+        _SignatureBanner(onTap: () => context.go('/menu')),
         const SizedBox(height: CoffeeSpacing.lg),
         Row(
           children: [
@@ -155,6 +167,109 @@ class _CatalogHome extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _SignatureBanner extends StatelessWidget {
+  const _SignatureBanner({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        final height = (constraints.maxWidth / 2).clamp(168.0, 240.0);
+
+        return Semantics(
+          button: true,
+          label: '${strings.signatureCollection}. ${strings.seeMenu}',
+          child: SizedBox(
+            height: height,
+            child: Material(
+              borderRadius: BorderRadius.circular(CoffeeRadius.card),
+              clipBehavior: Clip.antiAlias,
+              color: CoffeeColors.surfaceWarm,
+              child: InkWell(
+                onTap: onTap,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.asset(
+                      'assets/campaigns/signature-lineup.webp',
+                      fit: BoxFit.cover,
+                      excludeFromSemantics: true,
+                    ),
+                    FractionallySizedBox(
+                      widthFactor: 0.48,
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.all(CoffeeSpacing.md),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              strings.signatureCollection,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    color: CoffeeColors.textPrimary,
+                                    fontWeight: FontWeight.w800,
+                                    height: 1.08,
+                                  ),
+                            ),
+                            if (!compact) ...[
+                              const SizedBox(height: CoffeeSpacing.xs),
+                              Text(
+                                strings.signatureCollectionBody,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: CoffeeColors.textSecondary,
+                                    ),
+                              ),
+                            ],
+                            const SizedBox(height: CoffeeSpacing.sm),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    strings.seeMenu,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: CoffeeColors.deep,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: CoffeeSpacing.xxs),
+                                const Icon(
+                                  Icons.arrow_forward,
+                                  size: 18,
+                                  color: CoffeeColors.deep,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
