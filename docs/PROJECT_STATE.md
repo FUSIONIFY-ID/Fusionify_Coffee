@@ -8,8 +8,8 @@ Last updated: 2026-09-05
 - Default branch: `main`
 - Visibility: public
 - Latest fully validated implementation head before this documentation checkpoint: `f3929eaf0cc6d2b489602e3dbbf4b4cfdfa2a8cd`
-- CI validation run: `33980793485`
-- Repository Policy run: `33980793625`
+- CI validation run: `33981096549`
+- Repository Policy run: `33981096534`
 
 ## Current Product State
 
@@ -337,7 +337,7 @@ These should not be listed as wholly unimplemented anymore. External provider in
 
 Validated implementation head: `f3929eaf0cc6d2b489602e3dbbf4b4cfdfa2a8cd`
 
-GitHub Actions CI run `33980793485`: **PASS**
+GitHub Actions CI run `33981096549`: **PASS**
 
 Customer:
 - Flutter pub get: PASS
@@ -361,7 +361,7 @@ API:
 - e2e tests: PASS
 - NestJS build: PASS
 
-Repository Policy run `33980793625`: **PASS**
+Repository Policy run `33981096534`: **PASS**
 
 Current validation includes:
 - unit coverage for outlet-scoped staff SSE queue snapshots
