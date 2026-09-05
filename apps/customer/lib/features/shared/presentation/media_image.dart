@@ -10,8 +10,29 @@ String? assetPathFromMediaUrl(String? value) {
     return null;
   }
 
+  String decodedSource;
+  try {
+    decodedSource = Uri.decodeComponent(source);
+  } on FormatException {
+    return null;
+  }
+  if (!decodedSource.toLowerCase().startsWith('asset://') ||
+      decodedSource.contains('\\') ||
+      decodedSource
+          .substring('asset://'.length)
+          .split('/')
+          .any((segment) => segment == '.' || segment == '..')) {
+    return null;
+  }
+
   final uri = Uri.tryParse(source);
-  if (uri == null || uri.scheme != 'asset' || uri.host.isEmpty) {
+  if (uri == null ||
+      uri.scheme != 'asset' ||
+      uri.host.isEmpty ||
+      uri.userInfo.isNotEmpty ||
+      uri.hasPort ||
+      uri.hasQuery ||
+      uri.hasFragment) {
     return null;
   }
 

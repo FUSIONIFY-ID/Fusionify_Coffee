@@ -43,6 +43,7 @@ void main() {
     );
     expect(assetPathFromMediaUrl('asset://secrets/token.txt'), isNull);
     expect(assetPathFromMediaUrl('asset://products/../token.txt'), isNull);
+    expect(assetPathFromMediaUrl('asset://products/%2e%2e/token.txt'), isNull);
     expect(isRemoteMediaUrl('https://cdn.example.com/banner.webp'), isTrue);
     expect(isRemoteMediaUrl('http://10.0.2.2:3000/banner.webp'), isTrue);
     expect(isRemoteMediaUrl('javascript:alert(1)'), isFalse);
