@@ -53,10 +53,7 @@ void main() {
 
     expect(snapshot.preview, isTrue);
     expect(snapshot.outlet.pickupEnabled, isTrue);
-    expect(
-      snapshot.outlet.imageUrl,
-      'asset://outlets/preview-store.webp',
-    );
+    expect(snapshot.outlet.imageUrl, 'asset://outlets/preview-store.webp');
     expect(
       snapshot.products.single.imageUrl,
       'https://cdn.example.com/aren-latte.webp',

@@ -211,9 +211,8 @@ class _CampaignCarouselState extends State<_CampaignCarousel> {
               child: PageView.builder(
                 itemCount: campaigns.length,
                 onPageChanged: (index) => setState(() => _activeIndex = index),
-                itemBuilder: (context, index) => _CampaignBanner(
-                  campaign: campaigns[index],
-                ),
+                itemBuilder: (context, index) =>
+                    _CampaignBanner(campaign: campaigns[index]),
               ),
             ),
             if (campaigns.length > 1) ...[
@@ -326,8 +325,7 @@ class _CampaignBanner extends StatelessWidget {
                 Expanded(
                   child: MediaImage(
                     mediaUrl: campaign.imageUrl,
-                    bundledFallback:
-                        'assets/campaigns/signature-lineup.webp',
+                    bundledFallback: 'assets/campaigns/signature-lineup.webp',
                     fit: BoxFit.cover,
                     semanticLabel: campaign.title,
                     placeholderIcon: Icons.campaign_outlined,

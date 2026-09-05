@@ -17,9 +17,7 @@ class CatalogSnapshot {
           .toList(growable: false),
       campaigns: (json['campaigns'] as List<dynamic>? ?? const [])
           .map(
-            (item) => Campaign.fromJson(
-              Map<String, dynamic>.from(item as Map),
-            ),
+            (item) => Campaign.fromJson(Map<String, dynamic>.from(item as Map)),
           )
           .toList(growable: false),
     );
