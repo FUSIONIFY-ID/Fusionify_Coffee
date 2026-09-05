@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,29 +9,71 @@ import '../../../core/formatters/currency.dart';
 import '../../../core/realtime/customer_realtime_provider.dart';
 import '../../../l10n/app_strings.dart';
 import '../../../l10n/receipt_strings.dart';
+import '../../shared/presentation/customer_realtime_status.dart';
 import '../application/orders_provider.dart';
 import '../domain/order_history_models.dart';
 import 'order_status_labels.dart';
 
-class OrderDetailScreen extends ConsumerWidget {
+class OrderDetailScreen extends ConsumerStatefulWidget {
   const OrderDetailScreen({super.key, required this.orderId});
 
   final String orderId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OrderDetailScreen> createState() =>
+      _OrderDetailScreenState();
+}
+
+class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen>
+    with WidgetsBindingObserver {
+  Timer? _fallbackTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _fallbackTimer = Timer.periodic(
+      customerRealtimeFallbackInterval,
+      (_) => _refreshAuthoritative(),
+    );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _fallbackTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    ref.invalidate(customerRealtimeProvider);
+    _refreshAuthoritative();
+  }
+
+  void _refreshAuthoritative() {
+    if (!mounted ||
+        WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+      return;
+    }
+    ref.invalidate(orderDetailProvider(widget.orderId));
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ref.listen(customerRealtimeProvider, (previous, next) {
-      final previousOrder = previous?.value?.orderById(orderId);
-      final nextOrder = next.value?.orderById(orderId);
+      final previousOrder = previous?.value?.snapshot?.orderById(widget.orderId);
+      final nextOrder = next.value?.snapshot?.orderById(widget.orderId);
       if (nextOrder != null &&
           (previousOrder?.status != nextOrder.status ||
               previousOrder?.updatedAt != nextOrder.updatedAt)) {
-        ref.invalidate(orderDetailProvider(orderId));
+        ref.invalidate(orderDetailProvider(widget.orderId));
       }
     });
 
     final strings = context.strings;
-    final order = ref.watch(orderDetailProvider(orderId));
+    final order = ref.watch(orderDetailProvider(widget.orderId));
 
     return Scaffold(
       appBar: AppBar(
@@ -37,78 +81,97 @@ class OrderDetailScreen extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: strings.digitalReceipt,
-            onPressed: () => context.push('/orders/$orderId/receipt'),
+            onPressed: () =>
+                context.push('/orders/${widget.orderId}/receipt'),
             icon: const Icon(Icons.receipt_long_outlined),
           ),
         ],
       ),
-      body: order.when(
-        data: (value) => RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(orderDetailProvider(orderId));
-            await ref.read(orderDetailProvider(orderId).future);
-          },
-          child: ListView(
-            padding: const EdgeInsets.all(CoffeeSpacing.md),
-            children: [
-              _OrderHeader(order: value),
-              const SizedBox(height: CoffeeSpacing.lg),
-              Text(
-                strings.orderItems,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: CoffeeSpacing.sm),
-              Card(
-                child: Padding(
+      body: Column(
+        children: [
+          const CustomerRealtimeStatus(
+            padding: EdgeInsets.fromLTRB(
+              CoffeeSpacing.md,
+              CoffeeSpacing.sm,
+              CoffeeSpacing.md,
+              0,
+            ),
+          ),
+          Expanded(
+            child: order.when(
+              data: (value) => RefreshIndicator(
+                onRefresh: () async {
+                  ref.invalidate(orderDetailProvider(widget.orderId));
+                  await ref.read(orderDetailProvider(widget.orderId).future);
+                },
+                child: ListView(
                   padding: const EdgeInsets.all(CoffeeSpacing.md),
-                  child: Column(
-                    children: [
-                      for (
-                        var index = 0;
-                        index < value.items.length;
-                        index++
-                      ) ...[
-                        _OrderItemRow(item: value.items[index]),
-                        if (index < value.items.length - 1) const Divider(),
-                      ],
-                      const Divider(),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              strings.total,
-                              style: Theme.of(context).textTheme.titleMedium,
+                  children: [
+                    _OrderHeader(order: value),
+                    const SizedBox(height: CoffeeSpacing.lg),
+                    Text(
+                      strings.orderItems,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: CoffeeSpacing.sm),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(CoffeeSpacing.md),
+                        child: Column(
+                          children: [
+                            for (
+                              var index = 0;
+                              index < value.items.length;
+                              index++
+                            ) ...[
+                              _OrderItemRow(item: value.items[index]),
+                              if (index < value.items.length - 1)
+                                const Divider(),
+                            ],
+                            const Divider(),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    strings.total,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium,
+                                  ),
+                                ),
+                                Text(
+                                  formatRupiah(value.totalAmount),
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.w800),
+                                ),
+                              ],
                             ),
-                          ),
-                          Text(
-                            formatRupiah(value.totalAmount),
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: CoffeeSpacing.lg),
+                    Text(
+                      strings.orderTimeline,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: CoffeeSpacing.sm),
+                    _OrderTimeline(order: value),
+                    const SizedBox(height: CoffeeSpacing.xl),
+                  ],
                 ),
               ),
-              const SizedBox(height: CoffeeSpacing.lg),
-              Text(
-                strings.orderTimeline,
-                style: Theme.of(context).textTheme.titleLarge,
+              loading: () =>
+                  const Center(child: CircularProgressIndicator()),
+              error: (_, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(CoffeeSpacing.lg),
+                  child: Text(strings.orderDetailLoadFailed),
+                ),
               ),
-              const SizedBox(height: CoffeeSpacing.sm),
-              _OrderTimeline(order: value),
-              const SizedBox(height: CoffeeSpacing.xl),
-            ],
+            ),
           ),
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(CoffeeSpacing.lg),
-            child: Text(strings.orderDetailLoadFailed),
-          ),
-        ),
+        ],
       ),
     );
   }

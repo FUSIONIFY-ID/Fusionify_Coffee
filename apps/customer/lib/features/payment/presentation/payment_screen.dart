@@ -14,6 +14,7 @@ import '../../../l10n/app_strings.dart';
 import '../../cart/application/cart_controller.dart';
 import '../../checkout/application/checkout_provider.dart';
 import '../../checkout/domain/checkout_models.dart';
+import '../../shared/presentation/customer_realtime_status.dart';
 
 class PaymentScreen extends ConsumerStatefulWidget {
   const PaymentScreen({super.key, required this.paymentId});
@@ -41,7 +42,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
     WidgetsBinding.instance.addObserver(this);
     _refreshLocal();
     _fallbackTimer = Timer.periodic(
-      const Duration(seconds: 30),
+      customerRealtimeFallbackInterval,
       (_) => _refreshLocal(silent: true),
     );
     _clockTimer = Timer.periodic(
@@ -60,8 +61,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && _payment?.isPending == true) {
+    if (state != AppLifecycleState.resumed) return;
+
+    ref.invalidate(customerRealtimeProvider);
+    if (_payment?.isPending == true) {
       _checkProvider(silent: true);
+    } else {
+      _refreshLocal(silent: true);
     }
   }
 
@@ -208,14 +214,16 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(customerRealtimeProvider, (previous, next) {
-      next.whenData((snapshot) {
-        final payment = snapshot.paymentById(widget.paymentId);
-        if (payment != null) {
-          _applyRealtimePayment(payment);
-        }
+    if (_payment?.isTerminal != true) {
+      ref.listen(customerRealtimeProvider, (previous, next) {
+        next.whenData((state) {
+          final payment = state.snapshot?.paymentById(widget.paymentId);
+          if (payment != null) {
+            _applyRealtimePayment(payment);
+          }
+        });
       });
-    });
+    }
 
     final strings = context.strings;
     final payment = _payment;
@@ -233,6 +241,11 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen>
               padding: const EdgeInsets.all(CoffeeSpacing.md),
               children: [
                 _StatusHeader(payment: payment),
+                if (payment.isPending)
+                  const CustomerRealtimeStatus(
+                    showLive: true,
+                    padding: EdgeInsets.only(top: CoffeeSpacing.sm),
+                  ),
                 const SizedBox(height: CoffeeSpacing.lg),
                 if (payment.isPending && payment.qrString != null) ...[
                   Center(

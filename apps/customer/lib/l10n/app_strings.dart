@@ -402,6 +402,21 @@ class AppStrings {
     'Menunggu pembayaran',
     'Waiting for payment',
   );
+  String get realtimeConnecting => _pick(
+    'Menghubungkan pembaruan langsung…',
+    'Menyambungkan kemas kini langsung…',
+    'Connecting live updates…',
+  );
+  String get realtimeLive => _pick(
+    'Pembaruan status langsung aktif',
+    'Kemas kini status langsung aktif',
+    'Live status updates are active',
+  );
+  String get realtimeRecovering => _pick(
+    'Koneksi pembaruan sedang dipulihkan. Status tetap diperiksa otomatis.',
+    'Sambungan kemas kini sedang dipulihkan. Status masih disemak secara automatik.',
+    'Reconnecting live updates. Status is still checked automatically.',
+  );
 
   String get forgotPassword =>
       _pick('Lupa password?', 'Lupa kata laluan?', 'Forgot password?');

@@ -18,7 +18,7 @@ void main() {
               'provider': 'AUTOGOPAY',
               'channel': 'GOPAY_QRIS',
               'status': 'PAID',
-              'amount': 28000,
+              'amount': 28000.0,
               'currency': 'IDR',
               'providerRawStatus': 'PAID',
             },
@@ -30,5 +30,10 @@ void main() {
     expect(snapshot.signature, 'sig-1');
     expect(snapshot.orderById('order-1')?.status, 'CONFIRMED');
     expect(snapshot.paymentById('payment-1')?.status, 'PAID');
+    expect(snapshot.paymentById('payment-1')?.amount, 28000);
+    expect(
+      CustomerRealtimeSnapshot.fromJson(const {}).generatedAt,
+      DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
+    );
   });
 }

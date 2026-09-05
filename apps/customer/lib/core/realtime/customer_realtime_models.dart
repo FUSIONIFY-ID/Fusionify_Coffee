@@ -1,3 +1,19 @@
+enum CustomerRealtimeConnectionStatus { connecting, live, reconnecting }
+
+class CustomerRealtimeState {
+  const CustomerRealtimeState({
+    required this.connectionStatus,
+    this.snapshot,
+    this.reconnectAttempt = 0,
+    this.retryIn,
+  });
+
+  final CustomerRealtimeConnectionStatus connectionStatus;
+  final CustomerRealtimeSnapshot? snapshot;
+  final int reconnectAttempt;
+  final Duration? retryIn;
+}
+
 class CustomerRealtimeSnapshot {
   const CustomerRealtimeSnapshot({
     required this.signature,
@@ -21,7 +37,7 @@ class CustomerRealtimeSnapshot {
           .toList(),
       generatedAt:
           DateTime.tryParse(json['generatedAt'] as String? ?? '') ??
-          DateTime(2026),
+          DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
     );
   }
 
@@ -67,7 +83,7 @@ class CustomerRealtimeOrder {
       status: json['status'] as String? ?? '',
       updatedAt:
           DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
-          DateTime(2026),
+          DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
       payments: rawPayments
           .whereType<Map>()
           .map(
@@ -110,7 +126,7 @@ class CustomerRealtimePayment {
       provider: json['provider'] as String? ?? '',
       channel: json['channel'] as String? ?? '',
       status: json['status'] as String? ?? '',
-      amount: json['amount'] as int? ?? 0,
+      amount: (json['amount'] as num?)?.toInt() ?? 0,
       currency: json['currency'] as String? ?? 'IDR',
       qrString: json['qrString'] as String?,
       qrUrl: json['qrUrl'] as String?,

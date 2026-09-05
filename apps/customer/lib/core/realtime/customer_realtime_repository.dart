@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 
 import 'customer_realtime_models.dart';
 
+const customerRealtimeInactivityTimeout = Duration(seconds: 45);
+
 class CustomerRealtimeRepository {
   const CustomerRealtimeRepository(this._dio);
 
@@ -23,40 +25,68 @@ class CustomerRealtimeRepository {
       throw StateError('Customer realtime response is empty.');
     }
 
-    var eventType = 'message';
-    final dataLines = <String>[];
+    yield* decodeCustomerRealtimeEvents(body.stream);
+  }
+}
 
-    await for (final line
-        in body.stream
-            .map<List<int>>((chunk) => chunk)
-            .transform(utf8.decoder)
-            .transform(const LineSplitter())) {
-      if (line.isEmpty) {
-        if (eventType == 'account' && dataLines.isNotEmpty) {
-          final decoded = jsonDecode(dataLines.join('\n'));
-          if (decoded is Map<String, dynamic>) {
-            yield CustomerRealtimeSnapshot.fromJson(decoded);
-          } else if (decoded is Map) {
-            yield CustomerRealtimeSnapshot.fromJson(
-              Map<String, dynamic>.from(decoded),
-            );
-          }
-        }
-        eventType = 'message';
-        dataLines.clear();
-        continue;
-      }
+Stream<CustomerRealtimeSnapshot> decodeCustomerRealtimeEvents(
+  Stream<List<int>> byteStream, {
+  Duration inactivityTimeout = customerRealtimeInactivityTimeout,
+}) async* {
+  var eventType = 'message';
+  final dataLines = <String>[];
 
-      if (line.startsWith(':')) {
-        continue;
+  final lines = byteStream
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .timeout(inactivityTimeout);
+
+  await for (final line in lines) {
+    if (line.isEmpty) {
+      final snapshot = _decodeAccountEvent(eventType, dataLines);
+      if (snapshot != null) {
+        yield snapshot;
       }
-      if (line.startsWith('event:')) {
-        eventType = line.substring(6).trim();
-        continue;
-      }
-      if (line.startsWith('data:')) {
-        dataLines.add(line.substring(5).trimLeft());
-      }
+      eventType = 'message';
+      dataLines.clear();
+      continue;
+    }
+
+    if (line.startsWith(':')) {
+      continue;
+    }
+    if (line.startsWith('event:')) {
+      eventType = line.substring(6).trim();
+      continue;
+    }
+    if (line.startsWith('data:')) {
+      dataLines.add(line.substring(5).trimLeft());
     }
   }
+
+  final trailingSnapshot = _decodeAccountEvent(eventType, dataLines);
+  if (trailingSnapshot != null) {
+    yield trailingSnapshot;
+  }
+}
+
+CustomerRealtimeSnapshot? _decodeAccountEvent(
+  String eventType,
+  List<String> dataLines,
+) {
+  if (eventType != 'account' || dataLines.isEmpty) {
+    return null;
+  }
+
+  final decoded = jsonDecode(dataLines.join('\n'));
+  if (decoded is Map<String, dynamic>) {
+    return CustomerRealtimeSnapshot.fromJson(decoded);
+  }
+  if (decoded is Map) {
+    return CustomerRealtimeSnapshot.fromJson(
+      Map<String, dynamic>.from(decoded),
+    );
+  }
+
+  throw const FormatException('Customer realtime event must be a JSON object.');
 }

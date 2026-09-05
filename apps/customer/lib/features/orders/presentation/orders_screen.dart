@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,25 +12,59 @@ import '../../auth/application/auth_controller.dart';
 import '../../cart/application/cart_controller.dart';
 import '../../catalog/application/catalog_provider.dart';
 import '../../catalog/domain/catalog_models.dart';
+import '../../shared/presentation/customer_realtime_status.dart';
 import '../application/orders_provider.dart';
 import '../application/reorder_builder.dart';
 import '../domain/order_history_models.dart';
 import 'order_status_labels.dart';
 import 'reorder_strings.dart';
 
-class OrdersScreen extends ConsumerWidget {
+class OrdersScreen extends ConsumerStatefulWidget {
   const OrdersScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen(customerRealtimeProvider, (previous, next) {
-      final previousSignature = previous?.value?.signature;
-      final nextSignature = next.value?.signature;
-      if (nextSignature != null && nextSignature != previousSignature) {
-        ref.invalidate(orderHistoryProvider);
-      }
-    });
+  ConsumerState<OrdersScreen> createState() => _OrdersScreenState();
+}
 
+class _OrdersScreenState extends ConsumerState<OrdersScreen>
+    with WidgetsBindingObserver {
+  Timer? _fallbackTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _fallbackTimer = Timer.periodic(
+      customerRealtimeFallbackInterval,
+      (_) => _refreshAuthoritative(),
+    );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _fallbackTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    ref.invalidate(customerRealtimeProvider);
+    _refreshAuthoritative();
+  }
+
+  void _refreshAuthoritative() {
+    if (!mounted ||
+        WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed ||
+        ref.read(authControllerProvider).value == null) {
+      return;
+    }
+    ref.invalidate(orderHistoryProvider);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final strings = context.strings;
     final profile = ref.watch(authControllerProvider).value;
 
@@ -59,75 +95,99 @@ class OrdersScreen extends ConsumerWidget {
       );
     }
 
+    ref.listen(customerRealtimeProvider, (previous, next) {
+      final previousSignature = previous?.value?.snapshot?.signature;
+      final nextSignature = next.value?.snapshot?.signature;
+      if (nextSignature != null && nextSignature != previousSignature) {
+        ref.invalidate(orderHistoryProvider);
+      }
+    });
+
     final orders = ref.watch(orderHistoryProvider);
     final catalog = ref.watch(catalogProvider).value;
 
     return SafeArea(
-      child: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(orderHistoryProvider);
-          ref.invalidate(catalogProvider);
-          await Future.wait([
-            ref.read(orderHistoryProvider.future),
-            ref.read(catalogProvider.future),
-          ]);
-        },
-        child: orders.when(
-          data: (items) {
-            if (items.isEmpty) {
-              return ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  SizedBox(
-                    height: MediaQuery.sizeOf(context).height * 0.65,
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(CoffeeSpacing.xl),
-                        child: Text(
-                          strings.ordersEmpty,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }
-
-            return ListView.separated(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(CoffeeSpacing.md),
-              itemCount: items.length,
-              separatorBuilder: (_, _) =>
-                  const SizedBox(height: CoffeeSpacing.sm),
-              itemBuilder: (context, index) {
-                final order = items[index];
-                return _OrderCard(
-                  order: order,
-                  onTap: () => context.push('/orders/${order.id}'),
-                  onBuyAgain: catalog == null || !_canBuyAgain(order.status)
-                      ? null
-                      : () => _buyAgain(
-                          context: context,
-                          ref: ref,
-                          order: order,
-                          catalog: catalog,
-                        ),
-                );
-              },
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: [
-              SizedBox(
-                height: MediaQuery.sizeOf(context).height * 0.65,
-                child: Center(child: Text(strings.orderHistoryLoadFailed)),
-              ),
-            ],
+      child: Column(
+        children: [
+          const CustomerRealtimeStatus(
+            padding: EdgeInsets.fromLTRB(
+              CoffeeSpacing.md,
+              CoffeeSpacing.sm,
+              CoffeeSpacing.md,
+              0,
+            ),
           ),
-        ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(orderHistoryProvider);
+                ref.invalidate(catalogProvider);
+                await Future.wait([
+                  ref.read(orderHistoryProvider.future),
+                  ref.read(catalogProvider.future),
+                ]);
+              },
+              child: orders.when(
+                data: (items) {
+                  if (items.isEmpty) {
+                    return ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.sizeOf(context).height * 0.65,
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(CoffeeSpacing.xl),
+                              child: Text(
+                                strings.ordersEmpty,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  return ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(CoffeeSpacing.md),
+                    itemCount: items.length,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: CoffeeSpacing.sm),
+                    itemBuilder: (context, index) {
+                      final order = items[index];
+                      return _OrderCard(
+                        order: order,
+                        onTap: () => context.push('/orders/${order.id}'),
+                        onBuyAgain:
+                            catalog == null || !_canBuyAgain(order.status)
+                            ? null
+                            : () => _buyAgain(
+                                context: context,
+                                ref: ref,
+                                order: order,
+                                catalog: catalog,
+                              ),
+                      );
+                    },
+                  );
+                },
+                loading: () =>
+                    const Center(child: CircularProgressIndicator()),
+                error: (_, _) => ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.sizeOf(context).height * 0.65,
+                      child: Center(child: Text(strings.orderHistoryLoadFailed)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

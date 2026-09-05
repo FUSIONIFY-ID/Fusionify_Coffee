@@ -39,6 +39,10 @@ void main() {
     expect(malaysia.paymentReceived, isNotEmpty);
     expect(english.paymentReceived, isNotEmpty);
 
+    expect(indonesia.realtimeConnecting, isNotEmpty);
+    expect(malaysia.realtimeLive, isNotEmpty);
+    expect(english.realtimeRecovering, isNotEmpty);
+
     expect(indonesia.savedAddresses, 'Alamat tersimpan');
     expect(malaysia.savedAddresses, 'Alamat disimpan');
     expect(english.savedAddresses, 'Saved addresses');
