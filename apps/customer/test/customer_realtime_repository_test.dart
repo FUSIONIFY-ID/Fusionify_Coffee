@@ -8,9 +8,7 @@ void main() {
   test('decodes chunked account events and ignores heartbeats', () async {
     final chunks = [
       utf8.encode(': connected\n\nevent: heartbeat\ndata: {}\n\n'),
-      utf8.encode(
-        'event: account\ndata: {"signature":"sig-1","generatedAt":',
-      ),
+      utf8.encode('event: account\ndata: {"signature":"sig-1","generatedAt":'),
       utf8.encode('"2026-09-05T12:00:00.000Z","orders":[]}\n\n'),
     ];
 

@@ -173,8 +173,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen>
                     },
                   );
                 },
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, _) => ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: [

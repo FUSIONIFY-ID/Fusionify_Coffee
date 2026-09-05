@@ -20,8 +20,7 @@ class OrderDetailScreen extends ConsumerStatefulWidget {
   final String orderId;
 
   @override
-  ConsumerState<OrderDetailScreen> createState() =>
-      _OrderDetailScreenState();
+  ConsumerState<OrderDetailScreen> createState() => _OrderDetailScreenState();
 }
 
 class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen>
@@ -83,8 +82,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen>
         actions: [
           IconButton(
             tooltip: strings.digitalReceipt,
-            onPressed: () =>
-                context.push('/orders/${widget.orderId}/receipt'),
+            onPressed: () => context.push('/orders/${widget.orderId}/receipt'),
             icon: const Icon(Icons.receipt_long_outlined),
           ),
         ],
@@ -136,9 +134,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen>
                                 Expanded(
                                   child: Text(
                                     strings.total,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleMedium,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium,
                                   ),
                                 ),
                                 Text(
@@ -163,8 +161,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen>
                   ],
                 ),
               ),
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (_, _) => Center(
                 child: Padding(
                   padding: const EdgeInsets.all(CoffeeSpacing.lg),
