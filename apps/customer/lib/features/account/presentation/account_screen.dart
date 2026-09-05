@@ -319,10 +319,7 @@ class _MemberCard extends StatelessWidget {
       supportingText: summary.nextTier == null
           ? '${strings.memberSince} $year'
           : strings.nextTierProgress(
-              _formatSpend(
-                summary.currency,
-                summary.remainingToNextTier,
-              ),
+              _formatSpend(summary.currency, summary.remainingToNextTier),
               summary.nextTier!.name,
             ),
       onTap: onTap,

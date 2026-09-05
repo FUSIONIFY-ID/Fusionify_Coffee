@@ -55,10 +55,8 @@ class RewardsScreen extends ConsumerWidget {
           await ref.read(rewardsSummaryProvider.future);
         },
         child: summary.when(
-          data: (value) => _RewardsContent(
-            summary: value,
-            memberName: profile.fullName,
-          ),
+          data: (value) =>
+              _RewardsContent(summary: value, memberName: profile.fullName),
           loading: () => const _RewardsLoading(),
           error: (_, _) => _RewardsError(
             onRetry: () => ref.invalidate(rewardsSummaryProvider),
@@ -88,10 +86,7 @@ class _RewardsContent extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: CoffeeSpacing.md),
-        _MembershipCard(
-          membership: summary.membership,
-          memberName: memberName,
-        ),
+        _MembershipCard(membership: summary.membership, memberName: memberName),
         const SizedBox(height: CoffeeSpacing.xl),
         Text(
           strings.fusionPoints,
@@ -187,10 +182,7 @@ class _MembershipCard extends StatelessWidget {
         : next == null
         ? strings.topTierReached
         : strings.nextTierProgress(
-            _formatSpend(
-              membership.currency,
-              membership.remainingToNextTier,
-            ),
+            _formatSpend(membership.currency, membership.remainingToNextTier),
             next.name,
           );
 
