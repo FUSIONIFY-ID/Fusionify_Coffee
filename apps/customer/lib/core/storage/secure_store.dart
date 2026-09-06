@@ -12,10 +12,12 @@ class SecureStore {
   static const _accessTokenKey = 'auth_access_token';
   static const _refreshTokenKey = 'auth_refresh_token';
   static const _languageKey = 'preferred_language';
+  static const _outletKey = 'preferred_outlet';
 
   Future<String?> readAccessToken() => _storage.read(key: _accessTokenKey);
   Future<String?> readRefreshToken() => _storage.read(key: _refreshTokenKey);
   Future<String?> readLanguage() => _storage.read(key: _languageKey);
+  Future<String?> readOutletId() => _storage.read(key: _outletKey);
 
   Future<void> writeSession({
     required String accessToken,
@@ -29,6 +31,10 @@ class SecureStore {
 
   Future<void> writeLanguage(String value) {
     return _storage.write(key: _languageKey, value: value);
+  }
+
+  Future<void> writeOutletId(String value) {
+    return _storage.write(key: _outletKey, value: value);
   }
 
   Future<void> clearSession() async {

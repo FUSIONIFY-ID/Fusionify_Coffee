@@ -333,6 +333,8 @@ async function main() {
       note: 'Database-backed development fixture.',
       imageUrl: 'asset://outlets/preview-store.webp',
       translations: outletTranslations,
+      active: true,
+      sortOrder: 0,
       pickupEnabled: true,
       deliveryEnabled: true,
       latitude: -6.595,
@@ -347,6 +349,8 @@ async function main() {
       note: 'Database-backed development fixture.',
       imageUrl: 'asset://outlets/preview-store.webp',
       translations: outletTranslations,
+      active: true,
+      sortOrder: 0,
       pickupEnabled: true,
       deliveryEnabled: true,
       latitude: -6.595,
@@ -354,6 +358,56 @@ async function main() {
       deliveryRadiusMeters: 10000,
       deliveryBaseFee: 5000,
       deliveryPerKmFee: 2000,
+    },
+  });
+
+  const secondOutletTranslations = {
+    ID_ID: {
+      name: 'Fusionify Coffee Depok Preview',
+      note: 'Outlet kedua untuk menguji pemilihan dan ketersediaan menu.',
+    },
+    MS_MY: {
+      name: 'Fusionify Coffee Depok Preview',
+      note: 'Cawangan kedua untuk menguji pilihan dan ketersediaan menu.',
+    },
+    EN: {
+      name: 'Fusionify Coffee Depok Preview',
+      note: 'Second outlet fixture for outlet and menu availability testing.',
+    },
+  };
+
+  await prisma.outlet.upsert({
+    where: { id: 'depok-preview-outlet' },
+    update: {
+      name: 'Fusionify Coffee Depok Preview',
+      note: 'Second outlet fixture for outlet and menu availability testing.',
+      imageUrl: 'asset://outlets/preview-store.webp',
+      translations: secondOutletTranslations,
+      active: true,
+      sortOrder: 1,
+      pickupEnabled: true,
+      deliveryEnabled: false,
+      latitude: -6.4025,
+      longitude: 106.7942,
+      deliveryRadiusMeters: null,
+      deliveryBaseFee: 0,
+      deliveryPerKmFee: 0,
+    },
+    create: {
+      id: 'depok-preview-outlet',
+      name: 'Fusionify Coffee Depok Preview',
+      note: 'Second outlet fixture for outlet and menu availability testing.',
+      imageUrl: 'asset://outlets/preview-store.webp',
+      translations: secondOutletTranslations,
+      active: true,
+      sortOrder: 1,
+      pickupEnabled: true,
+      deliveryEnabled: false,
+      latitude: -6.4025,
+      longitude: 106.7942,
+      deliveryRadiusMeters: null,
+      deliveryBaseFee: 0,
+      deliveryPerKmFee: 0,
     },
   });
 
@@ -498,6 +552,29 @@ async function main() {
     categoryId: 'non-coffee',
     imageUrl: 'asset://products/chocolate-malt-cloud.webp',
   });
+
+  const [seededOutlets, seededProducts] = await Promise.all([
+    prisma.outlet.findMany({ select: { id: true } }),
+    prisma.product.findMany({ select: { id: true } }),
+  ]);
+  for (const outlet of seededOutlets) {
+    for (const product of seededProducts) {
+      await prisma.outletProductAvailability.upsert({
+        where: {
+          outletId_productId: {
+            outletId: outlet.id,
+            productId: product.id,
+          },
+        },
+        update: { available: true },
+        create: {
+          outletId: outlet.id,
+          productId: product.id,
+          available: true,
+        },
+      });
+    }
+  }
 
   const campaigns = [
     {

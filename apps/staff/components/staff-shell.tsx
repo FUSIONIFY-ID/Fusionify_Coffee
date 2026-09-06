@@ -17,6 +17,7 @@ export function StaffShell({
   const canManageStaff = staff.permissions.includes('staff.manage');
   const canManageOrders = staff.permissions.includes('orders.manage');
   const canManageRewards = staff.permissions.includes('rewards.manage');
+  const canManageCatalog = staff.permissions.includes('catalog.manage');
   const canReadInventory = staff.permissions.includes('inventory.read');
 
   async function logout() {
@@ -46,7 +47,10 @@ export function StaffShell({
               <small>POS</small>
             </Link>
           ) : null}
-          <Link className={pathname.startsWith('/kds') ? 'active' : ''} href="/kds">
+          <Link
+            className={pathname.startsWith('/kds') ? 'active' : ''}
+            href="/kds"
+          >
             <span>Queue</span>
             <small>KDS</small>
           </Link>
@@ -57,6 +61,15 @@ export function StaffShell({
             >
               <span>Operations</span>
               <small>Inventory</small>
+            </Link>
+          ) : null}
+          {canManageCatalog ? (
+            <Link
+              className={pathname.startsWith('/catalog') ? 'active' : ''}
+              href="/catalog"
+            >
+              <span>Catalog</span>
+              <small>Menu & media</small>
             </Link>
           ) : null}
           {canManageRewards ? (

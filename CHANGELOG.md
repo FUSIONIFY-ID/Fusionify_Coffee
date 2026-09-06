@@ -70,6 +70,15 @@ All notable project changes are documented by meaningful product and engineering
 - backend-driven product, campaign, and outlet media references with bundled offline fallbacks
 - localized campaign carousel populated by active backend campaign records
 
+#### Multi-outlet Catalog Management
+- active outlet directory and persistent customer outlet selection
+- customer menu search and category filtering
+- per-outlet product availability model and migration
+- server-enforced outlet activity and product availability at checkout
+- protected staff Catalog UI and APIs for outlets, categories, products, campaign banners, and availability
+- production HTTPS validation for backend-managed media URLs
+- second seeded preview outlet for demo and availability testing
+
 ### Changed
 
 - Runtime catalog uses PostgreSQL through NestJS/Prisma

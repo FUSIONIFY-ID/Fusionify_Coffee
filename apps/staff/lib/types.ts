@@ -99,6 +99,61 @@ export type StaffCatalog = {
   products: StaffCatalogProduct[];
 };
 
+export type CatalogAdminOutlet = {
+  id: string;
+  name: string;
+  note: string;
+  imageUrl: string | null;
+  currency: string;
+  timezone: string;
+  active: boolean;
+  sortOrder: number;
+  pickupEnabled: boolean;
+  deliveryEnabled: boolean;
+  latitude: number | null;
+  longitude: number | null;
+  deliveryRadiusMeters: number | null;
+  deliveryBaseFee: number;
+  deliveryPerKmFee: number;
+};
+
+export type CatalogAdminCategory = {
+  id: string;
+  name: string;
+  sortOrder: number;
+};
+
+export type CatalogAdminProduct = {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string | null;
+  basePrice: number;
+  categoryId: string;
+  category: { id: string; name: string };
+  active: boolean;
+  isBestseller: boolean;
+  outletAvailability: Array<{ outletId: string; available: boolean }>;
+};
+
+export type CatalogAdminCampaign = {
+  id: string;
+  title: string;
+  body: string;
+  ctaLabel: string;
+  imageUrl: string;
+  actionPath: '/menu' | '/rewards';
+  active: boolean;
+  sortOrder: number;
+};
+
+export type CatalogAdminOverview = {
+  outlets: CatalogAdminOutlet[];
+  categories: CatalogAdminCategory[];
+  products: CatalogAdminProduct[];
+  campaigns: CatalogAdminCampaign[];
+};
+
 export type StaffPaymentView = {
   id: string;
   orderId: string;

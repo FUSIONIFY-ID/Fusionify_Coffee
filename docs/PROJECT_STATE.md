@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-09-05
+Last updated: 2026-09-06
 
 ## Repository
 
@@ -102,6 +102,11 @@ Product names or provider names are not force-translated when they are proper na
 
 Implemented foundations include:
 - PostgreSQL-backed outlet/category/product/modifier catalog
+- active multi-outlet discovery and persistent customer outlet selection
+- outlet-aware menu search and category filtering
+- explicit per-outlet product availability
+- authoritative availability checks during customer and staff checkout
+- staff Catalog control for outlets, categories, products, campaigns, and availability
 - dynamic modifier groups/options
 - server-backed product detail
 - cart configuration identity
@@ -121,7 +126,7 @@ Implemented foundations include:
 
 Business values such as final membership thresholds and Fusion Points earning/redeem rates remain product configuration decisions and must not be described as final unless explicitly approved.
 
-The visual assets above are provisional preview media. The delivery contract for backend/CDN product, campaign, and outlet URLs is implemented, but production content and content-management operations remain release tasks. The Fusion F-Bean concept is not an approved official logo.
+The visual assets above are provisional preview media. The delivery contract for backend/CDN product, campaign, and outlet URLs and staff-side URL management are implemented. Direct binary upload/storage, production content approval, and CDN operations remain release tasks. The Fusion F-Bean concept is not an approved official logo.
 
 ## Checkout + Payment
 
@@ -262,6 +267,8 @@ Implemented management foundations:
 - session revocation after security-sensitive changes
 - last-active-SUPER_ADMIN protection
 - Team UI for privileged staff
+- Catalog UI and protected APIs for outlet, category, product, campaign/banner, and per-outlet availability management
+- safe media URL validation, with HTTPS required in production
 
 ## Staff POS + KDS
 

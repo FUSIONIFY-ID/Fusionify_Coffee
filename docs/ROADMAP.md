@@ -25,6 +25,9 @@ Implemented:
 - Material 3
 - adaptive customer navigation
 - database-backed outlet/category/product/modifiers
+- active multi-outlet selection with locally persisted customer preference
+- customer menu search, category filters, and per-outlet availability
+- staff catalog/banner management with authoritative checkout enforcement
 - localized catalog descriptions
 - product customization
 - cart
@@ -224,7 +227,7 @@ Before production:
 - production WhatsApp OTP validation
 - production SMS OTP validation
 - production API/TLS deployment
-- production CDN upload/content-management workflow and approved catalog/campaign media (runtime media URL contract complete)
+- production CDN binary upload workflow and approved catalog/campaign media (runtime media URL contract and staff URL management complete)
 - official logo, app icon, and splash approval
 - Android Play policy re-check
 - iOS App Store policy re-check

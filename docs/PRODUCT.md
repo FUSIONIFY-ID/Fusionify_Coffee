@@ -57,7 +57,7 @@ Expected flow:
 
 ### Delivery
 
-Delivery is planned after the pickup vertical slice is stable.
+The saved-address, outlet serviceability, delivery fee, and checkout foundations are implemented. Production delivery still depends on map/search and courier providers.
 
 Delivery will include:
 - Address search
@@ -128,12 +128,12 @@ Planned operating capabilities:
 
 ## Digital Benefits
 
-A future completed order may unlock digital benefits such as:
+An eligible completed order can unlock server-backed digital benefits such as:
 - Time-limited outlet Wi-Fi access
 - Time-limited or quota-based AI access
 - Digital receipt benefits
 
-These are future features and are not currently implemented.
+The entitlement, receipt, Wi-Fi credential, and AI quota foundations are implemented. Real outlet Wi-Fi and AI gateway operations remain external production integrations.
 
 ## Product Principle
 

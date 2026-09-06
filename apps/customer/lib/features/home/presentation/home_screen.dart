@@ -101,7 +101,7 @@ class _CatalogHome extends StatelessWidget {
           const _PreviewNotice(),
           const SizedBox(height: CoffeeSpacing.md),
         ],
-        _OutletCard(outlet: data.outlet),
+        _OutletCard(outlet: data.outlet, onTap: () => context.push('/outlets')),
         const SizedBox(height: CoffeeSpacing.md),
         _CampaignCarousel(campaigns: data.campaigns),
         const SizedBox(height: CoffeeSpacing.lg),
@@ -122,9 +122,12 @@ class _CatalogHome extends StatelessWidget {
             Expanded(
               child: _FulfillmentCard(
                 title: strings.delivery,
-                subtitle: strings.notImplementedYet,
+                subtitle: data.outlet.deliveryEnabled
+                    ? strings.deliveryFromThisOutlet
+                    : strings.temporarilyUnavailable,
                 icon: Icons.delivery_dining_outlined,
-                enabled: false,
+                enabled: data.outlet.deliveryEnabled,
+                onTap: () => context.go('/menu'),
               ),
             ),
           ],
@@ -380,52 +383,64 @@ class _PreviewNotice extends StatelessWidget {
 }
 
 class _OutletCard extends StatelessWidget {
-  const _OutletCard({required this.outlet});
+  const _OutletCard({required this.outlet, required this.onTap});
 
   final Outlet outlet;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(CoffeeSpacing.md),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(CoffeeRadius.control),
-              child: SizedBox(
-                width: 88,
-                height: 72,
-                child: MediaImage(
-                  mediaUrl: outlet.imageUrl,
-                  bundledFallback: 'assets/outlets/preview-store.webp',
-                  fit: BoxFit.cover,
-                  semanticLabel: outlet.name,
-                  placeholderIcon: Icons.store_outlined,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(CoffeeSpacing.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(CoffeeRadius.control),
+                child: SizedBox(
+                  width: 88,
+                  height: 72,
+                  child: MediaImage(
+                    mediaUrl: outlet.imageUrl,
+                    bundledFallback: 'assets/outlets/preview-store.webp',
+                    fit: BoxFit.cover,
+                    semanticLabel: outlet.name,
+                    placeholderIcon: Icons.store_outlined,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: CoffeeSpacing.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    outlet.name,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  if (outlet.note.isNotEmpty) ...[
-                    const SizedBox(height: CoffeeSpacing.xxs),
+              const SizedBox(width: CoffeeSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      outlet.note,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      outlet.name,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
+                    if (outlet.note.isNotEmpty) ...[
+                      const SizedBox(height: CoffeeSpacing.xxs),
+                      Text(
+                        outlet.note,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+              const Padding(
+                padding: EdgeInsets.only(top: CoffeeSpacing.xs),
+                child: Icon(
+                  Icons.swap_horiz,
+                  color: CoffeeColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

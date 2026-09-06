@@ -8,12 +8,27 @@ class CatalogRepository {
 
   final Dio _dio;
 
-  Future<CatalogSnapshot> fetchPreviewCatalog({
+  Future<List<Outlet>> fetchOutlets({required AppLanguage language}) async {
+    final response = await _dio.get<List<dynamic>>(
+      '/v1/catalog/outlets',
+      queryParameters: {'lang': language.apiValue},
+    );
+    final data = response.data;
+    if (data == null) {
+      throw const CatalogException('Outlet response is empty.');
+    }
+    return data
+        .map((item) => Outlet.fromJson(Map<String, dynamic>.from(item as Map)))
+        .toList(growable: false);
+  }
+
+  Future<CatalogSnapshot> fetchCatalog({
     required AppLanguage language,
+    required String outletId,
   }) async {
     final response = await _dio.get<Map<String, dynamic>>(
-      '/v1/catalog/preview',
-      queryParameters: {'lang': language.apiValue},
+      '/v1/catalog',
+      queryParameters: {'lang': language.apiValue, 'outletId': outletId},
     );
 
     final data = response.data;
