@@ -6,6 +6,17 @@ All notable project changes are documented by meaningful product and engineering
 
 ### Added
 
+#### Owner Control Center
+- permission-gated owner dashboard with 7-, 30-, and 90-day reporting
+- paid-sales and average-order metrics grouped safely by currency
+- completed-order, active-queue, and previous-period comparisons
+- all-outlet and single-outlet performance views with CSV export
+- operational alerts for failed/stale payments, low stock, and due maintenance
+- authenticated outlet directory with staff outlet scoping
+- asset service history and next-maintenance scheduling
+- owner-aware post-TOTP redirect and responsive mobile staff navigation drawer
+- database-backed e2e coverage for dashboard RBAC, outlet scope, alerts, and maintenance persistence
+
 #### Google Play Internal Readiness
 - locked Android application ID `id.fusionify.coffee`
 - fail-closed environment-based release signing configuration

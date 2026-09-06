@@ -7,6 +7,7 @@ import { CatalogModule } from './catalog/catalog.module';
 import { DatabaseModule } from './database/database.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { OperationsModule } from './operations/operations.module';
+import { OwnerDashboardModule } from './owner-dashboard/owner-dashboard.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { RewardsModule } from './rewards/rewards.module';
@@ -22,6 +23,7 @@ import { VouchersModule } from './vouchers/vouchers.module';
     CatalogModule,
     FavoritesModule,
     OperationsModule,
+    OwnerDashboardModule,
     OrdersModule,
     PaymentsModule,
     RewardsModule,

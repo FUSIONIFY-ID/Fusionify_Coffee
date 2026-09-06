@@ -7,10 +7,10 @@ Last updated: 2026-09-06
 - Repository: `FUSIONIFY-ID/Fusionify_Coffee`
 - Default branch: `main`
 - Visibility: public
-- Latest fully validated `main` head before the Play-internal-readiness branch: `2dc074e9117a741aada523796aa52e40f51f10bb`
-- CI validation run: `34027906534`
-- Repository Policy run: `34027906536`
-- API package publication run: `34028122264`
+- Latest fully validated `main` head: `cb9b1fd1fc52b8824b41f3c657aea7cb5cd385b2`
+- CI validation run: `34030885029`
+- Repository Policy run: `34030884986`
+- API package publication run: `34031205679`
 
 ## Current Product State
 
@@ -277,6 +277,25 @@ Implemented management foundations:
 - omitted modifier options are archived instead of destructively deleted, while cross-product/group ID reassignment is rejected
 - safe media URL validation, with HTTPS required in production
 
+## Owner Control Center
+
+Implemented:
+- permission-gated `/overview` workspace for `OWNER`, `SUPER_ADMIN`, and other roles with `finance.read`
+- automatic owner redirect to Overview after successful TOTP verification
+- real paid-sales reporting based only on orders with a `PAID` payment
+- separate totals per currency, with no cross-currency money aggregation
+- 7-, 30-, and 90-day reporting ranges with matching previous-period comparisons
+- paid-sales trend, completed-order count, active queue, and average paid order value
+- all-outlet or single-outlet scope for globally assigned staff
+- outlet performance table with search and working CSV export
+- operational attention list for failed/stale payments, low stock, and due maintenance
+- responsive desktop dashboard and mobile navigation drawer
+- backend RBAC and outlet scope remain authoritative
+
+The current outlet status is the database `active` state. The UI does not claim
+that an outlet is online or offline because runtime heartbeat telemetry is not
+implemented.
+
 ## Staff POS + KDS
 
 ### Cashier POS
@@ -341,6 +360,7 @@ The repository already contains foundations for:
 - suppliers
 - purchase orders
 - assets
+- asset service history and next-maintenance scheduling
 - saved customer addresses
 - delivery/serviceability flows
 - digital receipts
@@ -351,9 +371,9 @@ These should not be listed as wholly unimplemented anymore. External provider in
 
 ## Validation Evidence
 
-Validated baseline before the current modifier-management branch: `827e4e44454ea8469bf96fbcdcb63fbb9528ee54`
+Validated `main` baseline: `cb9b1fd1fc52b8824b41f3c657aea7cb5cd385b2`
 
-GitHub Actions CI run `34010219404`: **PASS**
+GitHub Actions CI run `34030885029`: **PASS**
 
 Customer:
 - Flutter pub get: PASS
@@ -388,10 +408,9 @@ Current validation includes:
 - preview product/media URL and membership-rank asset mapping coverage
 - Android/iOS native visual assets included in the successful customer build
 
-Current Play-internal-readiness branch adds pure-Dart release URL validation,
-fail-closed Gradle signing and API checks, a disposable-key CI release build,
-and a protected manual internal-AAB workflow. Final validation must record the
-branch CI result before these checks are described as passed.
+The Owner Control Center branch adds dashboard and asset-maintenance e2e
+coverage. Its final GitHub Actions evidence must be recorded after the branch is
+merged; local API lint, unit tests, TypeScript compilation, and Nest build pass.
 
 ## Explicitly Provisional / Not Final
 
@@ -436,6 +455,7 @@ External operations integrations:
 - production maps/geocoding/routing provider where required
 - courier provider/integration where required
 - deeper recipes/BOM/COGS/accounting operations where required
+- outlet uptime/heartbeat telemetry if an online/offline status is required
 
 ## Next Engineering Priority
 

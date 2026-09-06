@@ -60,6 +60,12 @@ export class StaffAuthController {
   }
 
   @UseGuards(StaffAuthGuard)
+  @Get('outlets')
+  outlets(@Req() request: AuthenticatedStaffRequest) {
+    return this.authService.listOutlets(request.staffAuth!.outletId);
+  }
+
+  @UseGuards(StaffAuthGuard)
   @Post('auth/logout')
   logout(@Req() request: AuthenticatedStaffRequest) {
     return this.authService.logout(request.staffAuth!.sessionId);

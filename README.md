@@ -23,6 +23,7 @@ The product direction is inspired by the usability level of major coffee-chain a
 
 ### Operations
 
+- Owner Control Center and multi-outlet performance
 - POS
 - KDS
 - Inventory and recipes

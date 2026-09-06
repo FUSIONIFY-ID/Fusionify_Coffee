@@ -9,6 +9,76 @@ export type StaffProfile = {
   permissions: string[];
 };
 
+export type StaffOutlet = {
+  id: string;
+  name: string;
+  currency: string;
+  timezone: string;
+  active: boolean;
+};
+
+export type OwnerDashboardCurrencyTotal = {
+  currency: string;
+  netSales: number;
+  previousNetSales: number;
+  paidOrders: number;
+  averageOrderValue: number;
+  netSalesChangeBps: number | null;
+};
+
+export type OwnerDashboardTrendPoint = {
+  date: string;
+  currencies: Array<{
+    currency: string;
+    netSales: number;
+    paidOrders: number;
+  }>;
+};
+
+export type OwnerDashboardOutletPerformance = StaffOutlet & {
+  netSales: number;
+  paidOrders: number;
+  completedOrders: number;
+  averageOrderValue: number;
+  activeQueue: number;
+  paymentAttention: number;
+  lowStock: number;
+  maintenanceDue: number;
+};
+
+export type OwnerDashboardAttention = {
+  type: 'PAYMENT' | 'LOW_STOCK' | 'MAINTENANCE_DUE';
+  severity: 'CRITICAL' | 'WARNING';
+  outletId: string;
+  outletName: string;
+  title: string;
+  detail: string;
+  occurredAt: string;
+  referenceId: string;
+};
+
+export type OwnerDashboard = {
+  generatedAt: string;
+  rangeDays: 7 | 30 | 90;
+  startAt: string;
+  endAt: string;
+  selectedOutletId: string | null;
+  outlets: StaffOutlet[];
+  currencyTotals: OwnerDashboardCurrencyTotal[];
+  totals: {
+    completedOrders: number;
+    previousCompletedOrders: number;
+    completedOrdersChangeBps: number | null;
+    activeQueue: number;
+    paymentAttention: number;
+    lowStock: number;
+    maintenanceDue: number;
+  };
+  trend: OwnerDashboardTrendPoint[];
+  outletPerformance: OwnerDashboardOutletPerformance[];
+  attention: OwnerDashboardAttention[];
+};
+
 export type StaffOrderItem = {
   id: string;
   productName: string;
@@ -229,6 +299,7 @@ export type OutletInventoryLevel = {
   outletId: string;
   inventoryItemId: string;
   onHandBaseUnit: number;
+  reorderPointBaseUnit: number;
   inventoryItem: InventoryItem;
 };
 
@@ -283,5 +354,6 @@ export type StaffAsset = {
   purchaseCost: number | null;
   serialNumber: string | null;
   notes: string | null;
+  nextMaintenanceAt: string | null;
   maintenances: AssetMaintenance[];
 };

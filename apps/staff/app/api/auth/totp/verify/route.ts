@@ -1,8 +1,14 @@
-import { backendPublicFetch, forwardResponse, setStaffSession } from '@/lib/backend';
+import {
+  backendPublicFetch,
+  forwardResponse,
+  setStaffSession,
+} from '@/lib/backend';
+import type { StaffProfile } from '@/lib/types';
 
 type VerifyResponse = {
   accessToken: string;
   refreshToken: string;
+  staff: StaffProfile;
 };
 
 export async function POST(request: Request) {
@@ -15,5 +21,5 @@ export async function POST(request: Request) {
 
   const data = (await response.json()) as VerifyResponse;
   await setStaffSession(data);
-  return Response.json({ success: true });
+  return Response.json({ success: true, staff: data.staff });
 }

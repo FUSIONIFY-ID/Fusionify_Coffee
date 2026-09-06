@@ -29,6 +29,11 @@ Do not convert the staff session to localStorage/sessionStorage tokens.
 - staff login
 - first-login TOTP setup
 - 6-digit authenticator verification
+- owner-first redirect to the Owner Control Center
+- paid-sales, completed-order, active-queue, and average-order reporting
+- all-outlet and single-outlet owner scope without mixing currencies
+- outlet performance search and CSV export
+- real payment, low-stock, and due-maintenance alerts
 - KDS queue: Confirmed / Preparing / Ready / Picked Up
 - sequential fulfillment actions
 - staff order detail + backend fulfillment log
@@ -38,8 +43,15 @@ Do not convert the staff session to localStorage/sessionStorage tokens.
 - reset staff TOTP
 - rewards/operations administration foundations
 - protected Catalog screen for outlet, category, product, campaign/banner, and per-outlet availability management
+- real outlet selector for operations staff
+- asset maintenance history, status update, and next-service scheduling
 
 Catalog media is managed as a backend/CDN URL. Production accepts HTTPS URLs; direct binary upload and CDN storage are intentionally separate infrastructure concerns.
+
+Owner reporting recognizes sales only when an order has a payment marked
+`PAID`. Money is grouped by currency rather than summed across currencies. The
+outlet Active/Inactive label reflects the configured outlet state and is not a
+runtime connectivity claim.
 
 ## Realtime KDS
 

@@ -822,22 +822,24 @@ model PurchaseOrderItem {
 }
 
 model Asset {
-  id           String             @id @default(cuid())
-  assetTag     String             @unique
-  outletId     String
-  outlet       Outlet             @relation(fields: [outletId], references: [id], onDelete: Restrict)
-  name         String
-  category     String
-  status       AssetStatus        @default(ACTIVE)
-  purchaseDate DateTime?
-  purchaseCost Int?
-  serialNumber String?
-  notes        String?
-  maintenances AssetMaintenance[]
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
+  id                String             @id @default(cuid())
+  assetTag          String             @unique
+  outletId          String
+  outlet            Outlet             @relation(fields: [outletId], references: [id], onDelete: Restrict)
+  name              String
+  category          String
+  status            AssetStatus        @default(ACTIVE)
+  purchaseDate      DateTime?
+  purchaseCost      Int?
+  serialNumber      String?
+  notes             String?
+  nextMaintenanceAt DateTime?
+  maintenances      AssetMaintenance[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   @@index([outletId, status])
+  @@index([nextMaintenanceAt, status])
 }
 
 model AssetMaintenance {
