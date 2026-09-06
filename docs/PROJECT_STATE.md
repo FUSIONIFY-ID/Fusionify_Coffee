@@ -7,9 +7,8 @@ Last updated: 2026-09-06
 - Repository: `FUSIONIFY-ID/Fusionify_Coffee`
 - Default branch: `main`
 - Visibility: public
-- Latest fully validated implementation head before this documentation checkpoint: `2e77f6441a4cedf1b45d19e28ec9382cae2c7b0b`
-- CI validation run: `33983235952`
-- Repository Policy run: `33983235958`
+- Latest fully validated `main` head before the modifier-management branch: `827e4e44454ea8469bf96fbcdcb63fbb9528ee54`
+- CI validation run: `34010219404`
 
 ## Current Product State
 
@@ -106,8 +105,9 @@ Implemented foundations include:
 - outlet-aware menu search and category filtering
 - explicit per-outlet product availability
 - authoritative availability checks during customer and staff checkout
-- staff Catalog control for outlets, categories, products, campaigns, and availability
-- dynamic modifier groups/options
+- staff Catalog control for outlets, categories, products, campaigns, availability, and complete modifier groups/options
+- dynamic modifier groups/options with stable IDs, active/archive state, ordering, defaults, and single/multi-select rules
+- inactive modifier groups/options are hidden from customer catalog, favorites, and server-authoritative order validation
 - server-backed product detail
 - cart configuration identity
 - quantity/subtotal handling
@@ -267,7 +267,8 @@ Implemented management foundations:
 - session revocation after security-sensitive changes
 - last-active-SUPER_ADMIN protection
 - Team UI for privileged staff
-- Catalog UI and protected APIs for outlet, category, product, campaign/banner, and per-outlet availability management
+- Catalog UI and protected APIs for outlet, category, product, campaign/banner, per-outlet availability, and modifier-group/option management
+- omitted modifier options are archived instead of destructively deleted, while cross-product/group ID reassignment is rejected
 - safe media URL validation, with HTTPS required in production
 
 ## Staff POS + KDS
@@ -344,9 +345,9 @@ These should not be listed as wholly unimplemented anymore. External provider in
 
 ## Validation Evidence
 
-Validated implementation head: `2e77f6441a4cedf1b45d19e28ec9382cae2c7b0b`
+Validated baseline before the current modifier-management branch: `827e4e44454ea8469bf96fbcdcb63fbb9528ee54`
 
-GitHub Actions CI run `33983235952`: **PASS**
+GitHub Actions CI run `34010219404`: **PASS**
 
 Customer:
 - Flutter pub get: PASS
@@ -370,8 +371,6 @@ API:
 - e2e tests: PASS
 - NestJS build: PASS
 
-Repository Policy run `33983235958`: **PASS**
-
 Current validation includes:
 - unit coverage for outlet-scoped staff SSE queue snapshots
 - staff application typecheck/build with EventSource KDS
@@ -382,6 +381,12 @@ Current validation includes:
 - customer localization, analyze, tests, and Android debug APK validation
 - preview product/media URL and membership-rank asset mapping coverage
 - Android/iOS native visual assets included in the successful customer build
+
+Current branch-local validation additionally covers modifier-group ownership,
+safe option archival, single-select defaults, inactive catalog filtering, API
+lint, 25 unit tests, Prisma validation/generation, and the NestJS production
+build. Its database-backed staff publish/archive flow is also covered by the
+CI e2e suite.
 
 ## Explicitly Provisional / Not Final
 

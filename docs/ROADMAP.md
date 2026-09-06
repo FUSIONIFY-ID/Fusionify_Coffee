@@ -27,7 +27,7 @@ Implemented:
 - database-backed outlet/category/product/modifiers
 - active multi-outlet selection with locally persisted customer preference
 - customer menu search, category filters, and per-outlet availability
-- staff catalog/banner management with authoritative checkout enforcement
+- staff catalog/banner/modifier management with authoritative checkout enforcement
 - localized catalog descriptions
 - product customization
 - cart

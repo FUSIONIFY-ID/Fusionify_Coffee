@@ -1,6 +1,7 @@
 'use client';
 
 import { type FormEvent, useCallback, useEffect, useState } from 'react';
+import { CatalogModifierEditor } from '@/components/catalog-modifier-editor';
 import { StaffShell } from '@/components/staff-shell';
 import { useStaff } from '@/hooks/use-staff';
 import { apiJson } from '@/lib/client-api';
@@ -42,6 +43,7 @@ const emptyProduct: CatalogAdminProduct = {
   category: { id: '', name: '' },
   active: true,
   isBestseller: false,
+  modifierGroups: [],
   outletAvailability: [],
 };
 
@@ -219,6 +221,9 @@ export default function CatalogPage() {
       ],
     }));
   }
+
+  const productExists =
+    overview?.products.some((item) => item.id === product.id) ?? false;
 
   return (
     <StaffShell staff={staff}>
@@ -581,7 +586,7 @@ export default function CatalogPage() {
               {busy ? 'Saving…' : 'Save product'}
             </button>
           </form>
-          {product.id ? (
+          {productExists ? (
             <div className="availability-list">
               <h3>Outlet availability</h3>
               {overview?.outlets.map((item) => {
@@ -610,6 +615,18 @@ export default function CatalogPage() {
                 );
               })}
             </div>
+          ) : null}
+          {productExists ? (
+            <CatalogModifierEditor
+              key={product.id}
+              product={product}
+              busy={busy}
+              save={save}
+            />
+          ) : product.id ? (
+            <p className="catalog-helper-copy">
+              Save the product before adding customization groups.
+            </p>
           ) : null}
         </section>
 

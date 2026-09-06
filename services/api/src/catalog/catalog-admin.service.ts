@@ -9,6 +9,7 @@ import type {
   SetOutletProductAvailabilityInput,
   UpsertCampaignInput,
   UpsertCategoryInput,
+  UpsertModifierGroupInput,
   UpsertOutletInput,
   UpsertProductInput,
 } from './catalog-admin.types';
@@ -31,6 +32,22 @@ export class CatalogAdminService {
       this.prisma.product.findMany({
         include: {
           category: { select: { id: true, name: true } },
+          modifierGroups: {
+            include: {
+              options: {
+                orderBy: [
+                  { active: 'desc' },
+                  { sortOrder: 'asc' },
+                  { name: 'asc' },
+                ],
+              },
+            },
+            orderBy: [
+              { active: 'desc' },
+              { sortOrder: 'asc' },
+              { name: 'asc' },
+            ],
+          },
           outletAvailability: {
             select: { outletId: true, available: true },
             orderBy: { outletId: 'asc' },
@@ -298,6 +315,171 @@ export class CatalogAdminService {
       },
     );
     return availability;
+  }
+
+  async upsertModifierGroup(
+    staffUserId: string,
+    productIdValue: string,
+    groupIdValue: string,
+    input: UpsertModifierGroupInput,
+  ) {
+    this.assertInput(input);
+    const productId = this.slug(productIdValue, 'productId');
+    const groupId = this.slug(groupIdValue, 'modifierGroupId');
+    const name = this.requiredText(input.name, 'name', 80);
+    const active = this.boolean(input.active, true, 'active');
+    const required = this.boolean(input.required, false, 'required');
+    const allowMultiple = this.boolean(
+      input.allowMultiple,
+      false,
+      'allowMultiple',
+    );
+    const sortOrder = this.nonNegativeInteger(
+      input.sortOrder ?? 0,
+      'sortOrder',
+    );
+
+    if (!Array.isArray(input.options) || input.options.length > 30) {
+      throw new BadRequestException('options must contain at most 30 items.');
+    }
+    const options = input.options.map((option, index) => {
+      this.assertInput(option);
+      const optionActive = this.boolean(option.active, true, 'option.active');
+      const isDefault = this.boolean(
+        option.isDefault,
+        false,
+        'option.isDefault',
+      );
+      if (!optionActive && isDefault) {
+        throw new BadRequestException(
+          'An inactive modifier option cannot be the default.',
+        );
+      }
+      return {
+        id: this.slug(option.id, `options[${index}].id`),
+        name: this.requiredText(option.name, `options[${index}].name`, 80),
+        priceDelta: this.nonNegativeInteger(
+          option.priceDelta,
+          `options[${index}].priceDelta`,
+        ),
+        isDefault,
+        active: optionActive,
+        sortOrder: this.nonNegativeInteger(
+          option.sortOrder ?? index,
+          `options[${index}].sortOrder`,
+        ),
+      };
+    });
+
+    if (new Set(options.map((option) => option.id)).size !== options.length) {
+      throw new BadRequestException('Modifier option IDs must be unique.');
+    }
+    const activeOptions = options.filter((option) => option.active);
+    if (active && activeOptions.length === 0) {
+      throw new BadRequestException(
+        'An active modifier group requires an active option.',
+      );
+    }
+    if (
+      !allowMultiple &&
+      activeOptions.filter((option) => option.isDefault).length > 1
+    ) {
+      throw new BadRequestException(
+        'A single-select modifier group can only have one default option.',
+      );
+    }
+
+    const [product, existingGroup, existingOptions] = await Promise.all([
+      this.prisma.product.findUnique({
+        where: { id: productId },
+        select: { id: true },
+      }),
+      this.prisma.modifierGroup.findUnique({
+        where: { id: groupId },
+        select: { productId: true },
+      }),
+      this.prisma.modifierOption.findMany({
+        where: { id: { in: options.map((option) => option.id) } },
+        select: { id: true, modifierGroupId: true },
+      }),
+    ]);
+    if (!product) throw new NotFoundException('Product not found.');
+    if (existingGroup && existingGroup.productId !== productId) {
+      throw new BadRequestException(
+        'Modifier group already belongs to another product.',
+      );
+    }
+    if (existingOptions.some((option) => option.modifierGroupId !== groupId)) {
+      throw new BadRequestException(
+        'Modifier option already belongs to another group.',
+      );
+    }
+
+    const group = await this.prisma.$transaction(async (tx) => {
+      await tx.modifierGroup.upsert({
+        where: { id: groupId },
+        update: { name, active, required, allowMultiple, sortOrder },
+        create: {
+          id: groupId,
+          productId,
+          name,
+          active,
+          required,
+          allowMultiple,
+          sortOrder,
+        },
+      });
+      await tx.modifierOption.updateMany({
+        where: {
+          modifierGroupId: groupId,
+          id: { notIn: options.map((option) => option.id) },
+        },
+        data: { active: false, isDefault: false },
+      });
+      for (const option of options) {
+        await tx.modifierOption.upsert({
+          where: { id: option.id },
+          update: {
+            name: option.name,
+            priceDelta: option.priceDelta,
+            isDefault: option.isDefault,
+            active: option.active,
+            sortOrder: option.sortOrder,
+          },
+          create: {
+            ...option,
+            modifierGroupId: groupId,
+          },
+        });
+      }
+      return tx.modifierGroup.findUniqueOrThrow({
+        where: { id: groupId },
+        include: {
+          options: {
+            orderBy: [
+              { active: 'desc' },
+              { sortOrder: 'asc' },
+              { name: 'asc' },
+            ],
+          },
+        },
+      });
+    });
+
+    await this.staffAuthService.audit(
+      staffUserId,
+      'CATALOG_MODIFIER_GROUP_UPDATED',
+      {
+        targetType: 'ModifierGroup',
+        targetId: group.id,
+        metadata: {
+          productId,
+          active: group.active,
+          optionCount: group.options.length,
+        },
+      },
+    );
+    return group;
   }
 
   private assertInput(value: unknown): asserts value is object {

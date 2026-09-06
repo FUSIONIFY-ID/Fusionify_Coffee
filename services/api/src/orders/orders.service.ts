@@ -143,6 +143,7 @@ export class OrdersService {
       },
       include: {
         modifierGroups: {
+          where: { active: true },
           orderBy: { sortOrder: 'asc' },
           include: {
             options: {

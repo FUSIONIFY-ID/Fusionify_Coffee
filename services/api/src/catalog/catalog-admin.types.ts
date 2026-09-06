@@ -43,3 +43,19 @@ export type UpsertCampaignInput = {
 export type SetOutletProductAvailabilityInput = {
   available: boolean;
 };
+
+export type UpsertModifierGroupInput = {
+  name: string;
+  active?: boolean;
+  required?: boolean;
+  allowMultiple?: boolean;
+  sortOrder?: number;
+  options: Array<{
+    id: string;
+    name: string;
+    priceDelta: number;
+    isDefault?: boolean;
+    active?: boolean;
+    sortOrder?: number;
+  }>;
+};
