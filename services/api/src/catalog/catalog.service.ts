@@ -50,6 +50,7 @@ export class CatalogService {
         include: {
           category: true,
           modifierGroups: {
+            where: { active: true },
             orderBy: { sortOrder: 'asc' },
             include: {
               options: {

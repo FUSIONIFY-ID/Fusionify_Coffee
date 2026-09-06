@@ -110,4 +110,120 @@ describe('CatalogAdminService', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(campaignUpsert).not.toHaveBeenCalled();
   });
+
+  it('upserts a complete modifier group and archives omitted options', async () => {
+    const groupUpsert = jest.fn().mockResolvedValue({ id: 'latte-size' });
+    const optionUpdateMany = jest.fn().mockResolvedValue({ count: 1 });
+    const optionUpsert = jest.fn().mockResolvedValue({ id: 'latte-regular' });
+    const savedGroup = {
+      id: 'latte-size',
+      productId: 'latte',
+      name: 'Size',
+      active: true,
+      required: true,
+      allowMultiple: false,
+      sortOrder: 0,
+      options: [
+        {
+          id: 'latte-regular',
+          modifierGroupId: 'latte-size',
+          name: 'Regular',
+          priceDelta: 0,
+          isDefault: true,
+          active: true,
+          sortOrder: 0,
+        },
+      ],
+    };
+    const transactionClient = {
+      modifierGroup: {
+        upsert: groupUpsert,
+        findUniqueOrThrow: jest.fn().mockResolvedValue(savedGroup),
+      },
+      modifierOption: {
+        updateMany: optionUpdateMany,
+        upsert: optionUpsert,
+      },
+    };
+    const transaction = jest.fn(
+      (callback: (client: typeof transactionClient) => Promise<unknown>) =>
+        callback(transactionClient),
+    );
+    const audit = jest.fn().mockResolvedValue(undefined);
+    const prisma = {
+      product: { findUnique: jest.fn().mockResolvedValue({ id: 'latte' }) },
+      modifierGroup: { findUnique: jest.fn().mockResolvedValue(null) },
+      modifierOption: { findMany: jest.fn().mockResolvedValue([]) },
+      $transaction: transaction,
+    } as unknown as PrismaService;
+    const service = new CatalogAdminService(prisma, {
+      audit,
+    } as unknown as StaffAuthService);
+
+    await expect(
+      service.upsertModifierGroup('staff-1', 'latte', 'latte-size', {
+        name: 'Size',
+        active: true,
+        required: true,
+        allowMultiple: false,
+        sortOrder: 0,
+        options: [
+          {
+            id: 'latte-regular',
+            name: 'Regular',
+            priceDelta: 0,
+            isDefault: true,
+            active: true,
+            sortOrder: 0,
+          },
+        ],
+      }),
+    ).resolves.toEqual(savedGroup);
+
+    const [archiveInput] = optionUpdateMany.mock.calls[0] as [unknown];
+    expect(archiveInput).toMatchObject({
+      where: {
+        modifierGroupId: 'latte-size',
+        id: { notIn: ['latte-regular'] },
+      },
+      data: { active: false, isDefault: false },
+    });
+    expect(audit).toHaveBeenCalledWith(
+      'staff-1',
+      'CATALOG_MODIFIER_GROUP_UPDATED',
+      expect.objectContaining({ targetId: 'latte-size' }),
+    );
+  });
+
+  it('rejects multiple defaults in a single-select modifier group', async () => {
+    const service = new CatalogAdminService(
+      {} as PrismaService,
+      {} as StaffAuthService,
+    );
+
+    await expect(
+      service.upsertModifierGroup('staff-1', 'latte', 'latte-size', {
+        name: 'Size',
+        active: true,
+        required: true,
+        allowMultiple: false,
+        options: [
+          {
+            id: 'latte-regular',
+            name: 'Regular',
+            priceDelta: 0,
+            isDefault: true,
+          },
+          {
+            id: 'latte-large',
+            name: 'Large',
+            priceDelta: 5000,
+            isDefault: true,
+          },
+        ],
+      }),
+    ).rejects.toThrow(
+      'A single-select modifier group can only have one default option.',
+    );
+  });
 });

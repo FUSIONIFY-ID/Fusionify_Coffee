@@ -347,6 +347,61 @@ describe('Fusionify Coffee API (e2e)', () => {
       .expect(403);
   });
 
+  it('lets catalog staff publish and archive server-priced modifier groups', async () => {
+    const admin = await createAndLoginStaff(StaffRole.SUPER_ADMIN);
+    const path =
+      '/v1/staff/catalog/products/aren-latte/modifier-groups/aren-latte-e2e-addon';
+    const body = {
+      name: 'E2E Extra Shot',
+      active: true,
+      required: false,
+      allowMultiple: false,
+      sortOrder: 99,
+      options: [
+        {
+          id: 'aren-latte-e2e-addon-single',
+          name: 'Single Shot',
+          priceDelta: 7000,
+          isDefault: false,
+          active: true,
+          sortOrder: 0,
+        },
+      ],
+    };
+
+    await request(app.getHttpServer())
+      .put(path)
+      .set('Authorization', `Bearer ${admin.accessToken}`)
+      .send(body)
+      .expect(200);
+
+    const published = await request(app.getHttpServer())
+      .get('/v1/catalog?outletId=preview-outlet&lang=EN')
+      .expect(200);
+
+    expect(published.text).toContain('"id":"aren-latte-e2e-addon"');
+    expect(published.text).toContain('"priceDelta":7000');
+
+    await request(app.getHttpServer())
+      .put(path)
+      .set('Authorization', `Bearer ${admin.accessToken}`)
+      .send({ ...body, active: false })
+      .expect(200);
+
+    const archived = await request(app.getHttpServer())
+      .get('/v1/catalog?outletId=preview-outlet&lang=EN')
+      .expect(200);
+
+    expect(archived.text).not.toContain('"id":"aren-latte-e2e-addon"');
+
+    const auditResponse = await request(app.getHttpServer())
+      .get('/v1/staff/audit-logs')
+      .set('Authorization', `Bearer ${admin.accessToken}`)
+      .expect(200);
+
+    expect(auditResponse.text).toContain('CATALOG_MODIFIER_GROUP_UPDATED');
+  });
+
   it('creates server-priced guest POS orders and fails payment safely without provider config', async () => {
     const cashier = await createAndLoginStaff(
       StaffRole.CASHIER,

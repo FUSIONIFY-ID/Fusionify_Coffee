@@ -123,6 +123,27 @@ export type CatalogAdminCategory = {
   sortOrder: number;
 };
 
+export type CatalogAdminModifierOption = {
+  id: string;
+  modifierGroupId: string;
+  name: string;
+  priceDelta: number;
+  isDefault: boolean;
+  active: boolean;
+  sortOrder: number;
+};
+
+export type CatalogAdminModifierGroup = {
+  id: string;
+  productId: string;
+  name: string;
+  active: boolean;
+  required: boolean;
+  allowMultiple: boolean;
+  sortOrder: number;
+  options: CatalogAdminModifierOption[];
+};
+
 export type CatalogAdminProduct = {
   id: string;
   name: string;
@@ -133,6 +154,7 @@ export type CatalogAdminProduct = {
   category: { id: string; name: string };
   active: boolean;
   isBestseller: boolean;
+  modifierGroups: CatalogAdminModifierGroup[];
   outletAvailability: Array<{ outletId: string; available: boolean }>;
 };
 

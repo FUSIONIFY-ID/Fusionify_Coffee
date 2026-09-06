@@ -123,6 +123,12 @@ describe('CatalogService', () => {
           some: { outletId: 'preview-outlet', available: true },
         },
       },
+      include: {
+        modifierGroups: {
+          where: { active: true },
+          include: { options: { where: { active: true } } },
+        },
+      },
     });
   });
 

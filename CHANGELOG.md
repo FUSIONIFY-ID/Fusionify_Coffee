@@ -79,6 +79,14 @@ All notable project changes are documented by meaningful product and engineering
 - production HTTPS validation for backend-managed media URLs
 - second seeded preview outlet for demo and availability testing
 
+#### Modifier Catalog Management
+- protected staff editor and API for product modifier groups and options
+- stable modifier/option IDs with cross-owner reassignment protection
+- active/archive state, required and multi-select rules, ordering, defaults, and server-validated price deltas
+- non-destructive archival for omitted options
+- inactive modifier filtering across catalog, favorites, and authoritative checkout
+- unit and database-backed e2e coverage for publish/archive behavior
+
 ### Changed
 
 - Runtime catalog uses PostgreSQL through NestJS/Prisma

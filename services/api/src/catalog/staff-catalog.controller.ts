@@ -17,6 +17,7 @@ import type {
   SetOutletProductAvailabilityInput,
   UpsertCampaignInput,
   UpsertCategoryInput,
+  UpsertModifierGroupInput,
   UpsertOutletInput,
   UpsertProductInput,
 } from './catalog-admin.types';
@@ -95,6 +96,21 @@ export class StaffCatalogController {
       request.staffAuth!.staffUserId,
       outletId,
       productId,
+      body,
+    );
+  }
+
+  @Put('products/:productId/modifier-groups/:groupId')
+  upsertModifierGroup(
+    @Req() request: AuthenticatedStaffRequest,
+    @Param('productId') productId: string,
+    @Param('groupId') groupId: string,
+    @Body() body: UpsertModifierGroupInput,
+  ) {
+    return this.catalogAdminService.upsertModifierGroup(
+      request.staffAuth!.staffUserId,
+      productId,
+      groupId,
       body,
     );
   }
