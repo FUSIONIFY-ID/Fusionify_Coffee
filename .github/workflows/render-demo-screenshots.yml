@@ -1,0 +1,38 @@
+name: Render Demo Screenshots
+
+on:
+  push:
+    branches:
+      - codex/render-demo-screenshots
+    paths:
+      - ".github/workflows/render-demo-screenshots.yml"
+      - "apps/customer/test/demo_capture_test.dart"
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/customer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.0"
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Render Flutter golden screenshots
+        run: >-
+          flutter test --update-goldens
+          --dart-define=CAPTURE_DEMO=true
+          test/demo_capture_test.dart
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fusionify-coffee-demo-screenshots
+          path: apps/customer/test/captures/*.png
+          if-no-files-found: error
+          retention-days: 7
