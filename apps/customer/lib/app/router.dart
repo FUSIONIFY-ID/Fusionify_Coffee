@@ -52,10 +52,7 @@ final appRouter = GoRouter(
     GoRoute(path: '/cart', builder: (_, _) => const CartScreen()),
     GoRoute(path: '/checkout', builder: (_, _) => const CheckoutScreen()),
     GoRoute(path: '/favorites', builder: (_, _) => const FavoritesScreen()),
-    GoRoute(
-      path: '/outlets',
-      builder: (_, _) => const OutletSelectionScreen(),
-    ),
+    GoRoute(path: '/outlets', builder: (_, _) => const OutletSelectionScreen()),
     GoRoute(
       path: '/orders/:orderId',
       builder: (context, state) =>

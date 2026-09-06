@@ -101,10 +101,7 @@ class _CatalogHome extends StatelessWidget {
           const _PreviewNotice(),
           const SizedBox(height: CoffeeSpacing.md),
         ],
-        _OutletCard(
-          outlet: data.outlet,
-          onTap: () => context.push('/outlets'),
-        ),
+        _OutletCard(outlet: data.outlet, onTap: () => context.push('/outlets')),
         const SizedBox(height: CoffeeSpacing.md),
         _CampaignCarousel(campaigns: data.campaigns),
         const SizedBox(height: CoffeeSpacing.lg),
