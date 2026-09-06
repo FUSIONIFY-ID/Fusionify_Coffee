@@ -154,6 +154,8 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await _precacheDemoAssets(tester);
+      await tester.pump();
 
       await expectLater(
         find.byType(Scaffold).first,
@@ -187,4 +189,31 @@ Future<void> _loadAndroidFonts() async {
     loader.addFont(Future.value(ByteData.sublistView(bytes)));
   }
   await loader.load();
+
+  final iconLoader = FontLoader('MaterialIcons');
+  final iconFile = File(
+    '$flutterRoot/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
+  );
+  final iconBytes = await iconFile.readAsBytes();
+  iconLoader.addFont(Future.value(ByteData.sublistView(iconBytes)));
+  await iconLoader.load();
+}
+
+Future<void> _precacheDemoAssets(WidgetTester tester) async {
+  final context = tester.element(find.byType(Scaffold).first);
+  await tester.runAsync(() async {
+    for (final asset in [
+      'assets/brand/fusion-f-bean-app-icon.png',
+      'assets/campaigns/signature-lineup.webp',
+      'assets/outlets/preview-store.webp',
+      'assets/products/aren-latte.webp',
+      'assets/products/sea-salt-latte.webp',
+      'assets/products/buttercream-latte.webp',
+      'assets/products/matcha-cloud.webp',
+      'assets/products/pandan-coconut-latte.webp',
+      'assets/products/chocolate-malt-cloud.webp',
+    ]) {
+      await precacheImage(AssetImage(asset), context);
+    }
+  });
 }
