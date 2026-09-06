@@ -1,6 +1,13 @@
 'use client';
 
-import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  type FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { OutletSelector } from '@/components/outlet-selector';
 import { StaffShell } from '@/components/staff-shell';
 import { useStaff } from '@/hooks/use-staff';
 import { apiJson } from '@/lib/client-api';
@@ -9,12 +16,14 @@ import type {
   OutletInventoryLevel,
   PurchaseOrder,
   StaffAsset,
+  StaffOutlet,
   Supplier,
 } from '@/lib/types';
 
 export default function OperationsPage() {
   const { staff, loading: staffLoading } = useStaff();
   const [outletId, setOutletId] = useState('');
+  const [outlets, setOutlets] = useState<StaffOutlet[]>([]);
   const [inventory, setInventory] = useState<OutletInventoryLevel[]>([]);
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -27,9 +36,9 @@ export default function OperationsPage() {
 
   const [itemSku, setItemSku] = useState('');
   const [itemName, setItemName] = useState('');
-  const [itemType, setItemType] = useState<'INGREDIENT' | 'PACKAGING' | 'SUPPLY'>(
-    'INGREDIENT',
-  );
+  const [itemType, setItemType] = useState<
+    'INGREDIENT' | 'PACKAGING' | 'SUPPLY'
+  >('INGREDIENT');
   const [itemUnit, setItemUnit] = useState('');
   const [itemCost, setItemCost] = useState('0');
 
@@ -52,6 +61,16 @@ export default function OperationsPage() {
   const [assetTag, setAssetTag] = useState('');
   const [assetName, setAssetName] = useState('');
   const [assetCategory, setAssetCategory] = useState('');
+  const [maintenanceAssetId, setMaintenanceAssetId] = useState('');
+  const [maintenanceDescription, setMaintenanceDescription] = useState('');
+  const [maintenanceCost, setMaintenanceCost] = useState('');
+  const [maintenancePerformedAt, setMaintenancePerformedAt] = useState(() =>
+    dateInputValue(new Date()),
+  );
+  const [nextMaintenanceAt, setNextMaintenanceAt] = useState('');
+  const [maintenanceStatus, setMaintenanceStatus] = useState<
+    'ACTIVE' | 'MAINTENANCE' | 'RETIRED'
+  >('ACTIVE');
 
   const canRead = staff?.permissions.includes('inventory.read') ?? false;
   const canManage = staff?.permissions.includes('inventory.manage') ?? false;
@@ -60,6 +79,30 @@ export default function OperationsPage() {
   useEffect(() => {
     if (staff?.outletId) setOutletId(staff.outletId);
   }, [staff?.outletId]);
+
+  useEffect(() => {
+    if (!staff || !canRead) return;
+    let active = true;
+    void apiJson<StaffOutlet[]>('/api/staff/outlets')
+      .then((nextOutlets) => {
+        if (!active) return;
+        setOutlets(nextOutlets);
+        setOutletId(
+          (current) => staff.outletId ?? (current || nextOutlets[0]?.id || ''),
+        );
+      })
+      .catch((cause) => {
+        if (!active) return;
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : 'Outlets could not be loaded.',
+        );
+      });
+    return () => {
+      active = false;
+    };
+  }, [staff, canRead]);
 
   const outletQuery = useMemo(() => {
     if (!effectiveOutletId) return '';
@@ -76,16 +119,23 @@ export default function OperationsPage() {
     setLoading(true);
     setError('');
     try {
-      const [nextInventory, nextItems, nextSuppliers, nextPurchaseOrders, nextAssets] =
-        await Promise.all([
-          apiJson<OutletInventoryLevel[]>(`/api/staff/operations/inventory${outletQuery}`),
-          apiJson<InventoryItem[]>('/api/staff/operations/inventory/items'),
-          apiJson<Supplier[]>('/api/staff/operations/suppliers'),
-          apiJson<PurchaseOrder[]>(
-            `/api/staff/operations/purchase-orders${outletQuery}`,
-          ),
-          apiJson<StaffAsset[]>(`/api/staff/operations/assets${outletQuery}`),
-        ]);
+      const [
+        nextInventory,
+        nextItems,
+        nextSuppliers,
+        nextPurchaseOrders,
+        nextAssets,
+      ] = await Promise.all([
+        apiJson<OutletInventoryLevel[]>(
+          `/api/staff/operations/inventory${outletQuery}`,
+        ),
+        apiJson<InventoryItem[]>('/api/staff/operations/inventory/items'),
+        apiJson<Supplier[]>('/api/staff/operations/suppliers'),
+        apiJson<PurchaseOrder[]>(
+          `/api/staff/operations/purchase-orders${outletQuery}`,
+        ),
+        apiJson<StaffAsset[]>(`/api/staff/operations/assets${outletQuery}`),
+      ]);
       setInventory(nextInventory);
       setItems(nextItems);
       setSuppliers(nextSuppliers);
@@ -94,6 +144,11 @@ export default function OperationsPage() {
       setAdjustItemId((current) => current || nextItems[0]?.id || '');
       setPoItemId((current) => current || nextItems[0]?.id || '');
       setPoSupplierId((current) => current || nextSuppliers[0]?.id || '');
+      setMaintenanceAssetId((current) =>
+        nextAssets.some((asset) => asset.id === current)
+          ? current
+          : nextAssets[0]?.id || '',
+      );
     } catch (cause) {
       setError(
         cause instanceof Error
@@ -139,16 +194,19 @@ export default function OperationsPage() {
 
     await runMutation(
       () =>
-        apiJson(`/api/staff/operations/inventory/items/${encodeURIComponent(sku)}`, {
-          method: 'PUT',
-          body: JSON.stringify({
-            name: itemName.trim(),
-            type: itemType,
-            baseUnit: itemUnit.trim(),
-            costPerBaseUnit,
-            active: true,
-          }),
-        }),
+        apiJson(
+          `/api/staff/operations/inventory/items/${encodeURIComponent(sku)}`,
+          {
+            method: 'PUT',
+            body: JSON.stringify({
+              name: itemName.trim(),
+              type: itemType,
+              baseUnit: itemUnit.trim(),
+              costPerBaseUnit,
+              active: true,
+            }),
+          },
+        ),
       `${sku} saved.`,
     );
   }
@@ -156,7 +214,11 @@ export default function OperationsPage() {
   async function adjustStock(event: FormEvent) {
     event.preventDefault();
     const quantityBaseUnit = Number.parseInt(adjustQuantity, 10);
-    if (!adjustItemId || !Number.isInteger(quantityBaseUnit) || quantityBaseUnit === 0) {
+    if (
+      !adjustItemId ||
+      !Number.isInteger(quantityBaseUnit) ||
+      quantityBaseUnit === 0
+    ) {
       setError('Choose an inventory item and enter a non-zero quantity.');
       return;
     }
@@ -267,7 +329,10 @@ export default function OperationsPage() {
     const remaining = order.items
       .map((item) => ({
         inventoryItemId: item.inventoryItemId,
-        quantityBaseUnit: Math.max(0, item.quantityBaseUnit - item.receivedBaseUnit),
+        quantityBaseUnit: Math.max(
+          0,
+          item.quantityBaseUnit - item.receivedBaseUnit,
+        ),
       }))
       .filter((item) => item.quantityBaseUnit > 0);
 
@@ -312,6 +377,51 @@ export default function OperationsPage() {
     setAssetCategory('');
   }
 
+  async function recordMaintenance(event: FormEvent) {
+    event.preventDefault();
+    const cost = maintenanceCost.trim()
+      ? Number.parseInt(maintenanceCost, 10)
+      : undefined;
+    if (!maintenanceAssetId || !maintenanceDescription.trim()) {
+      setError('Choose an asset and describe the maintenance work.');
+      return;
+    }
+    if (!maintenancePerformedAt) {
+      setError('Maintenance date is required.');
+      return;
+    }
+    if (cost != null && (!Number.isInteger(cost) || cost < 0)) {
+      setError('Maintenance cost must be a non-negative integer.');
+      return;
+    }
+
+    await runMutation(
+      () =>
+        apiJson(
+          `/api/staff/operations/assets/${encodeURIComponent(maintenanceAssetId)}/maintenance`,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              description: maintenanceDescription.trim(),
+              cost,
+              performedAt: dateToIso(maintenancePerformedAt),
+              nextMaintenanceAt: nextMaintenanceAt
+                ? dateToIso(nextMaintenanceAt)
+                : null,
+              statusAfter: maintenanceStatus,
+            }),
+          },
+        ),
+      'Maintenance record and next service schedule saved.',
+    );
+    setMaintenanceDescription('');
+    setMaintenanceCost('');
+  }
+
+  const selectedMaintenanceAsset = assets.find(
+    (asset) => asset.id === maintenanceAssetId,
+  );
+
   if (staffLoading || !staff) {
     return <main className="loading-page">Opening operations…</main>;
   }
@@ -331,35 +441,41 @@ export default function OperationsPage() {
           <p className="eyebrow">OUTLET OPERATIONS</p>
           <h1>Inventory, Purchasing & Assets</h1>
           <p>
-            Work from actual outlet stock and procurement records. Every mutation
-            stays behind staff RBAC and backend audit controls.
+            Work from actual outlet stock and procurement records. Every
+            mutation stays behind staff RBAC and backend audit controls.
           </p>
         </div>
       </header>
 
-      {!staff.outletId ? (
-        <section className="detail-card">
+      <section className="detail-card operations-scope-card">
+        <div>
           <p className="eyebrow">OUTLET SCOPE</p>
-          <h2>Select outlet</h2>
-          <div className="form-stack">
-            <label>
-              Outlet ID
-              <input
-                value={outletId}
-                onChange={(event) => setOutletId(event.target.value)}
-                placeholder="Outlet ID"
-              />
-            </label>
-            <button className="primary-button" type="button" onClick={() => void load()}>
-              Load outlet operations
-            </button>
-          </div>
-        </section>
-      ) : null}
+          <h2>
+            {outlets.find((outlet) => outlet.id === effectiveOutletId)?.name ??
+              'Select outlet'}
+          </h2>
+        </div>
+        <OutletSelector
+          outlets={outlets}
+          value={effectiveOutletId}
+          onChange={setOutletId}
+          disabled={Boolean(staff.outletId)}
+        />
+        <button
+          className="secondary-button compact-button"
+          type="button"
+          disabled={!effectiveOutletId || loading}
+          onClick={() => void load()}
+        >
+          Refresh data
+        </button>
+      </section>
 
       {error ? <div className="inline-alert">{error}</div> : null}
       {message ? <div className="detail-card">{message}</div> : null}
-      {loading ? <div className="detail-card">Loading outlet operations…</div> : null}
+      {loading ? (
+        <div className="detail-card">Loading outlet operations…</div>
+      ) : null}
 
       <div className="order-detail-grid">
         <section className="detail-card">
@@ -371,15 +487,22 @@ export default function OperationsPage() {
             ) : (
               inventory.map((level) => (
                 <article className="team-row" key={level.id}>
-                  <div className="team-avatar">{level.inventoryItem.sku.slice(0, 3)}</div>
+                  <div className="team-avatar">
+                    {level.inventoryItem.sku.slice(0, 3)}
+                  </div>
                   <div className="team-name">
                     <strong>{level.inventoryItem.name}</strong>
                     <span>
-                      {level.inventoryItem.type.replaceAll('_', ' ')} · {level.inventoryItem.baseUnit}
+                      {level.inventoryItem.type.replaceAll('_', ' ')} ·{' '}
+                      {level.inventoryItem.baseUnit}
                     </span>
                   </div>
                   <span className="team-role">
                     {level.onHandBaseUnit} {level.inventoryItem.baseUnit}
+                    {level.reorderPointBaseUnit > 0 &&
+                    level.onHandBaseUnit <= level.reorderPointBaseUnit
+                      ? ' · LOW'
+                      : ''}
                   </span>
                 </article>
               ))
@@ -394,7 +517,10 @@ export default function OperationsPage() {
             <form className="form-stack" onSubmit={adjustStock}>
               <label>
                 Inventory item
-                <select value={adjustItemId} onChange={(event) => setAdjustItemId(event.target.value)}>
+                <select
+                  value={adjustItemId}
+                  onChange={(event) => setAdjustItemId(event.target.value)}
+                >
                   <option value="">Select item</option>
                   {items.map((item) => (
                     <option value={item.id} key={item.id}>
@@ -423,7 +549,10 @@ export default function OperationsPage() {
                   placeholder="Stock count correction"
                 />
               </label>
-              <button className="primary-button" disabled={busy || !effectiveOutletId}>
+              <button
+                className="primary-button"
+                disabled={busy || !effectiveOutletId}
+              >
                 Save stock adjustment
               </button>
             </form>
@@ -441,9 +570,13 @@ export default function OperationsPage() {
                 <div className="team-avatar">{item.sku.slice(0, 3)}</div>
                 <div className="team-name">
                   <strong>{item.name}</strong>
-                  <span>{item.sku} · {item.baseUnit}</span>
+                  <span>
+                    {item.sku} · {item.baseUnit}
+                  </span>
                 </div>
-                <span className="team-role">{item.active ? item.type : 'INACTIVE'}</span>
+                <span className="team-role">
+                  {item.active ? item.type : 'INACTIVE'}
+                </span>
               </article>
             ))}
           </div>
@@ -456,15 +589,32 @@ export default function OperationsPage() {
             <form className="form-stack" onSubmit={saveInventoryItem}>
               <label>
                 SKU
-                <input required maxLength={40} value={itemSku} onChange={(event) => setItemSku(event.target.value.toUpperCase())} />
+                <input
+                  required
+                  maxLength={40}
+                  value={itemSku}
+                  onChange={(event) =>
+                    setItemSku(event.target.value.toUpperCase())
+                  }
+                />
               </label>
               <label>
                 Name
-                <input required maxLength={100} value={itemName} onChange={(event) => setItemName(event.target.value)} />
+                <input
+                  required
+                  maxLength={100}
+                  value={itemName}
+                  onChange={(event) => setItemName(event.target.value)}
+                />
               </label>
               <label>
                 Type
-                <select value={itemType} onChange={(event) => setItemType(event.target.value as typeof itemType)}>
+                <select
+                  value={itemType}
+                  onChange={(event) =>
+                    setItemType(event.target.value as typeof itemType)
+                  }
+                >
                   <option value="INGREDIENT">Ingredient</option>
                   <option value="PACKAGING">Packaging</option>
                   <option value="SUPPLY">Supply</option>
@@ -472,13 +622,27 @@ export default function OperationsPage() {
               </label>
               <label>
                 Base unit
-                <input required maxLength={24} value={itemUnit} onChange={(event) => setItemUnit(event.target.value)} placeholder="ml, gram, pcs" />
+                <input
+                  required
+                  maxLength={24}
+                  value={itemUnit}
+                  onChange={(event) => setItemUnit(event.target.value)}
+                  placeholder="ml, gram, pcs"
+                />
               </label>
               <label>
                 Cost per base unit
-                <input required min={0} type="number" value={itemCost} onChange={(event) => setItemCost(event.target.value)} />
+                <input
+                  required
+                  min={0}
+                  type="number"
+                  value={itemCost}
+                  onChange={(event) => setItemCost(event.target.value)}
+                />
               </label>
-              <button className="primary-button" disabled={busy}>Save inventory item</button>
+              <button className="primary-button" disabled={busy}>
+                Save inventory item
+              </button>
             </form>
           </section>
         ) : null}
@@ -494,12 +658,21 @@ export default function OperationsPage() {
             ) : (
               suppliers.map((supplier) => (
                 <article className="team-row" key={supplier.id}>
-                  <div className="team-avatar">{supplier.name.slice(0, 2).toUpperCase()}</div>
+                  <div className="team-avatar">
+                    {supplier.name.slice(0, 2).toUpperCase()}
+                  </div>
                   <div className="team-name">
                     <strong>{supplier.name}</strong>
-                    <span>{supplier.contactName || supplier.email || supplier.phone || 'No contact details'}</span>
+                    <span>
+                      {supplier.contactName ||
+                        supplier.email ||
+                        supplier.phone ||
+                        'No contact details'}
+                    </span>
                   </div>
-                  <span className="team-role">{supplier.active ? 'ACTIVE' : 'INACTIVE'}</span>
+                  <span className="team-role">
+                    {supplier.active ? 'ACTIVE' : 'INACTIVE'}
+                  </span>
                 </article>
               ))
             )}
@@ -511,11 +684,39 @@ export default function OperationsPage() {
             <p className="eyebrow">NEW SUPPLIER</p>
             <h2>Supplier contact</h2>
             <form className="form-stack" onSubmit={createSupplier}>
-              <label>Name<input required value={supplierName} onChange={(event) => setSupplierName(event.target.value)} /></label>
-              <label>Contact name<input value={supplierContact} onChange={(event) => setSupplierContact(event.target.value)} /></label>
-              <label>Phone<input value={supplierPhone} onChange={(event) => setSupplierPhone(event.target.value)} /></label>
-              <label>Email<input type="email" value={supplierEmail} onChange={(event) => setSupplierEmail(event.target.value)} /></label>
-              <button className="primary-button" disabled={busy}>Create supplier</button>
+              <label>
+                Name
+                <input
+                  required
+                  value={supplierName}
+                  onChange={(event) => setSupplierName(event.target.value)}
+                />
+              </label>
+              <label>
+                Contact name
+                <input
+                  value={supplierContact}
+                  onChange={(event) => setSupplierContact(event.target.value)}
+                />
+              </label>
+              <label>
+                Phone
+                <input
+                  value={supplierPhone}
+                  onChange={(event) => setSupplierPhone(event.target.value)}
+                />
+              </label>
+              <label>
+                Email
+                <input
+                  type="email"
+                  value={supplierEmail}
+                  onChange={(event) => setSupplierEmail(event.target.value)}
+                />
+              </label>
+              <button className="primary-button" disabled={busy}>
+                Create supplier
+              </button>
             </form>
           </section>
         ) : null}
@@ -534,14 +735,32 @@ export default function OperationsPage() {
                   <div className="team-avatar">PO</div>
                   <div className="team-name">
                     <strong>{order.supplier.name}</strong>
-                    <span>{order.items.length} line(s) · {order.currency}</span>
+                    <span>
+                      {order.items.length} line(s) · {order.currency}
+                    </span>
                   </div>
-                  <span className="team-role">{order.status.replaceAll('_', ' ')}</span>
+                  <span className="team-role">
+                    {order.status.replaceAll('_', ' ')}
+                  </span>
                   {canManage && order.status === 'DRAFT' ? (
-                    <button className="text-button" type="button" onClick={() => void markOrdered(order)}>Mark ordered</button>
+                    <button
+                      className="text-button"
+                      type="button"
+                      onClick={() => void markOrdered(order)}
+                    >
+                      Mark ordered
+                    </button>
                   ) : null}
-                  {canManage && (order.status === 'ORDERED' || order.status === 'PARTIALLY_RECEIVED') ? (
-                    <button className="text-button" type="button" onClick={() => void receiveRemaining(order)}>Receive remaining</button>
+                  {canManage &&
+                  (order.status === 'ORDERED' ||
+                    order.status === 'PARTIALLY_RECEIVED') ? (
+                    <button
+                      className="text-button"
+                      type="button"
+                      onClick={() => void receiveRemaining(order)}
+                    >
+                      Receive remaining
+                    </button>
                   ) : null}
                 </article>
               ))
@@ -553,27 +772,84 @@ export default function OperationsPage() {
           <section className="detail-card">
             <p className="eyebrow">NEW PURCHASE ORDER</p>
             <h2>Single-line purchase order</h2>
-            <p>Add more lines through subsequent procurement UI expansion; this form writes a real draft purchase order.</p>
+            <p>
+              Add more lines through subsequent procurement UI expansion; this
+              form writes a real draft purchase order.
+            </p>
             <form className="form-stack" onSubmit={createPurchaseOrder}>
               <label>
                 Supplier
-                <select value={poSupplierId} onChange={(event) => setPoSupplierId(event.target.value)}>
+                <select
+                  value={poSupplierId}
+                  onChange={(event) => setPoSupplierId(event.target.value)}
+                >
                   <option value="">Select supplier</option>
-                  {suppliers.map((supplier) => <option value={supplier.id} key={supplier.id}>{supplier.name}</option>)}
+                  {suppliers.map((supplier) => (
+                    <option value={supplier.id} key={supplier.id}>
+                      {supplier.name}
+                    </option>
+                  ))}
                 </select>
               </label>
               <label>
                 Inventory item
-                <select value={poItemId} onChange={(event) => setPoItemId(event.target.value)}>
+                <select
+                  value={poItemId}
+                  onChange={(event) => setPoItemId(event.target.value)}
+                >
                   <option value="">Select item</option>
-                  {items.map((item) => <option value={item.id} key={item.id}>{item.sku} · {item.name}</option>)}
+                  {items.map((item) => (
+                    <option value={item.id} key={item.id}>
+                      {item.sku} · {item.name}
+                    </option>
+                  ))}
                 </select>
               </label>
-              <label>Quantity<input required min={1} type="number" value={poQuantity} onChange={(event) => setPoQuantity(event.target.value)} /></label>
-              <label>Unit cost<input required min={0} type="number" value={poUnitCost} onChange={(event) => setPoUnitCost(event.target.value)} /></label>
-              <label>Currency<input required maxLength={3} value={poCurrency} onChange={(event) => setPoCurrency(event.target.value.toUpperCase())} /></label>
-              <label>Notes<input maxLength={500} value={poNotes} onChange={(event) => setPoNotes(event.target.value)} /></label>
-              <button className="primary-button" disabled={busy || !effectiveOutletId}>Create draft PO</button>
+              <label>
+                Quantity
+                <input
+                  required
+                  min={1}
+                  type="number"
+                  value={poQuantity}
+                  onChange={(event) => setPoQuantity(event.target.value)}
+                />
+              </label>
+              <label>
+                Unit cost
+                <input
+                  required
+                  min={0}
+                  type="number"
+                  value={poUnitCost}
+                  onChange={(event) => setPoUnitCost(event.target.value)}
+                />
+              </label>
+              <label>
+                Currency
+                <input
+                  required
+                  maxLength={3}
+                  value={poCurrency}
+                  onChange={(event) =>
+                    setPoCurrency(event.target.value.toUpperCase())
+                  }
+                />
+              </label>
+              <label>
+                Notes
+                <input
+                  maxLength={500}
+                  value={poNotes}
+                  onChange={(event) => setPoNotes(event.target.value)}
+                />
+              </label>
+              <button
+                className="primary-button"
+                disabled={busy || !effectiveOutletId}
+              >
+                Create draft PO
+              </button>
             </form>
           </section>
         ) : null}
@@ -589,10 +865,24 @@ export default function OperationsPage() {
             ) : (
               assets.map((asset) => (
                 <article className="team-row" key={asset.id}>
-                  <div className="team-avatar">{asset.assetTag.slice(0, 2)}</div>
+                  <div className="team-avatar">
+                    {asset.assetTag.slice(0, 2)}
+                  </div>
                   <div className="team-name">
                     <strong>{asset.name}</strong>
-                    <span>{asset.assetTag} · {asset.category}</span>
+                    <span>
+                      {asset.assetTag} · {asset.category}
+                      {asset.nextMaintenanceAt
+                        ? ` · next ${formatDate(asset.nextMaintenanceAt)}`
+                        : ' · no service scheduled'}
+                    </span>
+                    {asset.maintenances[0] ? (
+                      <span>
+                        Last service{' '}
+                        {formatDate(asset.maintenances[0].performedAt)} ·{' '}
+                        {asset.maintenances[0].description}
+                      </span>
+                    ) : null}
                   </div>
                   <span className="team-role">{asset.status}</span>
                 </article>
@@ -606,14 +896,158 @@ export default function OperationsPage() {
             <p className="eyebrow">REGISTER ASSET</p>
             <h2>Add outlet equipment</h2>
             <form className="form-stack" onSubmit={createAsset}>
-              <label>Asset tag<input required value={assetTag} onChange={(event) => setAssetTag(event.target.value.toUpperCase())} /></label>
-              <label>Name<input required value={assetName} onChange={(event) => setAssetName(event.target.value)} /></label>
-              <label>Category<input required value={assetCategory} onChange={(event) => setAssetCategory(event.target.value)} placeholder="Coffee machine" /></label>
-              <button className="primary-button" disabled={busy || !effectiveOutletId}>Register asset</button>
+              <label>
+                Asset tag
+                <input
+                  required
+                  value={assetTag}
+                  onChange={(event) =>
+                    setAssetTag(event.target.value.toUpperCase())
+                  }
+                />
+              </label>
+              <label>
+                Name
+                <input
+                  required
+                  value={assetName}
+                  onChange={(event) => setAssetName(event.target.value)}
+                />
+              </label>
+              <label>
+                Category
+                <input
+                  required
+                  value={assetCategory}
+                  onChange={(event) => setAssetCategory(event.target.value)}
+                  placeholder="Coffee machine"
+                />
+              </label>
+              <button
+                className="primary-button"
+                disabled={busy || !effectiveOutletId}
+              >
+                Register asset
+              </button>
             </form>
           </section>
         ) : null}
       </div>
+
+      {canManage ? (
+        <section className="detail-card maintenance-card">
+          <div className="maintenance-heading">
+            <div>
+              <p className="eyebrow">ASSET MAINTENANCE</p>
+              <h2>Record service and schedule the next visit</h2>
+            </div>
+            {selectedMaintenanceAsset ? (
+              <span className="team-role">
+                {selectedMaintenanceAsset.assetTag} ·{' '}
+                {selectedMaintenanceAsset.status}
+              </span>
+            ) : null}
+          </div>
+          <form className="maintenance-form" onSubmit={recordMaintenance}>
+            <label>
+              Asset
+              <select
+                required
+                value={maintenanceAssetId}
+                onChange={(event) => setMaintenanceAssetId(event.target.value)}
+              >
+                <option value="">Select asset</option>
+                {assets.map((asset) => (
+                  <option value={asset.id} key={asset.id}>
+                    {asset.assetTag} · {asset.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="maintenance-description">
+              Work completed
+              <input
+                required
+                maxLength={500}
+                value={maintenanceDescription}
+                onChange={(event) =>
+                  setMaintenanceDescription(event.target.value)
+                }
+                placeholder="Cleaned group head and replaced gasket"
+              />
+            </label>
+            <label>
+              Cost
+              <input
+                min={0}
+                step="1"
+                type="number"
+                value={maintenanceCost}
+                onChange={(event) => setMaintenanceCost(event.target.value)}
+                placeholder="Optional"
+              />
+            </label>
+            <label>
+              Service date
+              <input
+                required
+                type="date"
+                value={maintenancePerformedAt}
+                onChange={(event) =>
+                  setMaintenancePerformedAt(event.target.value)
+                }
+              />
+            </label>
+            <label>
+              Next service
+              <input
+                type="date"
+                min={maintenancePerformedAt}
+                value={nextMaintenanceAt}
+                onChange={(event) => setNextMaintenanceAt(event.target.value)}
+              />
+            </label>
+            <label>
+              Asset status after service
+              <select
+                value={maintenanceStatus}
+                onChange={(event) =>
+                  setMaintenanceStatus(
+                    event.target.value as typeof maintenanceStatus,
+                  )
+                }
+              >
+                <option value="ACTIVE">Active</option>
+                <option value="MAINTENANCE">Still in maintenance</option>
+                <option value="RETIRED">Retired</option>
+              </select>
+            </label>
+            <button
+              className="primary-button"
+              disabled={busy || !maintenanceAssetId}
+            >
+              Save maintenance record
+            </button>
+          </form>
+        </section>
+      ) : null}
     </StaffShell>
   );
+}
+
+function dateInputValue(date: Date) {
+  const offset = date.getTimezoneOffset();
+  return new Date(date.getTime() - offset * 60_000).toISOString().slice(0, 10);
+}
+
+function dateToIso(value: string) {
+  return `${value}T12:00:00.000Z`;
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat('en', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(new Date(value));
 }

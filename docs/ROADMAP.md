@@ -131,7 +131,7 @@ Still product-dependent:
 
 ## Milestone 0.5: Operations
 
-Status: **Foundation implemented; deeper operations remain**
+Status: **Owner and outlet-control foundation implemented; deeper operations remain**
 
 Implemented repository foundations:
 - inventory
@@ -139,6 +139,10 @@ Implemented repository foundations:
 - purchase orders
 - assets
 - staff operations interfaces/APIs
+- Owner Control Center with real paid-sales and fulfillment reporting
+- multi-outlet owner filtering and CSV export
+- operational alerts for payment, low stock, and maintenance due
+- asset maintenance history and next-service scheduling
 
 Potential deeper work depending on operational requirements:
 - recipes/BOM
@@ -148,7 +152,7 @@ Potential deeper work depending on operational requirements:
 - transfer workflows
 - receiving/accounting depth
 - COGS
-- maintenance scheduling/reporting depth
+- preventive-maintenance work orders, vendors, and attachment depth
 
 ## Milestone 0.6: Delivery
 
@@ -250,8 +254,9 @@ Before production:
 ## Next Priorities
 
 1. Preserve the current green CI baseline.
-2. Configure and validate real WhatsApp/SMS OTP providers.
-3. Deploy the API behind production HTTPS.
-4. Run controlled live AutoGoPay create/webhook/status/cancel tests.
-5. Approve production catalog/media, connect its CDN workflow, and complete release signing.
-6. Introduce a pub/sub trigger layer for customer/KDS only when deployment scale requires it.
+2. Validate the Owner Control Center and maintenance flow with production-like outlet data.
+3. Configure and validate real WhatsApp/SMS OTP providers.
+4. Deploy the API behind production HTTPS.
+5. Run controlled live AutoGoPay create/webhook/status/cancel tests.
+6. Approve production catalog/media, connect its CDN workflow, and complete release signing.
+7. Introduce a pub/sub trigger layer for customer/KDS only when deployment scale requires it.

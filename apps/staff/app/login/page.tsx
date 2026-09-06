@@ -3,6 +3,7 @@
 import { type FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiJson } from '@/lib/client-api';
+import type { StaffProfile } from '@/lib/types';
 
 type LoginResponse = {
   challengeToken: string;
@@ -66,11 +67,18 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await apiJson<{ success: true }>('/api/auth/totp/verify', {
-        method: 'POST',
-        body: JSON.stringify({ challengeToken, code }),
-      });
-      router.replace('/kds');
+      const response = await apiJson<{ success: true; staff: StaffProfile }>(
+        '/api/auth/totp/verify',
+        {
+          method: 'POST',
+          body: JSON.stringify({ challengeToken, code }),
+        },
+      );
+      router.replace(
+        response.staff.permissions.includes('finance.read')
+          ? '/overview'
+          : '/kds',
+      );
       router.refresh();
     } catch (cause) {
       setError(
@@ -97,7 +105,9 @@ export default function LoginPage() {
             <div className="page-heading compact">
               <p className="eyebrow">STAFF ACCESS</p>
               <h1>Sign in to your outlet</h1>
-              <p>Password verification is followed by your authenticator code.</p>
+              <p>
+                Password verification is followed by your authenticator code.
+              </p>
             </div>
             <form className="form-stack" onSubmit={submitCredentials}>
               <label>
@@ -178,7 +188,7 @@ export default function LoginPage() {
                   className="primary-button"
                   disabled={busy || code.length !== 6}
                 >
-                  {busy ? 'Verifying…' : 'Verify & open KDS'}
+                  {busy ? 'Verifying…' : 'Verify & continue'}
                 </button>
               </form>
             )}

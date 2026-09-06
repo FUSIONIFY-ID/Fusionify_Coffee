@@ -504,19 +504,37 @@ export class OperationsService {
     ) {
       throw new BadRequestException('Maintenance cost must be non-negative.');
     }
-    const maintenance = await this.prisma.assetMaintenance.create({
-      data: {
-        assetId: asset.id,
-        staffUserId,
-        description: this.requiredText(input.description, 'description', 500),
-        cost: input.cost ?? null,
-        performedAt: this.parseDate(input.performedAt, 'performedAt'),
-      },
+    const statusAfter = input.statusAfter ?? AssetStatus.ACTIVE;
+    if (!Object.values(AssetStatus).includes(statusAfter)) {
+      throw new BadRequestException('Asset status is invalid.');
+    }
+    const nextMaintenanceAt = input.nextMaintenanceAt
+      ? this.parseDate(input.nextMaintenanceAt, 'nextMaintenanceAt')
+      : null;
+    const maintenance = await this.prisma.$transaction(async (tx) => {
+      const record = await tx.assetMaintenance.create({
+        data: {
+          assetId: asset.id,
+          staffUserId,
+          description: this.requiredText(input.description, 'description', 500),
+          cost: input.cost ?? null,
+          performedAt: this.parseDate(input.performedAt, 'performedAt'),
+        },
+      });
+      await tx.asset.update({
+        where: { id: asset.id },
+        data: { status: statusAfter, nextMaintenanceAt },
+      });
+      return record;
     });
     await this.staffAuthService.audit(staffUserId, 'ASSET_MAINTENANCE_ADDED', {
       targetType: 'Asset',
       targetId: asset.id,
-      metadata: { maintenanceId: maintenance.id },
+      metadata: {
+        maintenanceId: maintenance.id,
+        statusAfter,
+        nextMaintenanceAt: nextMaintenanceAt?.toISOString() ?? null,
+      },
     });
     return maintenance;
   }

@@ -68,4 +68,6 @@ export type MaintenanceInput = {
   description: string;
   cost?: number | null;
   performedAt: string;
+  nextMaintenanceAt?: string | null;
+  statusAfter?: AssetStatus;
 };

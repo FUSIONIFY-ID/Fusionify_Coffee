@@ -217,6 +217,20 @@ export class StaffAuthService {
     return this.staffView(user);
   }
 
+  async listOutlets(staffOutletId: string | null) {
+    return this.prisma.outlet.findMany({
+      where: staffOutletId ? { id: staffOutletId } : undefined,
+      select: {
+        id: true,
+        name: true,
+        currency: true,
+        timezone: true,
+        active: true,
+      },
+      orderBy: [{ active: 'desc' }, { sortOrder: 'asc' }, { name: 'asc' }],
+    });
+  }
+
   async logout(sessionId: string) {
     const session = await this.prisma.staffSession.update({
       where: { id: sessionId },
