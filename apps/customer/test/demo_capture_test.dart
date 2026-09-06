@@ -117,10 +117,11 @@ const _demoCatalog = CatalogSnapshot(
 );
 
 void main() {
+  setUpAll(_loadAndroidFonts);
+
   testWidgets(
     'captures rendered customer home and menu demo',
     (tester) async {
-      await _loadAndroidFonts();
       await tester.binding.setSurfaceSize(const Size(390, 844));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
