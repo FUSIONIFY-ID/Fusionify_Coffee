@@ -222,6 +222,14 @@ Future scaling option:
 
 ## Release Readiness
 
+Implemented repository preparation:
+- locked Android application ID `id.fusionify.coffee`
+- protected environment-based upload signing with no debug fallback
+- build-time and runtime rejection of unsafe release API URLs
+- release-only cleartext traffic protection
+- CI proof path for signed release AAB generation
+- protected manual workflow and runbook for Play Internal AAB artifacts
+
 Before production:
 - live payment provider validation
 - production WhatsApp OTP validation

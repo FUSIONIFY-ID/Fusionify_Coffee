@@ -7,8 +7,10 @@ Last updated: 2026-09-06
 - Repository: `FUSIONIFY-ID/Fusionify_Coffee`
 - Default branch: `main`
 - Visibility: public
-- Latest fully validated `main` head before the modifier-management branch: `827e4e44454ea8469bf96fbcdcb63fbb9528ee54`
-- CI validation run: `34010219404`
+- Latest fully validated `main` head before the Play-internal-readiness branch: `2dc074e9117a741aada523796aa52e40f51f10bb`
+- CI validation run: `34027906534`
+- Repository Policy run: `34027906536`
+- API package publication run: `34028122264`
 
 ## Current Product State
 
@@ -27,9 +29,13 @@ The largest production-readiness gaps are now external/live integrations and rel
 - Dio
 - Android minSdk 28
 - Android compileSdk/targetSdk 36
+- locked Android application ID `id.fusionify.coffee`
 - no gradients
 - secure local session storage
 - Android debug APK builds in CI
+- release signing fails closed when protected upload-key variables are missing
+- release builds require a non-local HTTPS API URL and disable cleartext traffic
+- manual protected workflow for short-lived signed Play Internal AAB artifacts
 
 ### Backend
 
@@ -382,15 +388,13 @@ Current validation includes:
 - preview product/media URL and membership-rank asset mapping coverage
 - Android/iOS native visual assets included in the successful customer build
 
-Current branch-local validation additionally covers modifier-group ownership,
-safe option archival, single-select defaults, inactive catalog filtering, API
-lint, 25 unit tests, Prisma validation/generation, and the NestJS production
-build. Its database-backed staff publish/archive flow is also covered by the
-CI e2e suite.
+Current Play-internal-readiness branch adds pure-Dart release URL validation,
+fail-closed Gradle signing and API checks, a disposable-key CI release build,
+and a protected manual internal-AAB workflow. Final validation must record the
+branch CI result before these checks are described as passed.
 
 ## Explicitly Provisional / Not Final
 
-- Android application ID `id.fusionify.coffee`
 - official production Fusionify Coffee logo/media set
 - final approval or replacement of the provisional Fusion Bean icon/splash concept
 - production API hostname
@@ -415,7 +419,10 @@ Production content/release:
 - production CDN upload/content-management workflow and approved catalog/campaign media
 - official identity approval and platform-icon regeneration
 - production API deployment/hostname/TLS
-- Android production signing and Play readiness
+- provision and back up the real Android upload key
+- run the protected internal-AAB workflow with a reachable HTTPS API
+- upload the signed AAB to Google Play Internal Testing and record Console evidence
+- install through Google Play on API 28 and API 36 devices
 - iOS deployment/release configuration and App Store readiness
 - privacy/Data Safety/account-policy review
 - crash/ANR monitoring

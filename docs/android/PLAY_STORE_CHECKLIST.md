@@ -7,25 +7,27 @@ Re-check official policy before release.
 ## Identity and Package
 
 - [ ] Developer identity/account requirements satisfied
-- [ ] Stable application/package ID
+- [x] Stable application/package ID: `id.fusionify.coffee`
 - [ ] Package registered/recognized correctly
 - [ ] Play App Signing enabled
 - [ ] Upload key safely configured
 
 ## Build
 
-- [ ] minSdk 28
-- [ ] compileSdk at current approved project baseline or newer required baseline
-- [ ] targetSdk meets current Play requirement
+- [x] minSdk 28
+- [x] compileSdk 36
+- [x] targetSdk 36
 - [ ] Release AAB builds successfully
 - [ ] Release build signed with upload key
-- [ ] No debug configuration in release
+- [x] Release refuses debug signing fallback
+- [x] Release build refuses a missing, HTTP, local, or reserved API URL
+- [x] Cleartext traffic disabled in the release manifest
 - [ ] Edge-to-edge reviewed
 - [ ] Predictive back reviewed
 
 ## Permissions
 
-- [ ] Manifest permission list audited
+- [x] Current release manifest permission list audited: `INTERNET` only
 - [ ] Runtime permission UX tested
 - [ ] No background location unless explicitly approved
 - [ ] No broad media permission where system picker is enough
@@ -72,3 +74,7 @@ Re-check official policy before release.
 ## Final Rule
 
 Do not mark this checklist complete from documentation alone. Verify against the actual Play Console release.
+
+For internal-track preparation and evidence, use
+`PLAY_INTERNAL_TESTING.md`. Internal-track acceptance is not production
+approval.

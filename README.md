@@ -73,7 +73,15 @@ v0.3.0-preview.1
 
 runs `.github/workflows/release-preview.yml`. The workflow validates the Flutter app, builds a debug-signed preview APK, creates a GitHub **prerelease**, and attaches the APK.
 
-Preview releases are intentionally not presented as production Google Play builds. Production release signing remains a separate future step.
+Preview releases are intentionally not presented as production Google Play builds. Real upload-key provisioning and Play Console distribution remain protected release operations.
+
+### Google Play Internal AAB
+
+The manual `Build Play Internal AAB` workflow validates the customer app and
+creates a signed release AAB from protected repository secrets. It requires a
+real HTTPS Fusionify API URL and never stores the upload keystore in Git.
+
+See [Google Play Internal Testing](./docs/android/PLAY_INTERNAL_TESTING.md).
 
 ## Non-Negotiable Engineering Rules
 

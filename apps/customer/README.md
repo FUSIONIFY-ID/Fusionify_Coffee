@@ -150,15 +150,18 @@ flutter run --dart-define=API_BASE_URL=https://api.example.com
 
 ## Android
 
-Generated application ID remains provisional:
+The approved and locked Android application ID is:
 
 ```text
 id.fusionify.coffee
 ```
 
-Production release signing is intentionally not configured in Git.
+Release signing reads only protected environment variables and fails closed
+when signing material is absent. CI validates the release path with a disposable
+key; distributable builds require the protected Fusionify upload key.
 
-See `../../docs/android/SIGNING.md`.
+See `../../docs/android/SIGNING.md` and
+`../../docs/android/PLAY_INTERNAL_TESTING.md`.
 
 ## Preview GitHub Releases
 
