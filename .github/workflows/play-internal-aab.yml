@@ -1,0 +1,137 @@
+name: Build Play Internal AAB
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: Production or staging Fusionify API HTTPS base URL
+        required: true
+        type: string
+      build_name:
+        description: Semantic app version, for example 0.1.0
+        required: true
+        default: "0.1.0"
+        type: string
+      build_number:
+        description: Positive version code that has never been uploaded to Play
+        required: true
+        type: string
+      release_notes:
+        description: Internal tester release notes
+        required: true
+        default: "Initial Fusionify Coffee internal test."
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/customer
+    env:
+      API_BASE_URL: ${{ inputs.api_base_url }}
+      BUILD_NAME: ${{ inputs.build_name }}
+      BUILD_NUMBER: ${{ inputs.build_number }}
+      RELEASE_NOTES: ${{ inputs.release_notes }}
+      FUSIONIFY_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+      FUSIONIFY_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+      FUSIONIFY_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+
+    steps:
+      - name: Require main branch
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "Play Internal AAB must be built from main." >&2
+          exit 1
+
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.0"
+          channel: stable
+          cache: true
+
+      - name: Resolve Flutter dependencies
+        run: flutter pub get
+
+      - name: Validate source
+        run: |
+          dart format --output=none --set-exit-if-changed lib test tool
+          flutter analyze
+          flutter test
+
+      - name: Validate protected signing secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=()
+          [ -n "$KEYSTORE_BASE64" ] || missing+=(ANDROID_UPLOAD_KEYSTORE_BASE64)
+          [ -n "$FUSIONIFY_UPLOAD_STORE_PASSWORD" ] || missing+=(ANDROID_UPLOAD_STORE_PASSWORD)
+          [ -n "$FUSIONIFY_UPLOAD_KEY_ALIAS" ] || missing+=(ANDROID_UPLOAD_KEY_ALIAS)
+          [ -n "$FUSIONIFY_UPLOAD_KEY_PASSWORD" ] || missing+=(ANDROID_UPLOAD_KEY_PASSWORD)
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "Missing protected repository secrets: ${missing[*]}" >&2
+            exit 1
+          fi
+
+          KEYSTORE_PATH="$RUNNER_TEMP/fusionify-coffee-upload.jks"
+          umask 077
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          test -s "$KEYSTORE_PATH"
+          echo "FUSIONIFY_UPLOAD_STORE_FILE=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+
+      - name: Verify upload key
+        shell: bash
+        run: >-
+          keytool -list
+          -keystore "$FUSIONIFY_UPLOAD_STORE_FILE"
+          -storepass "$FUSIONIFY_UPLOAD_STORE_PASSWORD"
+          -alias "$FUSIONIFY_UPLOAD_KEY_ALIAS"
+
+      - name: Validate Play release inputs
+        run: >-
+          dart run tool/play_release_preflight.dart
+          --api-base-url="$API_BASE_URL"
+          --build-name="$BUILD_NAME"
+          --build-number="$BUILD_NUMBER"
+
+      - name: Build signed release AAB
+        run: >-
+          flutter build appbundle --release
+          --build-name="$BUILD_NAME"
+          --build-number="$BUILD_NUMBER"
+          --dart-define=API_BASE_URL="$API_BASE_URL"
+
+      - name: Verify and stage artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE="build/app/outputs/bundle/release/app-release.aab"
+          NAME="Fusionify-Coffee-${BUILD_NAME}-${BUILD_NUMBER}-internal.aab"
+          DIST="$RUNNER_TEMP/play-internal"
+          mkdir -p "$DIST"
+          test -s "$SOURCE"
+          jarsigner -verify "$SOURCE" | tee "$RUNNER_TEMP/aab-verification.txt"
+          grep -q "jar verified" "$RUNNER_TEMP/aab-verification.txt"
+          cp "$SOURCE" "$DIST/$NAME"
+          sha256sum "$DIST/$NAME" > "$DIST/$NAME.sha256"
+          printf '%s\n' "$RELEASE_NOTES" > "$DIST/release-notes.txt"
+
+      - name: Upload Play Internal artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fusionify-coffee-${{ inputs.build_name }}-${{ inputs.build_number }}-play-internal
+          path: ${{ runner.temp }}/play-internal
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Remove upload keystore
+        if: always()
+        shell: bash
+        run: rm -f "${FUSIONIFY_UPLOAD_STORE_FILE:-}"

@@ -9,11 +9,18 @@ Google Play protects and uses the app signing key for Play-distributed artifacts
 
 ## Current Repository State
 
-The Flutter scaffold currently has no production release signing configuration.
+Release signing is configured to read the upload keystore and credentials only
+from process environment variables. Any release task fails when these values
+are missing or the keystore path is invalid.
 
-The generated debug-key release signing shortcut was removed intentionally so a release is not accidentally treated as production-ready.
+Required variables:
 
-Current generated Android application ID is `id.fusionify.coffee`, but it remains provisional until explicitly locked as the production package ID.
+- `FUSIONIFY_UPLOAD_STORE_FILE`
+- `FUSIONIFY_UPLOAD_STORE_PASSWORD`
+- `FUSIONIFY_UPLOAD_KEY_ALIAS`
+- `FUSIONIFY_UPLOAD_KEY_PASSWORD`
+
+Debug signing is never used as a release fallback.
 
 ## Upload Key
 
@@ -24,7 +31,9 @@ Suggested naming convention:
 
 The actual key must be generated and stored securely outside Git.
 
-Do not create or commit a fake key for repository completeness.
+CI creates a disposable key only to prove the release build path. That AAB is
+not published or reused. Real internal and production artifacts require the
+Fusionify-managed upload key reconstructed from protected GitHub secrets.
 
 ## Never Commit
 
@@ -47,11 +56,20 @@ Back up:
 
 Use protected, independent storage. Do not keep the only copy on a development laptop.
 
-## Flutter Configuration Direction
+## Local Release Build
 
-When the production package ID and upload key are ready, release signing should load values from an untracked local configuration such as `key.properties` or protected CI secret storage.
+Export the four signing variables without writing passwords into a tracked
+file, then run:
 
-Never hardcode signing passwords in Gradle source.
+```bash
+flutter build appbundle --release \
+  --build-name=0.1.0 \
+  --build-number=1 \
+  --dart-define=API_BASE_URL=https://your-real-api.example
+```
+
+The API URL must be HTTPS and cannot be localhost. Never hardcode signing
+passwords in Gradle source or command history.
 
 ## Certificates
 
@@ -67,9 +85,13 @@ Do not assume they are interchangeable.
 
 ## Package ID
 
-Application/package ID must be explicitly approved and stabilized before Play production registration/signing configuration is treated as final.
+The approved Android application ID is:
 
-Do not register the provisional scaffold identity as final by accident.
+```text
+id.fusionify.coffee
+```
+
+See ADR 0007. Do not change it after the first Play upload.
 
 ## CI
 
@@ -78,8 +100,9 @@ Repository policy rejects:
 - Tracked `android/key.properties`
 - Release configuration that explicitly uses the debug signing key
 
-If CI produces signed release artifacts in the future:
-- Store signing material in protected CI secrets
-- Reconstruct temporary keystore only for the job
-- Prevent logs from printing secrets
-- Delete temporary signing material after the job
+The `Build Play Internal AAB` workflow uses protected CI secrets, reconstructs
+the upload keystore under the runner's temporary directory, verifies the
+signature, publishes the AAB as a short-lived workflow artifact, and removes
+the temporary keystore.
+
+See `PLAY_INTERNAL_TESTING.md` for setup and handoff steps.

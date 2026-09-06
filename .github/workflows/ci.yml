@@ -50,11 +50,58 @@ jobs:
       - run: flutter pub get
       - name: Check Dart format
         run: |
-          dart format lib test
-          git diff --exit-code -- lib test
+          dart format lib test tool
+          git diff --exit-code -- lib test tool
       - run: flutter analyze
       - run: flutter test
       - run: flutter build apk --debug
+      - name: Prepare ephemeral release signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          KEYSTORE_PATH="$RUNNER_TEMP/fusionify-coffee-ci-upload.jks"
+          KEYSTORE_PASSWORD="$(openssl rand -hex 24)"
+          echo "::add-mask::$KEYSTORE_PASSWORD"
+          keytool -genkeypair \
+            -keystore "$KEYSTORE_PATH" \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -keypass "$KEYSTORE_PASSWORD" \
+            -alias ci-upload \
+            -keyalg RSA \
+            -keysize 4096 \
+            -validity 3650 \
+            -dname "CN=Fusionify Coffee CI, O=Fusionify, C=ID"
+          {
+            echo "FUSIONIFY_UPLOAD_STORE_FILE=$KEYSTORE_PATH"
+            echo "FUSIONIFY_UPLOAD_STORE_PASSWORD=$KEYSTORE_PASSWORD"
+            echo "FUSIONIFY_UPLOAD_KEY_ALIAS=ci-upload"
+            echo "FUSIONIFY_UPLOAD_KEY_PASSWORD=$KEYSTORE_PASSWORD"
+          } >> "$GITHUB_ENV"
+      - name: Validate Play release inputs
+        run: >-
+          dart run tool/play_release_preflight.dart
+          --api-base-url=https://api.fusionify.id
+          --build-name=0.1.0
+          --build-number=1
+      - name: Build signed release AAB
+        run: >-
+          flutter build appbundle --release
+          --build-name=0.1.0
+          --build-number=1
+          --dart-define=API_BASE_URL=https://api.fusionify.id
+      - name: Verify release AAB signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAB="build/app/outputs/bundle/release/app-release.aab"
+          test -s "$AAB"
+          jarsigner -verify "$AAB" | tee "$RUNNER_TEMP/aab-verification.txt"
+          grep -q "jar verified" "$RUNNER_TEMP/aab-verification.txt"
+          sha256sum "$AAB"
+      - name: Remove ephemeral release signing
+        if: always()
+        shell: bash
+        run: rm -f "$FUSIONIFY_UPLOAD_STORE_FILE"
 
   api:
     runs-on: ubuntu-latest

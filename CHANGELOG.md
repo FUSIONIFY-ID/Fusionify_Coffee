@@ -6,6 +6,14 @@ All notable project changes are documented by meaningful product and engineering
 
 ### Added
 
+#### Google Play Internal Readiness
+- locked Android application ID `id.fusionify.coffee`
+- fail-closed environment-based release signing configuration
+- release-only cleartext traffic protection and local API rejection
+- signed release AAB validation with a disposable CI upload key
+- protected manual workflow for Fusionify-signed internal AAB artifacts
+- Play Internal Testing setup and evidence runbook
+
 #### Foundation / Ordering
 - Repository/agent memory and engineering policies
 - Material 3 Flutter Android/iOS foundation

@@ -24,8 +24,9 @@ Google Play release direction:
 - Android App Bundle (`.aab`)
 - Play App Signing
 - Fusionify-managed upload key
-- Stable application/package ID
+- locked application/package ID `id.fusionify.coffee`
 - Release signing configuration excluded from Git
+- release build fails when signing variables or the non-local HTTPS API URL are missing
 
 ## UI Compatibility
 
