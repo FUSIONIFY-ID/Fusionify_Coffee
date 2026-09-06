@@ -132,6 +132,13 @@ void main() {
         primaryTextTheme: baseTheme.primaryTextTheme.apply(
           fontFamily: 'Roboto',
         ),
+        chipTheme: baseTheme.chipTheme.copyWith(
+          labelStyle: baseTheme.chipTheme.labelStyle?.copyWith(
+            fontFamily: 'Roboto',
+          ),
+          secondaryLabelStyle: baseTheme.chipTheme.secondaryLabelStyle
+              ?.copyWith(fontFamily: 'Roboto'),
+        ),
       );
       await tester.pumpWidget(
         ProviderScope(
