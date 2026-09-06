@@ -22,6 +22,7 @@ import '../features/home/presentation/home_screen.dart';
 import '../features/menu/presentation/menu_screen.dart';
 import '../features/orders/presentation/order_detail_screen.dart';
 import '../features/orders/presentation/orders_screen.dart';
+import '../features/outlets/presentation/outlet_selection_screen.dart';
 import '../features/payment/presentation/payment_screen.dart';
 import '../features/product/presentation/product_detail_screen.dart';
 import '../features/receipts/presentation/digital_receipt_screen.dart';
@@ -51,6 +52,10 @@ final appRouter = GoRouter(
     GoRoute(path: '/cart', builder: (_, _) => const CartScreen()),
     GoRoute(path: '/checkout', builder: (_, _) => const CheckoutScreen()),
     GoRoute(path: '/favorites', builder: (_, _) => const FavoritesScreen()),
+    GoRoute(
+      path: '/outlets',
+      builder: (_, _) => const OutletSelectionScreen(),
+    ),
     GoRoute(
       path: '/orders/:orderId',
       builder: (context, state) =>

@@ -3,6 +3,51 @@ import { CatalogService } from './catalog.service';
 
 describe('CatalogService', () => {
   it('returns the requested localized catalog and falls back safely', async () => {
+    const productFindMany = jest.fn().mockResolvedValue([
+      {
+        id: 'aren-latte',
+        name: 'Aren Latte',
+        description: 'Fallback description',
+        imageUrl: 'https://cdn.example.com/products/aren-latte.webp',
+        translations: {
+          MS_MY: {
+            description: 'Espresso dan susu segar.',
+          },
+        },
+        category: {
+          name: 'Coffee',
+          translations: {
+            MS_MY: { name: 'Kopi' },
+          },
+        },
+        categoryId: 'coffee',
+        basePrice: 28000,
+        active: true,
+        isBestseller: true,
+        modifierGroups: [
+          {
+            id: 'aren-latte-milk',
+            name: 'Milk',
+            translations: {
+              MS_MY: { name: 'Susu' },
+            },
+            required: true,
+            allowMultiple: false,
+            options: [
+              {
+                id: 'aren-latte-milk-oat-milk',
+                name: 'Oat Milk',
+                translations: {
+                  MS_MY: { name: 'Susu Oat' },
+                },
+                priceDelta: 8000,
+                isDefault: false,
+              },
+            ],
+          },
+        ],
+      },
+    ]);
     const prisma = {
       outlet: {
         findFirst: jest.fn().mockResolvedValue({
@@ -22,51 +67,7 @@ describe('CatalogService', () => {
         }),
       },
       product: {
-        findMany: jest.fn().mockResolvedValue([
-          {
-            id: 'aren-latte',
-            name: 'Aren Latte',
-            description: 'Fallback description',
-            imageUrl: 'https://cdn.example.com/products/aren-latte.webp',
-            translations: {
-              MS_MY: {
-                description: 'Espresso dan susu segar.',
-              },
-            },
-            category: {
-              name: 'Coffee',
-              translations: {
-                MS_MY: { name: 'Kopi' },
-              },
-            },
-            categoryId: 'coffee',
-            basePrice: 28000,
-            active: true,
-            isBestseller: true,
-            modifierGroups: [
-              {
-                id: 'aren-latte-milk',
-                name: 'Milk',
-                translations: {
-                  MS_MY: { name: 'Susu' },
-                },
-                required: true,
-                allowMultiple: false,
-                options: [
-                  {
-                    id: 'aren-latte-milk-oat-milk',
-                    name: 'Oat Milk',
-                    translations: {
-                      MS_MY: { name: 'Susu Oat' },
-                    },
-                    priceDelta: 8000,
-                    isDefault: false,
-                  },
-                ],
-              },
-            ],
-          },
-        ]),
+        findMany: productFindMany,
       },
       campaign: {
         findMany: jest.fn().mockResolvedValue([
@@ -90,7 +91,7 @@ describe('CatalogService', () => {
     } as unknown as PrismaService;
 
     const service = new CatalogService(prisma);
-    const catalog = await service.getPreviewCatalog('MS_MY');
+    const catalog = await service.getCatalog('MS_MY', 'preview-outlet');
 
     expect(catalog.language).toBe('MS_MY');
     expect(catalog.outlet.name).toBe('Kedai Pratonton');
@@ -114,6 +115,14 @@ describe('CatalogService', () => {
       ctaLabel: 'Pesan Sekarang',
       imageUrl: 'asset://campaigns/morning-pickup.webp',
       actionPath: '/menu',
+    });
+    const [productQuery] = productFindMany.mock.calls[0] as [unknown];
+    expect(productQuery).toMatchObject({
+      where: {
+        outletAvailability: {
+          some: { outletId: 'preview-outlet', available: true },
+        },
+      },
     });
   });
 
@@ -145,8 +154,41 @@ describe('CatalogService', () => {
     } as unknown as PrismaService;
 
     const service = new CatalogService(prisma);
-    const catalog = await service.getPreviewCatalog(requested);
+    const catalog = await service.getCatalog(requested);
 
     expect(catalog.language).toBe(expected);
+  });
+
+  it('returns only active orderable outlets in localized order', async () => {
+    const findMany = jest.fn().mockResolvedValue([
+      {
+        id: 'bogor',
+        name: 'Bogor',
+        note: 'Fallback',
+        imageUrl: null,
+        translations: { ID_ID: { name: 'Bogor Tengah', note: 'Buka' } },
+        currency: 'IDR',
+        pickupEnabled: true,
+        deliveryEnabled: false,
+      },
+    ]);
+    const prisma = { outlet: { findMany } } as unknown as PrismaService;
+    const service = new CatalogService(prisma);
+
+    await expect(service.listOutlets('id-ID')).resolves.toEqual([
+      expect.objectContaining({
+        id: 'bogor',
+        name: 'Bogor Tengah',
+        note: 'Buka',
+      }),
+    ]);
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          active: true,
+          OR: [{ pickupEnabled: true }, { deliveryEnabled: true }],
+        },
+      }),
+    );
   });
 });

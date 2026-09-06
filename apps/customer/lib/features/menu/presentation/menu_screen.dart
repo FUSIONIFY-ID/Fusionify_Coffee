@@ -19,12 +19,27 @@ class MenuScreen extends ConsumerStatefulWidget {
 
 class _MenuScreenState extends ConsumerState<MenuScreen> {
   String _categoryId = 'all';
+  String _query = '';
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
     final cartCount = ref.watch(cartItemCountProvider);
     final catalog = ref.watch(catalogProvider);
+    final selectedOutlet = catalog.value?.outlet;
 
     return SafeArea(
       child: Column(
@@ -39,9 +54,28 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: Text(
-                    strings.orderCoffee,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        strings.orderCoffee,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      if (selectedOutlet != null)
+                        TextButton.icon(
+                          onPressed: () => context.push('/outlets'),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(0, 36),
+                          ),
+                          icon: const Icon(Icons.storefront_outlined, size: 18),
+                          label: Text(
+                            selectedOutlet.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 IconButton(
@@ -56,11 +90,37 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              CoffeeSpacing.md,
+              0,
+              CoffeeSpacing.md,
+              CoffeeSpacing.sm,
+            ),
+            child: SearchBar(
+              controller: _searchController,
+              hintText: strings.menuSearchHint,
+              leading: const Icon(Icons.search),
+              trailing: [
+                if (_query.isNotEmpty)
+                  IconButton(
+                    tooltip: strings.remove,
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() => _query = '');
+                    },
+                    icon: const Icon(Icons.close),
+                  ),
+              ],
+              onChanged: (value) => setState(() => _query = value),
+            ),
+          ),
           Expanded(
             child: catalog.when(
               data: (data) => _MenuContent(
                 snapshot: data,
                 selectedCategoryId: _categoryId,
+                searchQuery: _query,
                 onCategoryChanged: (categoryId) {
                   setState(() => _categoryId = categoryId);
                 },
@@ -89,11 +149,13 @@ class _MenuContent extends StatelessWidget {
   const _MenuContent({
     required this.snapshot,
     required this.selectedCategoryId,
+    required this.searchQuery,
     required this.onCategoryChanged,
   });
 
   final CatalogSnapshot snapshot;
   final String selectedCategoryId;
+  final String searchQuery;
   final ValueChanged<String> onCategoryChanged;
 
   @override
@@ -114,10 +176,23 @@ class _MenuContent extends StatelessWidget {
         ? selectedCategoryId
         : 'all';
 
-    final visibleProducts = activeCategoryId == 'all'
+    final categoryProducts = activeCategoryId == 'all'
         ? snapshot.products
         : snapshot.products
               .where((product) => product.categoryId == activeCategoryId)
+              .toList(growable: false);
+    final normalizedQuery = searchQuery.trim().toLowerCase();
+    final visibleProducts = normalizedQuery.isEmpty
+        ? categoryProducts
+        : categoryProducts
+              .where(
+                (product) =>
+                    product.name.toLowerCase().contains(normalizedQuery) ||
+                    product.description.toLowerCase().contains(
+                      normalizedQuery,
+                    ) ||
+                    product.category.toLowerCase().contains(normalizedQuery),
+              )
               .toList(growable: false);
 
     return CustomScrollView(
@@ -173,7 +248,12 @@ class _MenuContent extends StatelessWidget {
                     excludeFromSemantics: true,
                   ),
                   const SizedBox(height: CoffeeSpacing.md),
-                  Text(strings.noMenuAvailable, textAlign: TextAlign.center),
+                  Text(
+                    normalizedQuery.isEmpty
+                        ? strings.noMenuAvailable
+                        : strings.noSearchResults,
+                    textAlign: TextAlign.center,
+                  ),
                 ],
               ),
             ),

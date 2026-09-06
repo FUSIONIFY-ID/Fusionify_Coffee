@@ -40,7 +40,10 @@ export default function PosPage() {
 
   useEffect(() => {
     if (!staff) return;
-    apiJson<StaffCatalog>('/api/catalog?lang=EN')
+    const outletQuery = staff.outletId
+      ? `&outletId=${encodeURIComponent(staff.outletId)}`
+      : '';
+    apiJson<StaffCatalog>(`/api/catalog?lang=EN${outletQuery}`)
       .then((data) => {
         setCatalog(data);
         setCatalogError('');
@@ -95,7 +98,9 @@ export default function PosPage() {
 
   const categories = useMemo(() => {
     if (!catalog) return [];
-    return Array.from(new Set(catalog.products.map((product) => product.category)));
+    return Array.from(
+      new Set(catalog.products.map((product) => product.category)),
+    );
   }, [catalog]);
 
   const subtotal = cart.reduce(
@@ -379,7 +384,9 @@ export default function PosPage() {
                   <div>
                     <button
                       type="button"
-                      onClick={() => setQuantity((value) => Math.max(1, value - 1))}
+                      onClick={() =>
+                        setQuantity((value) => Math.max(1, value - 1))
+                      }
                     >
                       −
                     </button>
@@ -393,7 +400,10 @@ export default function PosPage() {
                   </div>
                 </div>
 
-                <button className="primary-button" onClick={addConfiguredProduct}>
+                <button
+                  className="primary-button"
+                  onClick={addConfiguredProduct}
+                >
                   Add to order
                 </button>
               </section>

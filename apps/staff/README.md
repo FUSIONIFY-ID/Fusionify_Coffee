@@ -37,6 +37,9 @@ Do not convert the staff session to localStorage/sessionStorage tokens.
 - suspend/reactivate staff
 - reset staff TOTP
 - rewards/operations administration foundations
+- protected Catalog screen for outlet, category, product, campaign/banner, and per-outlet availability management
+
+Catalog media is managed as a backend/CDN URL. Production accepts HTTPS URLs; direct binary upload and CDN storage are intentionally separate infrastructure concerns.
 
 ## Realtime KDS
 

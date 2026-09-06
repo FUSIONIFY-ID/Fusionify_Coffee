@@ -7,15 +7,46 @@ type CatalogLanguage = 'ID_ID' | 'MS_MY' | 'EN';
 export class CatalogService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getPreviewCatalog(requestedLanguage?: string) {
+  async listOutlets(requestedLanguage?: string) {
     const language = this.normalizeLanguage(requestedLanguage);
-    const [outlet, products, campaigns] = await Promise.all([
-      this.prisma.outlet.findFirst({
-        where: { pickupEnabled: true },
-        orderBy: { createdAt: 'asc' },
-      }),
+    const outlets = await this.prisma.outlet.findMany({
+      where: {
+        active: true,
+        OR: [{ pickupEnabled: true }, { deliveryEnabled: true }],
+      },
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+    });
+    return outlets.map((outlet) => this.outletView(outlet, language));
+  }
+
+  async getCatalog(
+    requestedLanguage?: string,
+    requestedOutletId?: string,
+    forcePreview = false,
+  ) {
+    const language = this.normalizeLanguage(requestedLanguage);
+    const outlet = await this.prisma.outlet.findFirst({
+      where: requestedOutletId
+        ? { id: requestedOutletId, active: true }
+        : {
+            active: true,
+            OR: [{ pickupEnabled: true }, { deliveryEnabled: true }],
+          },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+    });
+
+    if (!outlet) {
+      throw new NotFoundException('No active outlet is available.');
+    }
+
+    const [products, campaigns] = await Promise.all([
       this.prisma.product.findMany({
-        where: { active: true },
+        where: {
+          active: true,
+          outletAvailability: {
+            some: { outletId: outlet.id, available: true },
+          },
+        },
         include: {
           category: true,
           modifierGroups: {
@@ -36,22 +67,13 @@ export class CatalogService {
       }),
     ]);
 
-    if (!outlet) {
-      throw new NotFoundException('No pickup outlet is available.');
-    }
-
     return {
-      preview: true,
+      preview:
+        forcePreview ||
+        process.env.NODE_ENV !== 'production' ||
+        process.env.CATALOG_PREVIEW_MODE === 'true',
       language,
-      outlet: {
-        id: outlet.id,
-        name: this.text(outlet.translations, language, 'name', outlet.name),
-        note: this.text(outlet.translations, language, 'note', outlet.note),
-        imageUrl: outlet.imageUrl,
-        currency: outlet.currency,
-        pickupEnabled: outlet.pickupEnabled,
-        deliveryEnabled: outlet.deliveryEnabled,
-      },
+      outlet: this.outletView(outlet, language),
       products: products.map((product) => ({
         id: product.id,
         name: this.text(product.translations, language, 'name', product.name),
@@ -107,6 +129,30 @@ export class CatalogService {
         imageUrl: campaign.imageUrl,
         actionPath: campaign.actionPath,
       })),
+    };
+  }
+
+  private outletView(
+    outlet: {
+      id: string;
+      name: string;
+      note: string;
+      imageUrl: string | null;
+      translations: unknown;
+      currency: string;
+      pickupEnabled: boolean;
+      deliveryEnabled: boolean;
+    },
+    language: CatalogLanguage,
+  ) {
+    return {
+      id: outlet.id,
+      name: this.text(outlet.translations, language, 'name', outlet.name),
+      note: this.text(outlet.translations, language, 'note', outlet.note),
+      imageUrl: outlet.imageUrl,
+      currency: outlet.currency,
+      pickupEnabled: outlet.pickupEnabled,
+      deliveryEnabled: outlet.deliveryEnabled,
     };
   }
 

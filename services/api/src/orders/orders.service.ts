@@ -57,7 +57,9 @@ export class OrdersService {
     const outlet = await this.prisma.outlet.findUnique({
       where: { id: input.outletId },
     });
-    if (!outlet) throw new BadRequestException('Outlet is not available.');
+    if (!outlet?.active) {
+      throw new BadRequestException('Outlet is not available.');
+    }
 
     const fulfillmentType = input.fulfillmentType ?? FulfillmentType.PICKUP;
     const scheduledFor = this.resolveSchedule(input.scheduledFor);
@@ -132,7 +134,13 @@ export class OrdersService {
 
     const productIds = [...new Set(input.items.map((item) => item.productId))];
     const products = await this.prisma.product.findMany({
-      where: { id: { in: productIds }, active: true },
+      where: {
+        id: { in: productIds },
+        active: true,
+        outletAvailability: {
+          some: { outletId: outlet.id, available: true },
+        },
+      },
       include: {
         modifierGroups: {
           orderBy: { sortOrder: 'asc' },

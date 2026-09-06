@@ -46,9 +46,9 @@ class AppStrings {
     'What are you having today?',
   );
   String get pickupIntro => _pick(
-    'Mulai dari pickup. Delivery akan menyusul setelah alur pickup stabil.',
-    'Mulakan dengan ambil sendiri. Penghantaran akan menyusul selepas aliran pickup stabil.',
-    'Start with pickup. Delivery will follow after the pickup flow is stable.',
+    'Pilih outlet, atur minumanmu, lalu tentukan pickup atau delivery.',
+    'Pilih cawangan, sesuaikan minuman, kemudian pilih ambil sendiri atau penghantaran.',
+    'Choose an outlet, customize your drink, then select pickup or delivery.',
   );
   String get signatureCollection => _pick(
     'Tiga rasa khas Fusionify',
@@ -65,6 +65,32 @@ class AppStrings {
     'Pesan dari cawangan ini',
     'Order from this outlet',
   );
+  String get deliveryFromThisOutlet => _pick(
+    'Dikirim dari outlet ini',
+    'Dihantar dari cawangan ini',
+    'Delivered from this outlet',
+  );
+  String get chooseOutlet =>
+      _pick('Pilih outlet', 'Pilih cawangan', 'Choose outlet');
+  String get changeOutlet =>
+      _pick('Ganti outlet', 'Tukar cawangan', 'Change outlet');
+  String get outletSelectionBody => _pick(
+    'Menu dan ketersediaan dapat berbeda di setiap outlet.',
+    'Menu dan ketersediaan mungkin berbeza di setiap cawangan.',
+    'Menu and availability can differ by outlet.',
+  );
+  String get outletChangeClearsCart => _pick(
+    'Mengganti outlet akan mengosongkan keranjang agar harga dan ketersediaan tetap benar.',
+    'Menukar cawangan akan mengosongkan troli supaya harga dan ketersediaan kekal tepat.',
+    'Changing outlet clears your cart so pricing and availability stay correct.',
+  );
+  String get keepCurrentOutlet => _pick(
+    'Tetap di outlet ini',
+    'Kekal di cawangan ini',
+    'Keep current outlet',
+  );
+  String get confirmOutletChange =>
+      _pick('Ganti dan kosongkan', 'Tukar dan kosongkan', 'Change and clear');
   String get temporarilyUnavailable => _pick(
     'Sedang tidak tersedia',
     'Tidak tersedia buat masa ini',
@@ -88,6 +114,16 @@ class AppStrings {
     'Development preview catalog',
   );
   String get orderCoffee => _pick('Pesan Kopi', 'Pesan Kopi', 'Order Coffee');
+  String get menuSearchHint => _pick(
+    'Cari kopi, matcha, atau kategori',
+    'Cari kopi, matcha atau kategori',
+    'Search drinks or categories',
+  );
+  String get noSearchResults => _pick(
+    'Tidak ada menu yang cocok dengan pencarianmu.',
+    'Tiada menu yang sepadan dengan carian anda.',
+    'No menu items match your search.',
+  );
 
   String get menuLoadFailed => _pick(
     'Menu belum bisa dimuat.',

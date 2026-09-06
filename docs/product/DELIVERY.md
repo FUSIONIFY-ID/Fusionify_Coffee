@@ -1,6 +1,6 @@
 # Delivery
 
-Status: planned after stable pickup flow.
+Status: application foundation implemented; external provider integration pending.
 
 ## Scope
 
@@ -13,6 +13,18 @@ Delivery adds:
 - Serving outlet selection
 - Courier/provider integration
 - Delivery tracking
+
+Implemented today:
+- saved address CRUD
+- configured outlet radius/serviceability checks
+- server-calculated base and per-kilometer delivery fees
+- outlet delivery capability exposed to the customer app
+- checkout support for delivery address, quote, and authoritative validation
+
+Not yet live:
+- production address search/geocoding and route-distance provider
+- courier assignment/provider integration
+- courier tracking lifecycle
 
 ## Address
 

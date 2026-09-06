@@ -65,7 +65,7 @@ export class AddressesService {
       this.prisma.outlet.findUnique({ where: { id: outletId } }),
     ]);
     if (!address) throw new NotFoundException('Saved address not found.');
-    if (!outlet) throw new NotFoundException('Outlet not found.');
+    if (!outlet?.active) throw new NotFoundException('Outlet not found.');
     if (
       !outlet.deliveryEnabled ||
       outlet.latitude == null ||

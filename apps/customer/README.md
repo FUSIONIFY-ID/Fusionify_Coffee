@@ -35,7 +35,9 @@ Implemented development flow:
 
 ```text
 Home
+ -> Outlet selection
  -> Menu
+ -> Search/category filtering
  -> Product customization
  -> Cart
  -> Checkout
@@ -45,6 +47,8 @@ Home
  -> realtime payment/order status
  -> authoritative reconciliation fallback
 ```
+
+The selected active outlet is stored securely on-device. Catalog results and checkout validation are scoped to that outlet, and changing outlet clears a non-empty cart after confirmation.
 
 ## Material 3
 
