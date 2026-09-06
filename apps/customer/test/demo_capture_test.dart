@@ -1,8 +1,13 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fusionify_coffee/app/app.dart';
 import 'package:fusionify_coffee/app/router.dart';
+import 'package:fusionify_coffee/app/theme.dart';
 import 'package:fusionify_coffee/features/catalog/application/catalog_provider.dart';
 import 'package:fusionify_coffee/features/catalog/domain/catalog_models.dart';
 
@@ -115,16 +120,36 @@ void main() {
   testWidgets(
     'captures rendered customer home and menu demo',
     (tester) async {
+      await _loadAndroidFonts();
       await tester.binding.setSurfaceSize(const Size(390, 844));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
       appRouter.go('/');
+      final baseTheme = buildFusionifyCoffeeTheme();
+      final screenshotTheme = baseTheme.copyWith(
+        textTheme: baseTheme.textTheme.apply(fontFamily: 'Roboto'),
+        primaryTextTheme: baseTheme.primaryTextTheme.apply(
+          fontFamily: 'Roboto',
+        ),
+      );
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             catalogProvider.overrideWith((ref) async => _demoCatalog),
           ],
-          child: const FusionifyCoffeeApp(),
+          child: MaterialApp.router(
+            title: 'Fusionify Coffee',
+            debugShowCheckedModeBanner: false,
+            theme: screenshotTheme,
+            locale: const Locale('id'),
+            supportedLocales: const [
+              Locale('id'),
+              Locale('ms'),
+              Locale('en'),
+            ],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            routerConfig: appRouter,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -144,4 +169,21 @@ void main() {
     },
     skip: !_captureDemo,
   );
+}
+
+Future<void> _loadAndroidFonts() async {
+  final flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  if (flutterRoot == null) {
+    throw StateError('FLUTTER_ROOT is required to render demo screenshots.');
+  }
+
+  final loader = FontLoader('Roboto');
+  for (final filename in ['Roboto-Regular.ttf', 'Roboto-Medium.ttf']) {
+    final file = File(
+      '$flutterRoot/bin/cache/artifacts/material_fonts/$filename',
+    );
+    final bytes = await file.readAsBytes();
+    loader.addFont(Future.value(ByteData.sublistView(bytes)));
+  }
+  await loader.load();
 }
