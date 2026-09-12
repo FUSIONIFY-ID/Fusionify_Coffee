@@ -35,9 +35,7 @@ void main() {
       ),
     );
 
-    final product = find.bySemanticsLabel(
-      'Aren Latte, Terlaris, Rp28.000',
-    );
+    final product = find.bySemanticsLabel('Aren Latte, Terlaris, Rp28.000');
     expect(product, findsOneWidget);
 
     await tester.tap(product);
@@ -105,20 +103,20 @@ void main() {
     final semantics = tester.ensureSemantics();
     addTearDown(semantics.dispose);
     final container = ProviderContainer(
-      overrides: [
-        catalogProvider.overrideWith((ref) async => catalogFixture),
-      ],
+      overrides: [catalogProvider.overrideWith((ref) async => catalogFixture)],
     );
     addTearDown(container.dispose);
-    container.read(cartProvider.notifier).add(
-      const CartItem(
-        productId: 'aren-latte',
-        productName: 'Aren Latte',
-        unitPrice: 28000,
-        quantity: 1,
-        selectedOptions: [],
-      ),
-    );
+    container
+        .read(cartProvider.notifier)
+        .add(
+          const CartItem(
+            productId: 'aren-latte',
+            productName: 'Aren Latte',
+            unitPrice: 28000,
+            quantity: 1,
+            selectedOptions: [],
+          ),
+        );
 
     await tester.pumpWidget(
       UncontrolledProviderScope(

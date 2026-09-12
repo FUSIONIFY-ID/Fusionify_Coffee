@@ -42,11 +42,8 @@ class AppStrings {
       _pick('Kurangi jumlah', 'Kurangkan kuantiti', 'Decrease quantity');
   String get increaseQuantity =>
       _pick('Tambah jumlah', 'Tambah kuantiti', 'Increase quantity');
-  String quantityValue(int quantity) => _pick(
-    'Jumlah: $quantity',
-    'Kuantiti: $quantity',
-    'Quantity: $quantity',
-  );
+  String quantityValue(int quantity) =>
+      _pick('Jumlah: $quantity', 'Kuantiti: $quantity', 'Quantity: $quantity');
   String get requiredSelection =>
       _pick('Wajib dipilih', 'Wajib dipilih', 'Required');
   String get estimatedSubtotal =>
@@ -223,16 +220,10 @@ class AppStrings {
   String get emailOptional =>
       _pick('Email (opsional)', 'E-mel (pilihan)', 'Email (optional)');
   String get password => _pick('Password', 'Kata laluan', 'Password');
-  String get showPassword => _pick(
-    'Tampilkan password',
-    'Tunjukkan kata laluan',
-    'Show password',
-  );
-  String get hidePassword => _pick(
-    'Sembunyikan password',
-    'Sembunyikan kata laluan',
-    'Hide password',
-  );
+  String get showPassword =>
+      _pick('Tampilkan password', 'Tunjukkan kata laluan', 'Show password');
+  String get hidePassword =>
+      _pick('Sembunyikan password', 'Sembunyikan kata laluan', 'Hide password');
   String get minimumPassword =>
       _pick('Minimum 8 karakter', 'Minimum 8 aksara', 'Minimum 8 characters');
   String get completeProfile =>
@@ -246,11 +237,8 @@ class AppStrings {
   String get yourCoffee => _pick('Kopi Kamu', 'Kopi Anda', 'Your Coffee');
   String get buyAgain => _pick('Pesan Lagi', 'Pesan Semula', 'Buy Again');
   String get favorites => _pick('Favorit', 'Kegemaran', 'Favorites');
-  String get addToFavorites => _pick(
-    'Tambahkan ke favorit',
-    'Tambah ke kegemaran',
-    'Add to favorites',
-  );
+  String get addToFavorites =>
+      _pick('Tambahkan ke favorit', 'Tambah ke kegemaran', 'Add to favorites');
   String get removeFromFavorites => _pick(
     'Hapus dari favorit',
     'Buang daripada kegemaran',

@@ -242,9 +242,7 @@ class _CampaignCarouselState extends State<_CampaignCarousel> {
                         color: index == _activeIndex
                             ? CoffeeColors.primary
                             : CoffeeColors.border,
-                        borderRadius: BorderRadius.circular(
-                          CoffeeRadius.small,
-                        ),
+                        borderRadius: BorderRadius.circular(CoffeeRadius.small),
                       ),
                     ),
                   ),
