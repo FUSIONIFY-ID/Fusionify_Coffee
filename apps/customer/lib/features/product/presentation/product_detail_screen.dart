@@ -364,6 +364,7 @@ class _QuantityControl extends StatelessWidget {
             icon: const Icon(Icons.remove),
           ),
           Semantics(
+            container: true,
             liveRegion: true,
             label: context.strings.quantityValue(quantity),
             excludeSemantics: true,

@@ -19,7 +19,6 @@ void main() {
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
     var tapped = false;
 
     await tester.pumpWidget(
@@ -40,13 +39,13 @@ void main() {
 
     await tester.tap(product);
     expect(tapped, isTrue);
+    semantics.dispose();
   });
 
   testWidgets('catalog loading announces progress and honors reduced motion', (
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
 
     await tester.pumpWidget(
       _localizedApp(
@@ -61,11 +60,11 @@ void main() {
       (image.image as AssetImage).assetName,
       'assets/brand/fusion-f-bean-app-icon.png',
     );
+    semantics.dispose();
   });
 
   testWidgets('missing media keeps its accessible image label', (tester) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
 
     await tester.pumpWidget(
       _localizedApp(
@@ -82,6 +81,7 @@ void main() {
     );
 
     expect(find.bySemanticsLabel('Aren Latte'), findsOneWidget);
+    semantics.dispose();
   });
 
   testWidgets('password visibility action describes its current behavior', (
@@ -101,7 +101,6 @@ void main() {
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
     final container = ProviderContainer(
       overrides: [catalogProvider.overrideWith((ref) async => catalogFixture)],
     );
@@ -132,6 +131,7 @@ void main() {
     await tester.tap(find.byTooltip('Tambah jumlah'));
     await tester.pump();
     expect(find.bySemanticsLabel('Jumlah: 2'), findsOneWidget);
+    semantics.dispose();
   });
 }
 

@@ -80,6 +80,7 @@ class CartScreen extends ConsumerWidget {
                           icon: const Icon(Icons.remove),
                         ),
                         Semantics(
+                          container: true,
                           liveRegion: true,
                           label: strings.quantityValue(item.quantity),
                           excludeSemantics: true,
