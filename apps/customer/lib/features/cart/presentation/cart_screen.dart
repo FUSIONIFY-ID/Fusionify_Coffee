@@ -73,21 +73,31 @@ class CartScreen extends ConsumerWidget {
                     Row(
                       children: [
                         IconButton.outlined(
+                          tooltip: strings.decreaseQuantity,
                           onPressed: () => ref
                               .read(cartProvider.notifier)
                               .decrement(item.signature),
                           icon: const Icon(Icons.remove),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: CoffeeSpacing.sm,
-                          ),
-                          child: Text(
-                            '${item.quantity}',
-                            style: const TextStyle(fontWeight: FontWeight.w700),
+                        Semantics(
+                          container: true,
+                          liveRegion: true,
+                          label: strings.quantityValue(item.quantity),
+                          excludeSemantics: true,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: CoffeeSpacing.sm,
+                            ),
+                            child: Text(
+                              '${item.quantity}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                         ),
                         IconButton.outlined(
+                          tooltip: strings.increaseQuantity,
                           onPressed: () => ref
                               .read(cartProvider.notifier)
                               .increment(item.signature),

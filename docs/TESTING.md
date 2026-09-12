@@ -18,6 +18,9 @@ Priority flows:
 - Payment state display
 - Order-state progression
 - Rewards presentation
+- Accessibility semantics for critical ordering and authentication controls
+
+Automated accessibility checks are a regression baseline only. Complete the manual TalkBack, VoiceOver, large-text, contrast, reduced-motion, and focus-order review in [Customer Accessibility](./ACCESSIBILITY.md) before production release.
 
 ## Backend
 
