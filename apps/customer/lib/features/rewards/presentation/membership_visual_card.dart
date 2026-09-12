@@ -28,12 +28,23 @@ class MembershipVisualCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = _MembershipCardStyle.forRank(rank);
     final strings = context.strings;
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final semanticLabel = [
+      '${strings.membership}: $tierName',
+      if (memberName?.trim().isNotEmpty == true) memberName!.trim(),
+      supportingText,
+    ].join('. ');
 
     return Semantics(
       button: onTap != null,
-      label: '${strings.membership}: $tierName',
+      label: semanticLabel,
+      onTap: onTap,
+      excludeSemantics: true,
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 260),
+        duration: reduceMotion
+            ? Duration.zero
+            : const Duration(milliseconds: 260),
         child: AspectRatio(
           key: ValueKey(style.asset),
           aspectRatio: 1.586,

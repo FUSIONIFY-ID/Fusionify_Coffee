@@ -36,6 +36,7 @@ The largest production-readiness gaps are now external/live integrations and rel
 - release signing fails closed when protected upload-key variables are missing
 - release builds require a non-local HTTPS API URL and disable cleartext traffic
 - manual protected workflow for short-lived signed Play Internal AAB artifacts
+- localized semantics baseline for critical ordering/authentication controls and reduced-motion-aware customer loading/membership UI
 
 ### Backend
 
@@ -445,7 +446,7 @@ Production content/release:
 - iOS deployment/release configuration and App Store readiness
 - privacy/Data Safety/account-policy review
 - crash/ANR monitoring
-- accessibility review
+- manual TalkBack/VoiceOver, large-text, contrast, reduced-motion, and focus-order accessibility review
 
 Realtime/scale improvements:
 - customer realtime load/connection testing under production-like traffic

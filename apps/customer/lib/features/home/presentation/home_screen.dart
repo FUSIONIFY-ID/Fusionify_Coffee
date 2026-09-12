@@ -51,7 +51,9 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 IconButton(
                   onPressed: () => context.push('/cart'),
-                  tooltip: strings.cart,
+                  tooltip: cartCount > 0
+                      ? strings.cartWithItems(cartCount)
+                      : strings.cart,
                   icon: Badge(
                     isLabelVisible: cartCount > 0,
                     label: Text('$cartCount'),
@@ -190,6 +192,8 @@ class _CampaignCarouselState extends State<_CampaignCarousel> {
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     final campaigns = widget.campaigns.isEmpty
         ? [
             Campaign(
@@ -224,18 +228,24 @@ class _CampaignCarouselState extends State<_CampaignCarousel> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
                   campaigns.length,
-                  (index) => AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    width: index == _activeIndex ? 18 : 6,
-                    height: 6,
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: CoffeeSpacing.xxs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: index == _activeIndex
-                          ? CoffeeColors.primary
-                          : CoffeeColors.border,
-                      borderRadius: BorderRadius.circular(CoffeeRadius.small),
+                  (index) => ExcludeSemantics(
+                    child: AnimatedContainer(
+                      duration: reduceMotion
+                          ? Duration.zero
+                          : const Duration(milliseconds: 180),
+                      width: index == _activeIndex ? 18 : 6,
+                      height: 6,
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: CoffeeSpacing.xxs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: index == _activeIndex
+                            ? CoffeeColors.primary
+                            : CoffeeColors.border,
+                        borderRadius: BorderRadius.circular(
+                          CoffeeRadius.small,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -256,18 +266,21 @@ class _CampaignBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final actionPath = _safeCampaignPath(campaign.actionPath);
+    final onTap = actionPath == null ? null : () => context.go(actionPath);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: CoffeeSpacing.xxs),
       child: Semantics(
         button: actionPath != null,
         label: '${campaign.title}. ${campaign.ctaLabel}',
+        onTap: onTap,
+        excludeSemantics: true,
         child: Material(
           borderRadius: BorderRadius.circular(CoffeeRadius.card),
           clipBehavior: Clip.antiAlias,
           color: CoffeeColors.surfaceWarm,
           child: InkWell(
-            onTap: actionPath == null ? null : () => context.go(actionPath),
+            onTap: onTap,
             child: Row(
               children: [
                 Expanded(
@@ -390,56 +403,68 @@ class _OutletCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(CoffeeSpacing.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(CoffeeRadius.control),
-                child: SizedBox(
-                  width: 88,
-                  height: 72,
-                  child: MediaImage(
-                    mediaUrl: outlet.imageUrl,
-                    bundledFallback: 'assets/outlets/preview-store.webp',
-                    fit: BoxFit.cover,
-                    semanticLabel: outlet.name,
-                    placeholderIcon: Icons.store_outlined,
+    final label = [
+      context.strings.changeOutlet,
+      outlet.name,
+      if (outlet.note.isNotEmpty) outlet.note,
+    ].join('. ');
+
+    return Semantics(
+      button: true,
+      label: label,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(CoffeeSpacing.md),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(CoffeeRadius.control),
+                  child: SizedBox(
+                    width: 88,
+                    height: 72,
+                    child: MediaImage(
+                      mediaUrl: outlet.imageUrl,
+                      bundledFallback: 'assets/outlets/preview-store.webp',
+                      fit: BoxFit.cover,
+                      semanticLabel: outlet.name,
+                      placeholderIcon: Icons.store_outlined,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: CoffeeSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      outlet.name,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    if (outlet.note.isNotEmpty) ...[
-                      const SizedBox(height: CoffeeSpacing.xxs),
+                const SizedBox(width: CoffeeSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        outlet.note,
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        outlet.name,
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
+                      if (outlet.note.isNotEmpty) ...[
+                        const SizedBox(height: CoffeeSpacing.xxs),
+                        Text(
+                          outlet.note,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(top: CoffeeSpacing.xs),
-                child: Icon(
-                  Icons.swap_horiz,
-                  color: CoffeeColors.textSecondary,
+                const Padding(
+                  padding: EdgeInsets.only(top: CoffeeSpacing.xs),
+                  child: Icon(
+                    Icons.swap_horiz,
+                    color: CoffeeColors.textSecondary,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -467,31 +492,39 @@ class _FulfillmentCard extends StatelessWidget {
     final foreground = enabled
         ? CoffeeColors.textPrimary
         : CoffeeColors.textSecondary;
+    final semanticsTap = enabled ? onTap : null;
 
-    return Card(
-      child: InkWell(
-        onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(CoffeeRadius.card),
-        child: Padding(
-          padding: const EdgeInsets.all(CoffeeSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: enabled ? CoffeeColors.primary : foreground),
-              const SizedBox(height: CoffeeSpacing.sm),
-              Text(
-                title,
-                style: TextStyle(
-                  color: foreground,
-                  fontWeight: FontWeight.w700,
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: '$title. $subtitle',
+      onTap: semanticsTap,
+      excludeSemantics: true,
+      child: Card(
+        child: InkWell(
+          onTap: semanticsTap,
+          borderRadius: BorderRadius.circular(CoffeeRadius.card),
+          child: Padding(
+            padding: const EdgeInsets.all(CoffeeSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(icon, color: enabled ? CoffeeColors.primary : foreground),
+                const SizedBox(height: CoffeeSpacing.sm),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: foreground,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-              const SizedBox(height: CoffeeSpacing.xxs),
-              Text(
-                subtitle,
-                style: const TextStyle(color: CoffeeColors.textSecondary),
-              ),
-            ],
+                const SizedBox(height: CoffeeSpacing.xxs),
+                Text(
+                  subtitle,
+                  style: const TextStyle(color: CoffeeColors.textSecondary),
+                ),
+              ],
+            ),
           ),
         ),
       ),

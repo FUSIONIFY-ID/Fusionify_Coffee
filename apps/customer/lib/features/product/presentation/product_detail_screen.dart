@@ -192,7 +192,9 @@ class _ProductDetailContentState extends ConsumerState<_ProductDetailContent> {
         actions: [
           IconButton(
             onPressed: _toggleFavorite,
-            tooltip: strings.favorites,
+            tooltip: isFavorite
+                ? strings.removeFromFavorites
+                : strings.addToFavorites,
             icon: Icon(
               isFavorite ? Icons.favorite : Icons.favorite_border,
               color: isFavorite ? CoffeeColors.error : null,
@@ -287,15 +289,29 @@ class _ModifierSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(group.label, style: Theme.of(context).textTheme.titleMedium),
-            if (group.required)
-              const Text(
-                ' *',
-                style: TextStyle(
-                  color: CoffeeColors.error,
-                  fontWeight: FontWeight.w700,
-                ),
+            Semantics(
+              header: true,
+              label: group.required
+                  ? '${group.label}. ${context.strings.requiredSelection}'
+                  : group.label,
+              excludeSemantics: true,
+              child: Row(
+                children: [
+                  Text(
+                    group.label,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  if (group.required)
+                    const Text(
+                      ' *',
+                      style: TextStyle(
+                        color: CoffeeColors.error,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                ],
               ),
+            ),
           ],
         ),
         const SizedBox(height: CoffeeSpacing.sm),
@@ -342,12 +358,25 @@ class _QuantityControl extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(onPressed: onDecrease, icon: const Icon(Icons.remove)),
-          Text(
-            '$quantity',
-            style: const TextStyle(fontWeight: FontWeight.w700),
+          IconButton(
+            tooltip: context.strings.decreaseQuantity,
+            onPressed: onDecrease,
+            icon: const Icon(Icons.remove),
           ),
-          IconButton(onPressed: onIncrease, icon: const Icon(Icons.add)),
+          Semantics(
+            liveRegion: true,
+            label: context.strings.quantityValue(quantity),
+            excludeSemantics: true,
+            child: Text(
+              '$quantity',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+          IconButton(
+            tooltip: context.strings.increaseQuantity,
+            onPressed: onIncrease,
+            icon: const Icon(Icons.add),
+          ),
         ],
       ),
     );

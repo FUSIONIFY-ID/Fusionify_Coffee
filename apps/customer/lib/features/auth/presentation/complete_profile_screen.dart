@@ -114,6 +114,9 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
               labelText: strings.password,
               helperText: strings.minimumPassword,
               suffixIcon: IconButton(
+                tooltip: _hidePassword
+                    ? strings.showPassword
+                    : strings.hidePassword,
                 onPressed: () {
                   setState(() => _hidePassword = !_hidePassword);
                 },

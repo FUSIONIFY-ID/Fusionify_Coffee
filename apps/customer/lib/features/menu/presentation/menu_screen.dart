@@ -66,7 +66,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                           onPressed: () => context.push('/outlets'),
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
-                            minimumSize: const Size(0, 36),
+                            minimumSize: const Size(0, 48),
                           ),
                           icon: const Icon(Icons.storefront_outlined, size: 18),
                           label: Text(
@@ -79,7 +79,9 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                   ),
                 ),
                 IconButton(
-                  tooltip: strings.cart,
+                  tooltip: cartCount > 0
+                      ? strings.cartWithItems(cartCount)
+                      : strings.cart,
                   onPressed: () => context.push('/cart'),
                   icon: Badge(
                     isLabelVisible: cartCount > 0,

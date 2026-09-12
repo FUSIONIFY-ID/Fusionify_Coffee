@@ -15,56 +15,67 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
+    final semanticLabel = [
+      product.name,
+      if (product.isBestseller) strings.bestseller,
+      formatRupiah(product.basePrice),
+    ].join(', ');
 
-    return Material(
-      color: CoffeeColors.surface,
-      borderRadius: BorderRadius.circular(CoffeeRadius.card),
-      child: InkWell(
-        onTap: onTap,
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: Material(
+        color: CoffeeColors.surface,
         borderRadius: BorderRadius.circular(CoffeeRadius.card),
-        child: Container(
-          padding: const EdgeInsets.all(CoffeeSpacing.sm),
-          decoration: BoxDecoration(
-            border: Border.all(color: CoffeeColors.border),
-            borderRadius: BorderRadius.circular(CoffeeRadius.card),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: ProductImage(product: product),
-              ),
-              const SizedBox(height: CoffeeSpacing.sm),
-              if (product.isBestseller) ...[
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(CoffeeRadius.card),
+          child: Container(
+            padding: const EdgeInsets.all(CoffeeSpacing.sm),
+            decoration: BoxDecoration(
+              border: Border.all(color: CoffeeColors.border),
+              borderRadius: BorderRadius.circular(CoffeeRadius.card),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: ProductImage(product: product),
+                ),
+                const SizedBox(height: CoffeeSpacing.sm),
+                if (product.isBestseller) ...[
+                  Text(
+                    strings.bestseller,
+                    style: const TextStyle(
+                      color: CoffeeColors.deep,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: CoffeeSpacing.xxs),
+                ],
                 Text(
-                  strings.bestseller,
+                  product.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: CoffeeColors.deep,
-                    fontSize: 12,
+                    color: CoffeeColors.textPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: CoffeeSpacing.xxs),
+                Text(
+                  formatRupiah(product.basePrice),
+                  style: const TextStyle(
+                    color: CoffeeColors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ],
-              Text(
-                product.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: CoffeeColors.textPrimary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: CoffeeSpacing.xxs),
-              Text(
-                formatRupiah(product.basePrice),
-                style: const TextStyle(
-                  color: CoffeeColors.textPrimary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
