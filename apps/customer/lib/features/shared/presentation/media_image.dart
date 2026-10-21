@@ -120,7 +120,7 @@ class MediaImage extends StatelessWidget {
   }
 
   Widget _placeholder() {
-    return ColoredBox(
+    final placeholder = ColoredBox(
       color: CoffeeColors.surfaceWarm,
       child: Center(
         child: Icon(
@@ -129,6 +129,17 @@ class MediaImage extends StatelessWidget {
           color: CoffeeColors.textSecondary,
         ),
       ),
+    );
+
+    final label = semanticLabel?.trim();
+    if (label == null || label.isEmpty) {
+      return ExcludeSemantics(child: placeholder);
+    }
+
+    return Semantics(
+      image: true,
+      label: label,
+      child: ExcludeSemantics(child: placeholder),
     );
   }
 }

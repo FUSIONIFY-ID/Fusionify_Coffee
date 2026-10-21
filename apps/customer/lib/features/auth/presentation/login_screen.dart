@@ -101,6 +101,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             decoration: InputDecoration(
               labelText: strings.password,
               suffixIcon: IconButton(
+                tooltip: _hidePassword
+                    ? strings.showPassword
+                    : strings.hidePassword,
                 onPressed: () {
                   setState(() => _hidePassword = !_hidePassword);
                 },

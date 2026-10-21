@@ -115,65 +115,83 @@ class _OutletOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(CoffeeSpacing.md),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(CoffeeRadius.control),
-                child: SizedBox(
-                  width: 84,
-                  height: 72,
-                  child: MediaImage(
-                    mediaUrl: outlet.imageUrl,
-                    bundledFallback: 'assets/outlets/preview-store.webp',
-                    fit: BoxFit.cover,
-                    semanticLabel: outlet.name,
-                    placeholderIcon: Icons.store_outlined,
+    final strings = context.strings;
+    final capabilities = [
+      if (outlet.pickupEnabled) strings.pickup,
+      if (outlet.deliveryEnabled) strings.delivery,
+    ];
+    final label = [
+      outlet.name,
+      if (outlet.note.isNotEmpty) outlet.note,
+      if (capabilities.isNotEmpty) capabilities.join(', '),
+    ].join('. ');
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(CoffeeSpacing.md),
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(CoffeeRadius.control),
+                  child: SizedBox(
+                    width: 84,
+                    height: 72,
+                    child: MediaImage(
+                      mediaUrl: outlet.imageUrl,
+                      bundledFallback: 'assets/outlets/preview-store.webp',
+                      fit: BoxFit.cover,
+                      semanticLabel: outlet.name,
+                      placeholderIcon: Icons.store_outlined,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: CoffeeSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      outlet.name,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    if (outlet.note.isNotEmpty) ...[
-                      const SizedBox(height: CoffeeSpacing.xxs),
+                const SizedBox(width: CoffeeSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        outlet.note,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        outlet.name,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      if (outlet.note.isNotEmpty) ...[
+                        const SizedBox(height: CoffeeSpacing.xxs),
+                        Text(
+                          outlet.note,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                      const SizedBox(height: CoffeeSpacing.xs),
+                      Wrap(
+                        spacing: CoffeeSpacing.xs,
+                        children: [
+                          if (outlet.pickupEnabled)
+                            _Capability(label: strings.pickup),
+                          if (outlet.deliveryEnabled)
+                            _Capability(label: strings.delivery),
+                        ],
                       ),
                     ],
-                    const SizedBox(height: CoffeeSpacing.xs),
-                    Wrap(
-                      spacing: CoffeeSpacing.xs,
-                      children: [
-                        if (outlet.pickupEnabled)
-                          _Capability(label: context.strings.pickup),
-                        if (outlet.deliveryEnabled)
-                          _Capability(label: context.strings.delivery),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-              Icon(
-                selected ? Icons.check_circle : Icons.chevron_right,
-                color: selected
-                    ? CoffeeColors.primary
-                    : CoffeeColors.textSecondary,
-              ),
-            ],
+                Icon(
+                  selected ? Icons.check_circle : Icons.chevron_right,
+                  color: selected
+                      ? CoffeeColors.primary
+                      : CoffeeColors.textSecondary,
+                ),
+              ],
+            ),
           ),
         ),
       ),

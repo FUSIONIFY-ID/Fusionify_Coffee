@@ -10,75 +10,87 @@ class CatalogLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Center(
-          child: Image.asset(
-            'assets/animations/fusion-f-bean-loading.gif',
-            width: 64,
-            height: 64,
-            excludeFromSemantics: true,
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      label: context.strings.loading,
+      excludeSemantics: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Image.asset(
+              reduceMotion
+                  ? 'assets/brand/fusion-f-bean-app-icon.png'
+                  : 'assets/animations/fusion-f-bean-loading.gif',
+              width: 64,
+              height: 64,
+              excludeFromSemantics: true,
+            ),
           ),
-        ),
-        const SizedBox(height: CoffeeSpacing.sm),
-        Container(
-          height: 18,
-          width: 180,
-          decoration: BoxDecoration(
-            color: CoffeeColors.border,
-            borderRadius: BorderRadius.circular(CoffeeRadius.small),
+          const SizedBox(height: CoffeeSpacing.sm),
+          Container(
+            height: 18,
+            width: 180,
+            decoration: BoxDecoration(
+              color: CoffeeColors.border,
+              borderRadius: BorderRadius.circular(CoffeeRadius.small),
+            ),
           ),
-        ),
-        const SizedBox(height: CoffeeSpacing.md),
-        SizedBox(
-          height: 250,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: cardCount,
-            separatorBuilder: (_, _) => const SizedBox(width: CoffeeSpacing.sm),
-            itemBuilder: (_, _) {
-              return Container(
-                width: 176,
-                decoration: BoxDecoration(
-                  color: CoffeeColors.surface,
-                  border: Border.all(color: CoffeeColors.border),
-                  borderRadius: BorderRadius.circular(CoffeeRadius.card),
-                ),
-                padding: const EdgeInsets.all(CoffeeSpacing.sm),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AspectRatio(
-                      aspectRatio: 1,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: CoffeeColors.surfaceWarm,
-                          borderRadius: BorderRadius.circular(
-                            CoffeeRadius.control,
+          const SizedBox(height: CoffeeSpacing.md),
+          SizedBox(
+            height: 250,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: cardCount,
+              separatorBuilder: (_, _) =>
+                  const SizedBox(width: CoffeeSpacing.sm),
+              itemBuilder: (_, _) {
+                return Container(
+                  width: 176,
+                  decoration: BoxDecoration(
+                    color: CoffeeColors.surface,
+                    border: Border.all(color: CoffeeColors.border),
+                    borderRadius: BorderRadius.circular(CoffeeRadius.card),
+                  ),
+                  padding: const EdgeInsets.all(CoffeeSpacing.sm),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 1,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: CoffeeColors.surfaceWarm,
+                            borderRadius: BorderRadius.circular(
+                              CoffeeRadius.control,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: CoffeeSpacing.sm),
-                    Container(
-                      height: 14,
-                      width: 120,
-                      color: CoffeeColors.border,
-                    ),
-                    const SizedBox(height: CoffeeSpacing.xs),
-                    Container(
-                      height: 14,
-                      width: 84,
-                      color: CoffeeColors.border,
-                    ),
-                  ],
-                ),
-              );
-            },
+                      const SizedBox(height: CoffeeSpacing.sm),
+                      Container(
+                        height: 14,
+                        width: 120,
+                        color: CoffeeColors.border,
+                      ),
+                      const SizedBox(height: CoffeeSpacing.xs),
+                      Container(
+                        height: 14,
+                        width: 84,
+                        color: CoffeeColors.border,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

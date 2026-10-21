@@ -42,6 +42,7 @@ Start with:
 ## Quality, Privacy, and Decisions
 
 - [Testing](./TESTING.md)
+- [Customer Accessibility](./ACCESSIBILITY.md)
 - [Privacy Data Map](./PRIVACY_DATA_MAP.md)
 - [Architecture Decision Records](./adr/README.md)
 

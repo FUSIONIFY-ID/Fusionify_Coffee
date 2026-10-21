@@ -233,6 +233,7 @@ Implemented repository preparation:
 - release-only cleartext traffic protection
 - CI proof path for signed release AAB generation
 - protected manual workflow and runbook for Play Internal AAB artifacts
+- automated customer semantics baseline and reduced-motion handling for critical ordering/authentication UI
 
 Before production:
 - live payment provider validation
@@ -248,7 +249,7 @@ Before production:
 - signing/package verification
 - SDK/security audit
 - crash/ANR monitoring
-- accessibility review
+- manual TalkBack/VoiceOver, large-text, contrast, reduced-motion, and focus-order accessibility review
 - operational monitoring/alerting
 
 ## Next Priorities

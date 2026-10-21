@@ -6,6 +6,12 @@ All notable project changes are documented by meaningful product and engineering
 
 ### Added
 
+#### Customer Accessibility Baseline
+- localized screen-reader labels for product cards, cart counts, quantity controls, password visibility, favorite state, outlet selection, fulfillment choices, and membership credentials
+- live loading/quantity announcements and static loading media when reduced motion is requested
+- reduced-motion-aware campaign indicators and membership transitions
+- widget regression coverage plus a manual TalkBack/VoiceOver release checklist
+
 #### Owner Control Center
 - permission-gated owner dashboard with 7-, 30-, and 90-day reporting
 - paid-sales and average-order metrics grouped safely by currency
