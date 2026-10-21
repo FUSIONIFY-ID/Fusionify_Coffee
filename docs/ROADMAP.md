@@ -2,6 +2,15 @@
 
 Roadmap items describe planned sequencing and verified status.
 
+Last updated: 2026-10-21
+
+Validated `main` baseline: `3b3cbf38b925bde562f325e17db4a991eb7b38f7`
+
+Validation evidence:
+- CI run `39533219496`: **PASS**
+- Repository Policy run `39533219571`: **PASS**
+- API package publication run `39533930765`: **PASS**
+
 ## Foundation
 
 Status: **Complete**
@@ -254,10 +263,11 @@ Before production:
 
 ## Next Priorities
 
-1. Preserve the current green CI baseline.
+1. Preserve the validated green `main` baseline.
 2. Validate the Owner Control Center and maintenance flow with production-like outlet data.
-3. Configure and validate real WhatsApp/SMS OTP providers.
-4. Deploy the API behind production HTTPS.
-5. Run controlled live AutoGoPay create/webhook/status/cancel tests.
-6. Approve production catalog/media, connect its CDN workflow, and complete release signing.
-7. Introduce a pub/sub trigger layer for customer/KDS only when deployment scale requires it.
+3. Complete manual TalkBack/VoiceOver, large-text, contrast, reduced-motion, and focus-order review.
+4. Configure and validate real WhatsApp/SMS OTP providers.
+5. Deploy the API behind production HTTPS.
+6. Run controlled live AutoGoPay customer and POS create/webhook/status/cancel tests.
+7. Approve production catalog/media, connect its CDN workflow, and complete release signing.
+8. Introduce a pub/sub trigger layer for customer/KDS only when deployment scale requires it.
