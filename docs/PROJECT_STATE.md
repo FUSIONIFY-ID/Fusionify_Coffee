@@ -1,16 +1,16 @@
 # Project State
 
-Last updated: 2026-09-06
+Last updated: 2026-10-21
 
 ## Repository
 
 - Repository: `FUSIONIFY-ID/Fusionify_Coffee`
 - Default branch: `main`
 - Visibility: public
-- Latest fully validated `main` head: `cb9b1fd1fc52b8824b41f3c657aea7cb5cd385b2`
-- CI validation run: `34030885029`
-- Repository Policy run: `34030884986`
-- API package publication run: `34031205679`
+- Latest fully validated `main` head: `3b3cbf38b925bde562f325e17db4a991eb7b38f7`
+- CI validation run: `39533219496`
+- Repository Policy run: `39533219571`
+- API package publication run: `39533930765`
 
 ## Current Product State
 
@@ -372,9 +372,13 @@ These should not be listed as wholly unimplemented anymore. External provider in
 
 ## Validation Evidence
 
-Validated `main` baseline: `cb9b1fd1fc52b8824b41f3c657aea7cb5cd385b2`
+Validated `main` baseline: `3b3cbf38b925bde562f325e17db4a991eb7b38f7`
 
-GitHub Actions CI run `34030885029`: **PASS**
+GitHub Actions CI run `39533219496`: **PASS**
+
+Repository Policy run `39533219571`: **PASS**
+
+API package publication run `39533930765`: **PASS**
 
 Customer:
 - Flutter pub get: PASS
@@ -408,10 +412,12 @@ Current validation includes:
 - customer localization, analyze, tests, and Android debug APK validation
 - preview product/media URL and membership-rank asset mapping coverage
 - Android/iOS native visual assets included in the successful customer build
+- Owner Control Center dashboard RBAC, outlet scope, reporting, and asset-maintenance e2e coverage
+- localized customer accessibility semantics and reduced-motion regression coverage
 
-The Owner Control Center branch adds dashboard and asset-maintenance e2e
-coverage. Its final GitHub Actions evidence must be recorded after the branch is
-merged; local API lint, unit tests, TypeScript compilation, and Nest build pass.
+The validated `main` baseline includes the merged Owner Control Center and
+customer accessibility work. Manual TalkBack/VoiceOver, large-text, contrast,
+reduced-motion, and focus-order review remains a release requirement.
 
 ## Explicitly Provisional / Not Final
 
@@ -460,9 +466,11 @@ External operations integrations:
 
 ## Next Engineering Priority
 
-1. Keep current green CI baseline.
-2. Configure real OTP providers in a secure deployment environment.
-3. Deploy API behind production HTTPS.
-4. Perform a controlled low-value AutoGoPay live transaction and webhook validation.
-5. Replace snapshot polling with pub/sub only when deployment scale actually requires multiple API instances.
-6. Complete release signing, store-policy, privacy, accessibility, and monitoring work before production release.
+1. Keep the validated `main` baseline green.
+2. Validate Owner Control Center and maintenance flows with production-like outlet data.
+3. Complete manual accessibility review on representative Android and iOS devices.
+4. Configure real OTP providers in a secure deployment environment.
+5. Deploy the API behind production HTTPS.
+6. Perform controlled low-value AutoGoPay customer and POS transactions, including webhook/status/cancel validation.
+7. Complete release signing, store-policy, privacy, and monitoring work before production release.
+8. Replace snapshot polling with pub/sub only when deployment scale actually requires multiple API instances.
