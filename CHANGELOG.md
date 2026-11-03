@@ -129,3 +129,6 @@ All notable project changes are documented by meaningful product and engineering
 - Nest decorated signatures use type-only imports
 - payment reservation concurrency race guarded at database level
 - Android release no longer uses debug signing
+- `pubspec.lock` now matches the pinned `flutter_secure_storage` 10.3.1, and CI fails when `flutter pub get` changes the lockfile
+- Next.js build output, TypeScript build info, and golden-test failure images are no longer left untracked
+- membership card fallback colors now come from `CoffeeColors` tokens

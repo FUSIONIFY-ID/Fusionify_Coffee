@@ -48,6 +48,8 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
+      - name: Check pubspec.lock is in sync
+        run: git diff --exit-code -- pubspec.lock
       - name: Check Dart format
         run: |
           dart format lib test tool

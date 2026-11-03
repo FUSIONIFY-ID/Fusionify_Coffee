@@ -176,21 +176,21 @@ class _MembershipCardStyle {
       return const _MembershipCardStyle(
         asset: 'assets/membership/fusion-black.webp',
         foregroundColor: Colors.white,
-        fallbackColor: Color(0xFF121212),
+        fallbackColor: CoffeeColors.membershipBlack,
       );
     }
     if (rank == 3) {
       return const _MembershipCardStyle(
         asset: 'assets/membership/fusion-gold.webp',
-        foregroundColor: Color(0xFF251A0A),
-        fallbackColor: Color(0xFFD5A94E),
+        foregroundColor: CoffeeColors.onMembershipGold,
+        fallbackColor: CoffeeColors.membershipGold,
       );
     }
     if (rank == 2) {
       return const _MembershipCardStyle(
         asset: 'assets/membership/fusion-silver.webp',
-        foregroundColor: Color(0xFF181816),
-        fallbackColor: Color(0xFFD5D7DA),
+        foregroundColor: CoffeeColors.textPrimary,
+        fallbackColor: CoffeeColors.membershipSilver,
       );
     }
     return const _MembershipCardStyle(
