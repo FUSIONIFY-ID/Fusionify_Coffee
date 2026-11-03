@@ -17,6 +17,11 @@ abstract final class CoffeeColors {
   static const success = Color(0xFF237A49);
   static const warning = Color(0xFFA6610A);
   static const error = Color(0xFFB3261E);
+
+  static const membershipBlack = Color(0xFF121212);
+  static const membershipGold = Color(0xFFD5A94E);
+  static const onMembershipGold = Color(0xFF251A0A);
+  static const membershipSilver = Color(0xFFD5D7DA);
 }
 
 abstract final class CoffeeSpacing {

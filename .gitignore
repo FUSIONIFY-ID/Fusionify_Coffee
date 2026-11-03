@@ -28,6 +28,7 @@ android/key.properties
 .pub/
 build/
 coverage/
+**/test/failures/
 **/ios/Flutter/.last_build_id
 
 # Android build
@@ -51,6 +52,10 @@ dist/
 .nest/
 .npm/
 .pnpm-store/
+
+# Next.js staff app
+.next/
+*.tsbuildinfo
 
 # Prisma local database files
 *.db
